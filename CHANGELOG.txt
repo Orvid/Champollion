@@ -1,3 +1,6 @@
+0.0.1
+ - Comandeered to support Fallout 4.
+
 1.0.1
  - Fixed two missing opcodes for array_findelement and array_rfindelement
  
