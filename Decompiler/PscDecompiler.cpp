@@ -219,6 +219,7 @@ const Pex::StringTable::Index& Decompiler::PscDecompiler::typeOfVar(const Pex::S
     }
     else
     {
+        assert(it->second.isValid());
         return it->second;
     }
 }
@@ -523,7 +524,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
 
             case Pex::OpCode::ARRAY_CREATE:
             {
-                node = Node::ArrayCreate::make(ip, args[0].getId(), typeOfVar(args[0].getId()), args[1].getInteger());
+                node = Node::ArrayCreate::make(ip, args[0].getId(), fromValue(ip, args[0]), fromValue(ip, args[1]));
             }
                 break;
             case Pex::OpCode::ARRAY_LENGTH:
@@ -560,6 +561,20 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
 
                 node = callNode;
             }
+                break;
+            case Pex::OpCode::STRUCT_GET:
+            {
+                node = Node::PropertyAccess::make(ip, args[0].getId(), fromValue(ip, args[1]), args[2].getId());
+            }
+                break;
+            case Pex::OpCode::STRUCT_SET:
+            {
+                node = Node::PropertyAccess::make(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[2].getId());
+                node = Node::Assign::make(ip, node, fromValue(ip, args[0]));
+            }
+                break;
+            case Pex::OpCode::ARRAY_FINDSTRUCT:
+            case Pex::OpCode::ARRAY_RFINDSTRUCT:
                 break;
 
             }

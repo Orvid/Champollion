@@ -10,6 +10,7 @@
 #include "StringTable.hpp"
 #include "NamedItem.hpp"
 #include "DocumentedItem.hpp"
+#include "StructInfo.hpp"
 #include "Variable.hpp"
 #include "Property.hpp"
 #include "State.hpp"
@@ -39,6 +40,12 @@ public:
     StringTable::Index getAutoStateName() const;
     void setAutoStateName(StringTable::Index value);
 
+    std::uint8_t getConstFlag() const { return m_ConstFlag; }
+    void setConstFlag(std::uint8_t value) { m_ConstFlag = value; }
+
+    const StructInfos& getStructInfos() const { return m_StructInfos; }
+    StructInfos& getStructInfos() { return m_StructInfos; }
+
     const Variables& getVariables() const;
     Variables& getVariables();
 
@@ -51,7 +58,9 @@ public:
 private:
     StringTable::Index m_ParentClassName;
     StringTable::Index m_AutoStateName;
+    std::uint8_t m_ConstFlag;
 
+    StructInfos m_StructInfos;
     Variables m_Variables;
     Properties m_Properties;
     States m_States;

@@ -8,23 +8,21 @@
 
 namespace Node {
 
-class ArrayCreate : public Base
+class ArrayCreate : public Base,
+        public FieldIndexNodeMixin<0>
 {
 public:
-    ArrayCreate(size_t ip, const Pex::StringTable::Index& result, const Pex::StringTable::Index& type, std::uint32_t size);
+    ArrayCreate(size_t ip, const Pex::StringTable::Index& result, const Node::BasePtr type, Node::BasePtr size);
     virtual ~ArrayCreate();
 
-    static std::shared_ptr<ArrayCreate> make(size_t ip, const Pex::StringTable::Index& result, const Pex::StringTable::Index& type, std::uint32_t size);
+    static std::shared_ptr<ArrayCreate> make(size_t ip, const Pex::StringTable::Index& result, const Node::BasePtr type, Node::BasePtr size);
 
     virtual void                        visit(Visitor* visitor);
 
-    const Pex::StringTable::Index&  getType() const;
-
-    std::uint32_t                       getSize() const;
+    const Node::BasePtr  getType() const;
 
 protected:
-    Pex::StringTable::Index m_Type;
-    std::uint32_t               m_Size;
+    const Node::BasePtr     m_Type;
 };
 
 }

@@ -7,7 +7,9 @@
 #include <cstdint>
 #include <vector>
 
+#include "DocumentedItem.hpp"
 #include "StringTable.hpp"
+#include "UserFlagged.hpp"
 
 namespace Pex {
 
@@ -74,10 +76,67 @@ public:
         StringTable::Index m_FunctionName;
         FunctionType m_FunctionType;
 
-        LineNumbers  m_LineNumbers;
+        LineNumbers m_LineNumbers;
+    };
+
+    class PEX_API PropertyGroup :
+            public UserFlagged
+    {
+    public:
+        typedef std::vector<StringTable::Index> Names;
+
+    public:
+        PropertyGroup() = default;
+        ~PropertyGroup() = default;
+
+        StringTable::Index getObjectName() const { return m_ObjectName; }
+        void setObjectName(StringTable::Index value) { m_ObjectName = value; }
+
+        StringTable::Index getGroupName() const { return m_GroupName; }
+        void setGroupName(StringTable::Index value) { m_GroupName = value; }
+
+        StringTable::Index getGroupDocumentation() const { return m_GroupDocumentation; }
+        void setGroupDocumentation(StringTable::Index value) { m_GroupDocumentation = value; }
+
+        const Names& getNames() const { return m_Names; }
+        Names& getNames() { return m_Names; }
+
+     private:
+        StringTable::Index m_ObjectName;
+        StringTable::Index m_GroupName;
+        StringTable::Index m_GroupDocumentation;
+
+        Names m_Names;
+    };
+
+    class PEX_API StructOrder
+    {
+    public:
+        typedef std::vector<StringTable::Index> Names;
+
+    public:
+        StructOrder() = default;
+        ~StructOrder() = default;
+
+        StringTable::Index getObjectName() const { return m_ObjectName; }
+        void setObjectName(StringTable::Index value) { m_ObjectName = value; }
+
+        StringTable::Index getOrderName() const { return m_OrderName; }
+        void setOrderName(StringTable::Index value) { m_OrderName = value; }
+
+        const Names& getNames() const { return m_Names; }
+        Names& getNames() { return m_Names; }
+
+     private:
+        StringTable::Index m_ObjectName;
+        StringTable::Index m_OrderName;
+
+        Names m_Names;
     };
 
     typedef std::vector<FunctionInfo> FunctionInfos;
+    typedef std::vector<PropertyGroup> PropertyGroups;
+    typedef std::vector<StructOrder> StructOrders;
 public:
     DebugInfo();
     ~DebugInfo();
@@ -88,11 +147,18 @@ public:
     const FunctionInfos& getFunctionInfos() const;
     FunctionInfos& getFunctionInfos();
 
+    const PropertyGroups& getPropertyGroups() const { return m_PropertyGroup; }
+    PropertyGroups& getPropertyGroups() { return m_PropertyGroup; }
+
+    const StructOrders& getStructOrders() const { return m_StructOrder; }
+    StructOrders& getStructOrders() { return m_StructOrder; }
+
     const FunctionInfo *getFunctionInfo(const StringTable::Index& object, const StringTable::Index& state, const StringTable::Index& name, FunctionType type = FunctionType::Method) const;
 private:
     std::time_t m_ModificationTime;
     FunctionInfos m_FunctionInfo;
-
+    PropertyGroups m_PropertyGroup;
+    StructOrders m_StructOrder;
 };
 }
 #endif // DEBUGINFO_HPP

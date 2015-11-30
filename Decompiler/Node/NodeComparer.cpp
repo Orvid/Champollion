@@ -145,7 +145,10 @@ void Node::NodeComparer::visit(Node::PropertyAccess *node)
 void Node::NodeComparer::visit(Node::ArrayCreate *node)
 {
     m_Visitor << (DynamicVisitor::LambdaArrayCreate)[&](ArrayCreate* ref, DynamicVisitor*) {
-        m_Result = ref->getType() == node->getType() && ref->getSize() == node->getSize();
+        if (ref->getType() == node->getType())
+        {
+            m_Result = isSameChildren(ref, node);
+        }
     };
     m_Reference->visit(& m_Visitor);
 }

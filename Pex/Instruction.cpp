@@ -62,6 +62,17 @@ static const OpCodeInfo OPCODES[Pex::OpCode::MAX_OPCODE] = {
     {"array_setelement", 3, false},
     {"array_findelement", 4, false},
     {"array_rfindelement", 4, false},
+    {"is", 3, false},
+    {"struct_create", 1, false},
+    {"struct_get", 3, false},
+    {"struct_set", 3, false},
+    {"array_findstruct", 5, false},
+    {"array_rfundstruct", 5, false},
+    {"array_add", 3, false},
+    {"array_insert", 3, false},
+    {"array_removelast", 1, false},
+    {"array_remove", 3, false},
+    {"array_clear", 1, false}
 };
 
 /**

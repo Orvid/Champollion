@@ -12,4 +12,5 @@ SUBDIRS += \
 Champollion.depends = Decompiler Pex
 Decompiler.depends = Pex
 
-INCLUDEPATH += L:/Dev/Lib/Boost/include/boost-1_53
+INCLUDEPATH += F:\Software\boost_1_58_0
+INCLUDEPATH += F:\Qt\5.5\msvc2013_64\include

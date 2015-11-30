@@ -30,8 +30,12 @@ public:
     const Value&       getDefaultValue() const;
     void               setDefaultValue(const Value& value);
 
+    std::uint8_t getConstFlag() const { return m_ConstFlag; }
+    void setConstFlag(std::uint8_t value) { m_ConstFlag = value; }
+
 protected:
     Value              m_DefaultValue;
+    std::uint8_t m_ConstFlag;
 
 };
 

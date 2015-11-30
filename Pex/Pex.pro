@@ -52,7 +52,8 @@ HEADERS += Binary.hpp\
     TypedName.hpp \
     Instruction.hpp \
     DocumentedItem.hpp \
-    Pex_global.hpp
+    Pex_global.hpp \
+    StructInfo.hpp
 
 unix:!symbian {
     maemo5 {
