@@ -1,0 +1,62 @@
+
+
+body {
+	font-size: 14px;
+}
+
+
+h1 {
+	font-size: 18px;
+}
+
+h2 {
+	font-size: 16px;
+	margin-left: 4ex;
+}
+
+.command-line {
+	background-color: lightgrey;
+	border: 2px solid black;
+	padding: 3px;
+}
+
+.file {
+	font-style: italic;
+}
+
+table {
+	border: 2px solid black;
+	border-collapse: collapse;
+}
+
+td {
+	border: 1px solid black;
+}
+
+th {
+	border: 1px solid black;
+}
+
+.psc-sample {
+	border: 2px solid black;
+	background-color: lightyellow;
+	margin-top: 2px;
+	margin-bottom: 2px;	
+}
+
+.psc-sample .sample {
+	text-align: center;
+	font-weight: bold;
+}
+.psc-sample pre{
+	overflow: auto;
+	height: 20em;
+}
+
+.output {
+	border: 1px solid black;
+	background-color: lightgray;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+

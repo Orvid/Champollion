@@ -1,0 +1,8 @@
+DEFINES += _CRT_SECURE_NO_WARNINGS BOOST_LIB_DIAGNOSTIC
+
+INCLUDEPATH += L:/Dev/Lib/Boost/include/boost-1_53
+LIBS += -LL:/Dev/Lib/Boost/lib
+
+PREFIX = $$PWD/build
+
+VERSION = 1.0.1

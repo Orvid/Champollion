@@ -1,0 +1,5094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Champollion V1.0.1 Readme</title>
+	<link rel="stylesheet" type="text/css" href="readme.css">
+</head>
+
+<body>
+<h1>What's this ?</h1>
+<p>Champollion is a decompiler for the Papyrus script language used in Skyrim. 
+It aims to produce a Papyrus Script file (.psc) from a .pex binary file. 
+The decompiled script should (hopefully) recompile to a functionally equivalent PEX binary.
+</p>
+<p>The source code is available at <a href="http://skyrim.nexusmods.com/mods/35307/">Skyrim NexusMod</a> under the LGPL V3 license</p>
+<p>Copyright &copy; 2013 Paul-Henry Perrin</p>
+
+<h1>Dependencies</h1>
+Champollion needs the  <a href="http://www.microsoft.com/en-us/download/details.aspx?id=30679">runtime libraries for Visual C++ 11</a>
+
+<h1>Usage</h1>
+<p>The decompilation is driven by the Champollion.exe file</p>
+<h2>Parameters</h2>
+<div class="command-line">Champollion <span class="file">&lt;file or directory&gt;</span>
+[-p <span class="file">&lt;output directory&gt;</span>] 
+[-a [<span class="file">&lt;assembly directory&gt;</span>]] 
+[-c] [-t]</div>
+<br>
+<table class="parameter">
+<thead> 
+	<tr>
+		<th>Short</th>
+		<th>Long</th>
+		<th>Description</th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td>-p <span class="file">output directory</span></td>
+		<td>--psc <span class="file">output directory</span></td>
+		<td>Set the output directory, where Champollion will write the decompiled files</td>
+	</tr>
+	<tr>
+		<td>-a [<span class="file">assembly directory</span>]</td>
+		<td>--asm [<span class="file">assembly directory</span>]</td>
+		<td>Champollion will write an assembly version of the PEX file in the given directory, if one. The assembly file is an human readable version of the content of the PEX file</td>
+	</tr>
+	<tr>
+		<td>-c</td>
+		<td>--comment</td>
+		<td>The decompiled file will be annotated with the assembly instruction corresponding to the decompiled code lines.</td>
+	</tr>
+	<tr>
+		<td>-t</td>
+		<td>--threaded</td>
+		<td>Champollion will parallelize the decompilation. It is usefull when decompiling a directory containing many PEX file.<br>
+			To get the maximum speed, the output must be redirected to a file via the &gt; operator to avoid writing many lines to the console.
+		</td>
+	</tr>		
+</tbody>
+</table>
+
+<h2>Examples</h2>
+
+<p>Decompiling a file</p>
+<div class="command-line">Champollion.exe bsa\out\scripts\arenascript.pex</div>
+<div class="output">
+<pre> 
+bsa\out\scripts\arenascript.pex decompiled to .\arenascript.psc
+1 files processed in 0.0160009 s
+</pre>
+</div>
+<div class="psc-sample">
+<span class="sample">arenascript.psc</span>
+<pre>
+;/ Decompiled by Champollion V1.0.0
+Source   : ArenaScript.psc
+Modified : 2012-02-12 00:06:16
+Compiled : 2013-02-13 20:15:01
+User     : builds
+Computer : BUILDFARM09
+/;
+scriptName ArenaScript extends Quest conditional
+
+;-- Properties --------------------------------------
+int property WagerAmount auto
+ArenaCombatQuest property SpecialFightDB auto
+Armor property LoanerShield auto
+bool property NextWagerFightIsPeople auto conditional
+Faction property ArenaFaction auto
+Faction property EastmarchCrimeFaction auto
+ObjectReference property Gate1 auto
+ReferenceAlias property PitDoor auto
+Quest property EastmarchJail auto
+bool property CombatOngoing auto conditional
+Quest property DB03 auto
+ArenaCombatQuest property Fight13 auto
+ArenaCombatQuest property TransitionFight auto
+Faction property SelfLoathing auto
+ReferenceAlias property Combatant10 auto
+ObjectReference property Gate2 auto
+ArenaCombatQuest property Fight12 auto
+Keyword property Wave4Keyword auto
+Keyword property Wave2Keyword auto
+bool property NextWagerFightIsEasyAnimals auto conditional
+ObjectReference property Gate3 auto
+bool property NextWagerFightIsExotic auto conditional
+int property Level0Fights auto
+int property NumberOfPlayerFights auto
+ArenaCombatQuest property NextWagerFight auto
+ArenaCombatQuest property Fight04 auto
+ReferenceAlias property Combatant02 auto
+ReferenceAlias property Combatant07 auto
+ArenaCombatQuest property Fight01 auto
+bool property PlayerChoseTheField auto conditional
+ReferenceAlias property Combatant09 auto
+ArenaCombatQuest property Fight05 auto
+ReferenceAlias property Combatant03 auto
+ArenaCombatQuest property SpecialFightJail auto
+ArenaCombatQuest property CurrentFight auto
+Keyword property Wave1Keyword auto
+ReferenceAlias property Combatant08 auto
+bool property RewardDue auto conditional
+ReferenceAlias property TransitionCombatant auto
+int property Level3Fights auto
+ReferenceAlias property Combatant06 auto
+bool property WagerResolutionRequired auto conditional
+ArenaCombatQuest property Fight11 auto
+ReferenceAlias property Combatant05 auto
+ArenaCombatQuest property Fight03 auto
+ArenaCombatQuest property Fight10 auto
+ArenaCombatQuest property Fight09 auto
+Faction property PacifyFaction auto
+int property Level2Fights auto
+ArenaCombatQuest property Fight06 auto
+bool property NextWagerFightIsToughAnimals auto conditional
+ReferenceAlias property Combatant04 auto
+ArenaCombatQuest property Fight08 auto
+Quest property ArenaWagerFighterQuest auto
+Weapon property LoanerSword auto
+bool property PlayerWonWager auto conditional
+Keyword property Wave5Keyword auto
+bool property PlayerGotTheSkinny auto conditional
+ArenaCombatQuest property Fight02 auto
+int property Level1Fights auto
+bool property DBFightWentAwry = false auto conditional
+Keyword property Wave3Keyword auto
+int property ArrestOffset auto
+bool property CombatPreSet auto
+MiscObject property Gold auto
+bool property WagerOngoing auto conditional
+int property FightsToNextLevel auto conditional
+ArenaCombatQuest property Fight07 auto
+ReferenceAlias property Combatant01 auto
+Quest property PointerQuest auto
+Keyword property LinkedDoorKeyword auto
+
+;-- Variables ---------------------------------------
+int _maxFights = 13
+ObjectReference _spawnPoint02
+ObjectReference _spawnPoint03
+ObjectReference _spawnPoint05
+ObjectReference _spawnPoint04
+ObjectReference _spawnPoint01
+
+;-- Functions ---------------------------------------
+
+function RegisterCombatant(ObjectReference fighter)
+
+	(fighter as actor).AddToFaction(PacifyFaction)
+	if CurrentFight != none && (CurrentFight as arenacombatquest).IsTransitionFight
+		self.RegisterTransitionCombatant(fighter)
+		return 
+	endIf
+	if Combatant01.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant02.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant03.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant04.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant05.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant06.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant07.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant08.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant09.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant10.ForceRefIfEmpty(fighter)
+		
+	endIf
+endFunction
+
+function Promote()
+
+	game.GetPlayer().ModFactionRank(ArenaFaction, 1)
+	int rank = game.GetPlayer().GetFactionRank(ArenaFaction)
+	if rank == 1
+		FightsToNextLevel = Level1Fights
+	elseIf rank == 2
+		FightsToNextLevel = Level2Fights
+	elseIf rank == 3
+		FightsToNextLevel = Level3Fights
+	elseIf rank == 4
+		FightsToNextLevel = 2147483647
+	endIf
+endFunction
+
+function RegisterTransitionCombatant(ObjectReference fighter)
+
+	if TransitionCombatant.GetReference() != none
+		return 
+	endIf
+	TransitionCombatant.ForceRefTo(fighter)
+	TransitionCombatant.GetActorReference().SetNoBleedoutRecovery(true)
+endFunction
+
+function EndWagerFight()
+
+	bool fieldWon = (ArenaWagerFighterQuest as arenawagerfighterquestscript).fighter.GetActorReference().IsDead()
+	NextWagerFight.Stop()
+	if PlayerChoseTheField == fieldWon
+		PlayerWonWager = true
+	else
+		PlayerWonWager = false
+	endIf
+	WagerResolutionRequired = true
+endFunction
+
+; Skipped compiler generated GotoState
+
+keyword function GetKeywordForWave(int wave)
+
+	if wave == 1
+		return Wave1Keyword
+	elseIf wave == 2
+		return Wave2Keyword
+	elseIf wave == 3
+		return Wave3Keyword
+	elseIf wave == 4
+		return Wave4Keyword
+	elseIf wave == 5
+		return Wave5Keyword
+	else
+		return none
+	endIf
+endFunction
+
+function PlayerJoin()
+
+	if PointerQuest.IsRunning()
+		PointerQuest.SetStage(20)
+	endIf
+	game.GetPlayer().AddToFaction(ArenaFaction)
+	NumberOfPlayerFights = 0
+	FightsToNextLevel = Level0Fights
+endFunction
+
+function PlayerAvoidedWager()
+
+	PlayerChoseTheField = false
+	WagerOngoing = false
+endFunction
+
+function CombatOver()
+
+	if WagerOngoing
+		self.EndWagerFight()
+		return 
+	endIf
+	CurrentFight.Stop()
+	PitDoor.GetReference().Lock(false, false)
+	CombatOngoing = false
+	RewardDue = true
+	NumberOfPlayerFights += 1
+endFunction
+
+function ResolveWager()
+
+	if PlayerWonWager
+		game.GetPlayer().AddItem(Gold as form, WagerAmount * 2, false)
+	endIf
+	self.CleanupBodies()
+	WagerOngoing = false
+	WagerResolutionRequired = false
+	ArenaWagerFighterQuest.Stop()
+	self.PickNextWagerFight(NextWagerFight)
+endFunction
+
+function StartWagerFight()
+
+	NextWagerFight.Start()
+	ArenaWagerFighterQuest.Start()
+	CombatPreSet = true
+endFunction
+
+function StartCombat()
+
+	if 20 <= DB03.GetStage() && 40 > DB03.GetStage()
+		CurrentFight = SpecialFightDB
+		if game.GetPlayer().GetItemCount(LoanerSword as form) < 1
+			game.GetPlayer().AddItem(LoanerSword as form, 1, false)
+		endIf
+		if game.GetPlayer().GetItemCount(LoanerShield as form) < 1
+			game.GetPlayer().AddItem(LoanerShield as form, 1, false)
+		endIf
+		game.GetPlayer().EquipItem(LoanerSword as form, false, false)
+		game.GetPlayer().EquipItem(LoanerShield as form, false, false)
+	elseIf 20 == EastmarchJail.GetStage() && EastmarchJail.IsRunning()
+		CurrentFight = SpecialFightJail
+		game.GetPlayer().AddItem(LoanerSword as form, 1, false)
+		game.GetPlayer().AddItem(LoanerShield as form, 1, false)
+		game.GetPlayer().EquipItem(LoanerSword as form, false, false)
+		game.GetPlayer().EquipItem(LoanerShield as form, false, false)
+	else
+		CurrentFight = self.PickNextFight(0)
+	endIf
+	CurrentFight.Start()
+	CombatPreSet = true
+	PitDoor.GetReference().Lock(false, false)
+	CombatOngoing = true
+endFunction
+
+arenacombatquest function GetFightQuestFromIndex(int questIndex)
+
+	if questIndex == 1
+		return Fight01
+	elseIf questIndex == 2
+		return Fight02
+	elseIf questIndex == 3
+		return Fight03
+	elseIf questIndex == 4
+		return Fight04
+	elseIf questIndex == 5
+		return Fight05
+	elseIf questIndex == 6
+		return Fight06
+	elseIf questIndex == 7
+		return Fight07
+	elseIf questIndex == 8
+		return Fight08
+	elseIf questIndex == 9
+		return Fight09
+	elseIf questIndex == 10
+		return Fight10
+	elseIf questIndex == 11
+		return Fight11
+	elseIf questIndex == 12
+		return Fight12
+	elseIf questIndex == 13
+		return Fight13
+	else
+		return none
+	endIf
+endFunction
+
+function CleanupBodies()
+
+	if self._CleanupBody(Combatant01)
+		
+	endIf
+	if self._CleanupBody(Combatant02)
+		
+	endIf
+	if self._CleanupBody(Combatant03)
+		
+	endIf
+	if self._CleanupBody(Combatant04)
+		
+	endIf
+	if self._CleanupBody(Combatant05)
+		
+	endIf
+	if self._CleanupBody(Combatant06)
+		
+	endIf
+	if self._CleanupBody(Combatant07)
+		
+	endIf
+	if self._CleanupBody(Combatant08)
+		
+	endIf
+	if self._CleanupBody(Combatant09)
+		
+	endIf
+	if self._CleanupBody(Combatant10)
+		
+	endIf
+	if TransitionCombatant.GetReference() != none
+		actor ref = TransitionCombatant.GetActorReference()
+		game.GetPlayer().RemoveFromFaction(SelfLoathing)
+		ref.RemoveFromFaction(SelfLoathing)
+		ref.SetFactionRank(ArenaFaction, 4)
+		ref.SetNoBleedoutRecovery(false)
+		TransitionCombatant.Clear()
+	endIf
+	_spawnPoint01 = none
+	_spawnPoint02 = none
+	_spawnPoint03 = none
+	_spawnPoint04 = none
+	_spawnPoint05 = none
+	Gate1.SetOpen(false)
+	Gate2.SetOpen(false)
+	Gate3.SetOpen(false)
+endFunction
+
+bool function _CleanupBody(referencealias combatant)
+
+	if combatant.GetReference() != none
+		actor ref = combatant.GetActorReference()
+		combatant.Clear()
+		if WagerOngoing
+			ref.Delete()
+		elseIf ref.IsDead()
+			ref.Delete()
+		else
+			ref.MoveToMyEditorLocation()
+			ref.ResetHealthAndLimbs()
+		endIf
+		return true
+	else
+		return false
+	endIf
+endFunction
+
+function Reward()
+
+	PitDoor.GetReference().Lock(true, false)
+	self.CleanupBodies()
+	if 20 == EastmarchJail.GetStage() && EastmarchJail.IsRunning()
+		game.GetPlayer().UnequipItem(LoanerSword as form, false, false)
+		game.GetPlayer().UnequipItem(LoanerShield as form, false, false)
+		game.GetPlayer().RemoveItem(LoanerSword as form, 1, false, none)
+		game.GetPlayer().RemoveItem(LoanerShield as form, 1, false, none)
+		EastmarchCrimeFaction.SetCrimeGold(0)
+		EastmarchCrimeFaction.SetCrimeGoldViolent(0)
+		EastmarchJail.SetStage(200)
+	elseIf game.GetPlayer().GetFactionRank(ArenaFaction) >= 4
+		game.GetPlayer().AddItem(Gold as form, 100, false)
+	elseIf FightsToNextLevel <= 0
+		self.Promote()
+	else
+		game.GetPlayer().AddItem(Gold as form, 100, false)
+		FightsToNextLevel -= 1
+	endIf
+	RewardDue = false
+endFunction
+
+function PlaceBet(int amount)
+
+	WagerOngoing = true
+	WagerAmount = amount
+	game.GetPlayer().RemoveItem(Gold as form, WagerAmount, false, none)
+endFunction
+
+function RegisterSpawnPoint(ObjectReference spawnMarker)
+
+	if _spawnPoint01 == none
+		_spawnPoint01 = spawnMarker
+	elseIf _spawnPoint02 == none
+		_spawnPoint02 = spawnMarker
+	elseIf _spawnPoint03 == none
+		_spawnPoint03 = spawnMarker
+	elseIf _spawnPoint04 == none
+		_spawnPoint04 = spawnMarker
+	elseIf _spawnPoint05 == none
+		_spawnPoint05 = spawnMarker
+	endIf
+endFunction
+
+int function GetIndexFromFightQuest(arenacombatquest rQuest)
+
+	if rQuest == Fight01
+		return 1
+	elseIf rQuest == Fight02
+		return 2
+	elseIf rQuest == Fight03
+		return 3
+	elseIf rQuest == Fight04
+		return 4
+	elseIf rQuest == Fight05
+		return 5
+	elseIf rQuest == Fight06
+		return 6
+	elseIf rQuest == Fight07
+		return 7
+	elseIf rQuest == Fight08
+		return 8
+	elseIf rQuest == Fight09
+		return 9
+	elseIf rQuest == Fight10
+		return 10
+	elseIf rQuest == Fight11
+		return 11
+	elseIf rQuest == Fight12
+		return 12
+	elseIf rQuest == Fight13
+		return 13
+	else
+		return 0
+	endIf
+endFunction
+
+ObjectReference function GetDoorForWave(int wave)
+
+	keyword toMatch = self.GetKeywordForWave(wave)
+	if _spawnPoint01.HasKeyword(toMatch)
+		return _spawnPoint01.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint02.HasKeyword(toMatch)
+		return _spawnPoint02.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint03.HasKeyword(toMatch)
+		return _spawnPoint03.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint04.HasKeyword(toMatch)
+		return _spawnPoint04.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint05.HasKeyword(toMatch)
+		return _spawnPoint05.GetLinkedRef(LinkedDoorKeyword)
+	else
+		return none
+	endIf
+endFunction
+
+function PickNextWagerFight(arenacombatquest lastFight)
+
+	int lastFightIndex = -1
+	if lastFight != none
+		lastFightIndex = self.GetIndexFromFightQuest(lastFight)
+	endIf
+	int fightIndex = lastFightIndex
+	while fightIndex == lastFightIndex
+		fightIndex = utility.RandomInt(1, _maxFights)
+	endWhile
+	NextWagerFight = self.GetFightQuestFromIndex(fightIndex)
+	NextWagerFightIsToughAnimals = false
+	NextWagerFightIsEasyAnimals = false
+	NextWagerFightIsPeople = false
+	NextWagerFightIsExotic = false
+	if NextWagerFight == Fight01
+		NextWagerFightIsEasyAnimals = true
+	elseIf NextWagerFight == Fight02
+		NextWagerFightIsEasyAnimals = true
+	elseIf NextWagerFight == Fight03
+		NextWagerFightIsEasyAnimals = true
+	elseIf NextWagerFight == Fight04
+		NextWagerFightIsPeople = true
+	elseIf NextWagerFight == Fight05
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight06
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight07
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight08
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight09
+		NextWagerFightIsPeople = true
+	elseIf NextWagerFight == Fight10
+		NextWagerFightIsExotic = true
+	elseIf NextWagerFight == Fight11
+		NextWagerFightIsPeople = true
+	elseIf NextWagerFight == Fight12
+		NextWagerFightIsExotic = true
+	elseIf NextWagerFight == Fight13
+		NextWagerFightIsPeople = true
+	endIf
+endFunction
+
+referencealias function GetCombatantAlias(int index)
+
+	if index == 1
+		return Combatant01
+	elseIf index == 2
+		return Combatant02
+	elseIf index == 3
+		return Combatant03
+	elseIf index == 4
+		return Combatant04
+	elseIf index == 5
+		return Combatant05
+	elseIf index == 6
+		return Combatant06
+	elseIf index == 7
+		return Combatant07
+	elseIf index == 8
+		return Combatant08
+	elseIf index == 9
+		return Combatant09
+	elseIf index == 10
+		return Combatant10
+	else
+		return none
+	endIf
+endFunction
+
+; Skipped compiler generated GetState
+
+function Setup()
+
+	WagerOngoing = false
+	self.PickNextWagerFight(none)
+endFunction
+
+arenacombatquest function PickNextFight(int offset)
+
+	int minFight = -1
+	int maxFight = -1
+	int playerRank = game.GetPlayer().GetFactionRank(ArenaFaction)
+	if FightsToNextLevel <= 0
+		return TransitionFight
+	endIf
+	if playerRank == 0
+		minFight = 1
+		maxFight = 3
+		int fightIndex = utility.RandomInt(minFight, maxFight)
+		return self.GetFightQuestFromIndex(fightIndex)
+	elseIf playerRank == 1
+		bool humanFight = utility.RandomInt(0, 2) as bool
+		if !humanFight
+			minFight = 2
+			maxFight = 3
+			int fightindex = utility.RandomInt(minFight, maxFight)
+			return self.GetFightQuestFromIndex(fightindex)
+		else
+			return Fight04
+		endIf
+	elseIf playerRank == 2
+		minFight = 5
+		maxFight = 9
+		int fightindex = utility.RandomInt(minFight, maxFight)
+		return self.GetFightQuestFromIndex(fightindex)
+	elseIf playerRank == 3
+		int animalFight = utility.RandomInt(0, 2)
+		if animalFight == 0
+			minFight = 7
+			maxFight = 9
+			int fightindex = utility.RandomInt(minFight, maxFight)
+			if fightindex == 9
+				fightindex = 10
+			endIf
+			return self.GetFightQuestFromIndex(fightindex)
+		else
+			return Fight11
+		endIf
+	else
+		int fightRoll = utility.RandomInt(1, 10)
+		if fightRoll <= 3
+			if utility.RandomInt(0, 1)
+				return Fight08
+			else
+				return Fight10
+			endIf
+		elseIf fightRoll <= 9
+			return Fight13
+		else
+			return Fight12
+		endIf
+	endIf
+	return none
+endFunction
+</pre>
+</div>
+
+<p>Decompiling a file in a subdirectory, with the assembly file in another</p>
+<div class="command-line">Champollion.exe bsa\out\scripts\arenascript.pex -p decompiled -a asm</div>
+<div class="output">
+<pre>
+bsa\out\scripts\arenascript.pex dissassembled to asm\arenascript.pas
+bsa\out\scripts\arenascript.pex decompiled to decompiled\arenascript.psc
+1 files processed in 0.0290016 s
+</pre>
+</div>
+<div class="psc-sample">
+<span class="sample">decompiled\arenascript.psc</span>
+<pre>
+;/ Decompiled by Champollion V1.0.0
+Source   : ArenaScript.psc
+Modified : 2012-02-12 00:06:16
+Compiled : 2013-02-13 20:15:01
+User     : builds
+Computer : BUILDFARM09
+/;
+scriptName ArenaScript extends Quest conditional
+
+;-- Properties --------------------------------------
+int property WagerAmount auto
+ArenaCombatQuest property SpecialFightDB auto
+Armor property LoanerShield auto
+bool property NextWagerFightIsPeople auto conditional
+Faction property ArenaFaction auto
+Faction property EastmarchCrimeFaction auto
+ObjectReference property Gate1 auto
+ReferenceAlias property PitDoor auto
+Quest property EastmarchJail auto
+bool property CombatOngoing auto conditional
+Quest property DB03 auto
+ArenaCombatQuest property Fight13 auto
+ArenaCombatQuest property TransitionFight auto
+Faction property SelfLoathing auto
+ReferenceAlias property Combatant10 auto
+ObjectReference property Gate2 auto
+ArenaCombatQuest property Fight12 auto
+Keyword property Wave4Keyword auto
+Keyword property Wave2Keyword auto
+bool property NextWagerFightIsEasyAnimals auto conditional
+ObjectReference property Gate3 auto
+bool property NextWagerFightIsExotic auto conditional
+int property Level0Fights auto
+int property NumberOfPlayerFights auto
+ArenaCombatQuest property NextWagerFight auto
+ArenaCombatQuest property Fight04 auto
+ReferenceAlias property Combatant02 auto
+ReferenceAlias property Combatant07 auto
+ArenaCombatQuest property Fight01 auto
+bool property PlayerChoseTheField auto conditional
+ReferenceAlias property Combatant09 auto
+ArenaCombatQuest property Fight05 auto
+ReferenceAlias property Combatant03 auto
+ArenaCombatQuest property SpecialFightJail auto
+ArenaCombatQuest property CurrentFight auto
+Keyword property Wave1Keyword auto
+ReferenceAlias property Combatant08 auto
+bool property RewardDue auto conditional
+ReferenceAlias property TransitionCombatant auto
+int property Level3Fights auto
+ReferenceAlias property Combatant06 auto
+bool property WagerResolutionRequired auto conditional
+ArenaCombatQuest property Fight11 auto
+ReferenceAlias property Combatant05 auto
+ArenaCombatQuest property Fight03 auto
+ArenaCombatQuest property Fight10 auto
+ArenaCombatQuest property Fight09 auto
+Faction property PacifyFaction auto
+int property Level2Fights auto
+ArenaCombatQuest property Fight06 auto
+bool property NextWagerFightIsToughAnimals auto conditional
+ReferenceAlias property Combatant04 auto
+ArenaCombatQuest property Fight08 auto
+Quest property ArenaWagerFighterQuest auto
+Weapon property LoanerSword auto
+bool property PlayerWonWager auto conditional
+Keyword property Wave5Keyword auto
+bool property PlayerGotTheSkinny auto conditional
+ArenaCombatQuest property Fight02 auto
+int property Level1Fights auto
+bool property DBFightWentAwry = false auto conditional
+Keyword property Wave3Keyword auto
+int property ArrestOffset auto
+bool property CombatPreSet auto
+MiscObject property Gold auto
+bool property WagerOngoing auto conditional
+int property FightsToNextLevel auto conditional
+ArenaCombatQuest property Fight07 auto
+ReferenceAlias property Combatant01 auto
+Quest property PointerQuest auto
+Keyword property LinkedDoorKeyword auto
+
+;-- Variables ---------------------------------------
+int _maxFights = 13
+ObjectReference _spawnPoint02
+ObjectReference _spawnPoint03
+ObjectReference _spawnPoint05
+ObjectReference _spawnPoint04
+ObjectReference _spawnPoint01
+
+;-- Functions ---------------------------------------
+
+function RegisterCombatant(ObjectReference fighter)
+
+	(fighter as actor).AddToFaction(PacifyFaction)
+	if CurrentFight != none && (CurrentFight as arenacombatquest).IsTransitionFight
+		self.RegisterTransitionCombatant(fighter)
+		return 
+	endIf
+	if Combatant01.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant02.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant03.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant04.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant05.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant06.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant07.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant08.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant09.ForceRefIfEmpty(fighter)
+		
+	elseIf Combatant10.ForceRefIfEmpty(fighter)
+		
+	endIf
+endFunction
+
+function Promote()
+
+	game.GetPlayer().ModFactionRank(ArenaFaction, 1)
+	int rank = game.GetPlayer().GetFactionRank(ArenaFaction)
+	if rank == 1
+		FightsToNextLevel = Level1Fights
+	elseIf rank == 2
+		FightsToNextLevel = Level2Fights
+	elseIf rank == 3
+		FightsToNextLevel = Level3Fights
+	elseIf rank == 4
+		FightsToNextLevel = 2147483647
+	endIf
+endFunction
+
+function RegisterTransitionCombatant(ObjectReference fighter)
+
+	if TransitionCombatant.GetReference() != none
+		return 
+	endIf
+	TransitionCombatant.ForceRefTo(fighter)
+	TransitionCombatant.GetActorReference().SetNoBleedoutRecovery(true)
+endFunction
+
+function EndWagerFight()
+
+	bool fieldWon = (ArenaWagerFighterQuest as arenawagerfighterquestscript).fighter.GetActorReference().IsDead()
+	NextWagerFight.Stop()
+	if PlayerChoseTheField == fieldWon
+		PlayerWonWager = true
+	else
+		PlayerWonWager = false
+	endIf
+	WagerResolutionRequired = true
+endFunction
+
+; Skipped compiler generated GotoState
+
+keyword function GetKeywordForWave(int wave)
+
+	if wave == 1
+		return Wave1Keyword
+	elseIf wave == 2
+		return Wave2Keyword
+	elseIf wave == 3
+		return Wave3Keyword
+	elseIf wave == 4
+		return Wave4Keyword
+	elseIf wave == 5
+		return Wave5Keyword
+	else
+		return none
+	endIf
+endFunction
+
+function PlayerJoin()
+
+	if PointerQuest.IsRunning()
+		PointerQuest.SetStage(20)
+	endIf
+	game.GetPlayer().AddToFaction(ArenaFaction)
+	NumberOfPlayerFights = 0
+	FightsToNextLevel = Level0Fights
+endFunction
+
+function PlayerAvoidedWager()
+
+	PlayerChoseTheField = false
+	WagerOngoing = false
+endFunction
+
+function CombatOver()
+
+	if WagerOngoing
+		self.EndWagerFight()
+		return 
+	endIf
+	CurrentFight.Stop()
+	PitDoor.GetReference().Lock(false, false)
+	CombatOngoing = false
+	RewardDue = true
+	NumberOfPlayerFights += 1
+endFunction
+
+function ResolveWager()
+
+	if PlayerWonWager
+		game.GetPlayer().AddItem(Gold as form, WagerAmount * 2, false)
+	endIf
+	self.CleanupBodies()
+	WagerOngoing = false
+	WagerResolutionRequired = false
+	ArenaWagerFighterQuest.Stop()
+	self.PickNextWagerFight(NextWagerFight)
+endFunction
+
+function StartWagerFight()
+
+	NextWagerFight.Start()
+	ArenaWagerFighterQuest.Start()
+	CombatPreSet = true
+endFunction
+
+function StartCombat()
+
+	if 20 <= DB03.GetStage() && 40 > DB03.GetStage()
+		CurrentFight = SpecialFightDB
+		if game.GetPlayer().GetItemCount(LoanerSword as form) < 1
+			game.GetPlayer().AddItem(LoanerSword as form, 1, false)
+		endIf
+		if game.GetPlayer().GetItemCount(LoanerShield as form) < 1
+			game.GetPlayer().AddItem(LoanerShield as form, 1, false)
+		endIf
+		game.GetPlayer().EquipItem(LoanerSword as form, false, false)
+		game.GetPlayer().EquipItem(LoanerShield as form, false, false)
+	elseIf 20 == EastmarchJail.GetStage() && EastmarchJail.IsRunning()
+		CurrentFight = SpecialFightJail
+		game.GetPlayer().AddItem(LoanerSword as form, 1, false)
+		game.GetPlayer().AddItem(LoanerShield as form, 1, false)
+		game.GetPlayer().EquipItem(LoanerSword as form, false, false)
+		game.GetPlayer().EquipItem(LoanerShield as form, false, false)
+	else
+		CurrentFight = self.PickNextFight(0)
+	endIf
+	CurrentFight.Start()
+	CombatPreSet = true
+	PitDoor.GetReference().Lock(false, false)
+	CombatOngoing = true
+endFunction
+
+arenacombatquest function GetFightQuestFromIndex(int questIndex)
+
+	if questIndex == 1
+		return Fight01
+	elseIf questIndex == 2
+		return Fight02
+	elseIf questIndex == 3
+		return Fight03
+	elseIf questIndex == 4
+		return Fight04
+	elseIf questIndex == 5
+		return Fight05
+	elseIf questIndex == 6
+		return Fight06
+	elseIf questIndex == 7
+		return Fight07
+	elseIf questIndex == 8
+		return Fight08
+	elseIf questIndex == 9
+		return Fight09
+	elseIf questIndex == 10
+		return Fight10
+	elseIf questIndex == 11
+		return Fight11
+	elseIf questIndex == 12
+		return Fight12
+	elseIf questIndex == 13
+		return Fight13
+	else
+		return none
+	endIf
+endFunction
+
+function CleanupBodies()
+
+	if self._CleanupBody(Combatant01)
+		
+	endIf
+	if self._CleanupBody(Combatant02)
+		
+	endIf
+	if self._CleanupBody(Combatant03)
+		
+	endIf
+	if self._CleanupBody(Combatant04)
+		
+	endIf
+	if self._CleanupBody(Combatant05)
+		
+	endIf
+	if self._CleanupBody(Combatant06)
+		
+	endIf
+	if self._CleanupBody(Combatant07)
+		
+	endIf
+	if self._CleanupBody(Combatant08)
+		
+	endIf
+	if self._CleanupBody(Combatant09)
+		
+	endIf
+	if self._CleanupBody(Combatant10)
+		
+	endIf
+	if TransitionCombatant.GetReference() != none
+		actor ref = TransitionCombatant.GetActorReference()
+		game.GetPlayer().RemoveFromFaction(SelfLoathing)
+		ref.RemoveFromFaction(SelfLoathing)
+		ref.SetFactionRank(ArenaFaction, 4)
+		ref.SetNoBleedoutRecovery(false)
+		TransitionCombatant.Clear()
+	endIf
+	_spawnPoint01 = none
+	_spawnPoint02 = none
+	_spawnPoint03 = none
+	_spawnPoint04 = none
+	_spawnPoint05 = none
+	Gate1.SetOpen(false)
+	Gate2.SetOpen(false)
+	Gate3.SetOpen(false)
+endFunction
+
+bool function _CleanupBody(referencealias combatant)
+
+	if combatant.GetReference() != none
+		actor ref = combatant.GetActorReference()
+		combatant.Clear()
+		if WagerOngoing
+			ref.Delete()
+		elseIf ref.IsDead()
+			ref.Delete()
+		else
+			ref.MoveToMyEditorLocation()
+			ref.ResetHealthAndLimbs()
+		endIf
+		return true
+	else
+		return false
+	endIf
+endFunction
+
+function Reward()
+
+	PitDoor.GetReference().Lock(true, false)
+	self.CleanupBodies()
+	if 20 == EastmarchJail.GetStage() && EastmarchJail.IsRunning()
+		game.GetPlayer().UnequipItem(LoanerSword as form, false, false)
+		game.GetPlayer().UnequipItem(LoanerShield as form, false, false)
+		game.GetPlayer().RemoveItem(LoanerSword as form, 1, false, none)
+		game.GetPlayer().RemoveItem(LoanerShield as form, 1, false, none)
+		EastmarchCrimeFaction.SetCrimeGold(0)
+		EastmarchCrimeFaction.SetCrimeGoldViolent(0)
+		EastmarchJail.SetStage(200)
+	elseIf game.GetPlayer().GetFactionRank(ArenaFaction) >= 4
+		game.GetPlayer().AddItem(Gold as form, 100, false)
+	elseIf FightsToNextLevel <= 0
+		self.Promote()
+	else
+		game.GetPlayer().AddItem(Gold as form, 100, false)
+		FightsToNextLevel -= 1
+	endIf
+	RewardDue = false
+endFunction
+
+function PlaceBet(int amount)
+
+	WagerOngoing = true
+	WagerAmount = amount
+	game.GetPlayer().RemoveItem(Gold as form, WagerAmount, false, none)
+endFunction
+
+function RegisterSpawnPoint(ObjectReference spawnMarker)
+
+	if _spawnPoint01 == none
+		_spawnPoint01 = spawnMarker
+	elseIf _spawnPoint02 == none
+		_spawnPoint02 = spawnMarker
+	elseIf _spawnPoint03 == none
+		_spawnPoint03 = spawnMarker
+	elseIf _spawnPoint04 == none
+		_spawnPoint04 = spawnMarker
+	elseIf _spawnPoint05 == none
+		_spawnPoint05 = spawnMarker
+	endIf
+endFunction
+
+int function GetIndexFromFightQuest(arenacombatquest rQuest)
+
+	if rQuest == Fight01
+		return 1
+	elseIf rQuest == Fight02
+		return 2
+	elseIf rQuest == Fight03
+		return 3
+	elseIf rQuest == Fight04
+		return 4
+	elseIf rQuest == Fight05
+		return 5
+	elseIf rQuest == Fight06
+		return 6
+	elseIf rQuest == Fight07
+		return 7
+	elseIf rQuest == Fight08
+		return 8
+	elseIf rQuest == Fight09
+		return 9
+	elseIf rQuest == Fight10
+		return 10
+	elseIf rQuest == Fight11
+		return 11
+	elseIf rQuest == Fight12
+		return 12
+	elseIf rQuest == Fight13
+		return 13
+	else
+		return 0
+	endIf
+endFunction
+
+ObjectReference function GetDoorForWave(int wave)
+
+	keyword toMatch = self.GetKeywordForWave(wave)
+	if _spawnPoint01.HasKeyword(toMatch)
+		return _spawnPoint01.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint02.HasKeyword(toMatch)
+		return _spawnPoint02.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint03.HasKeyword(toMatch)
+		return _spawnPoint03.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint04.HasKeyword(toMatch)
+		return _spawnPoint04.GetLinkedRef(LinkedDoorKeyword)
+	elseIf _spawnPoint05.HasKeyword(toMatch)
+		return _spawnPoint05.GetLinkedRef(LinkedDoorKeyword)
+	else
+		return none
+	endIf
+endFunction
+
+function PickNextWagerFight(arenacombatquest lastFight)
+
+	int lastFightIndex = -1
+	if lastFight != none
+		lastFightIndex = self.GetIndexFromFightQuest(lastFight)
+	endIf
+	int fightIndex = lastFightIndex
+	while fightIndex == lastFightIndex
+		fightIndex = utility.RandomInt(1, _maxFights)
+	endWhile
+	NextWagerFight = self.GetFightQuestFromIndex(fightIndex)
+	NextWagerFightIsToughAnimals = false
+	NextWagerFightIsEasyAnimals = false
+	NextWagerFightIsPeople = false
+	NextWagerFightIsExotic = false
+	if NextWagerFight == Fight01
+		NextWagerFightIsEasyAnimals = true
+	elseIf NextWagerFight == Fight02
+		NextWagerFightIsEasyAnimals = true
+	elseIf NextWagerFight == Fight03
+		NextWagerFightIsEasyAnimals = true
+	elseIf NextWagerFight == Fight04
+		NextWagerFightIsPeople = true
+	elseIf NextWagerFight == Fight05
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight06
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight07
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight08
+		NextWagerFightIsToughAnimals = true
+	elseIf NextWagerFight == Fight09
+		NextWagerFightIsPeople = true
+	elseIf NextWagerFight == Fight10
+		NextWagerFightIsExotic = true
+	elseIf NextWagerFight == Fight11
+		NextWagerFightIsPeople = true
+	elseIf NextWagerFight == Fight12
+		NextWagerFightIsExotic = true
+	elseIf NextWagerFight == Fight13
+		NextWagerFightIsPeople = true
+	endIf
+endFunction
+
+referencealias function GetCombatantAlias(int index)
+
+	if index == 1
+		return Combatant01
+	elseIf index == 2
+		return Combatant02
+	elseIf index == 3
+		return Combatant03
+	elseIf index == 4
+		return Combatant04
+	elseIf index == 5
+		return Combatant05
+	elseIf index == 6
+		return Combatant06
+	elseIf index == 7
+		return Combatant07
+	elseIf index == 8
+		return Combatant08
+	elseIf index == 9
+		return Combatant09
+	elseIf index == 10
+		return Combatant10
+	else
+		return none
+	endIf
+endFunction
+
+; Skipped compiler generated GetState
+
+function Setup()
+
+	WagerOngoing = false
+	self.PickNextWagerFight(none)
+endFunction
+
+arenacombatquest function PickNextFight(int offset)
+
+	int minFight = -1
+	int maxFight = -1
+	int playerRank = game.GetPlayer().GetFactionRank(ArenaFaction)
+	if FightsToNextLevel <= 0
+		return TransitionFight
+	endIf
+	if playerRank == 0
+		minFight = 1
+		maxFight = 3
+		int fightIndex = utility.RandomInt(minFight, maxFight)
+		return self.GetFightQuestFromIndex(fightIndex)
+	elseIf playerRank == 1
+		bool humanFight = utility.RandomInt(0, 2) as bool
+		if !humanFight
+			minFight = 2
+			maxFight = 3
+			int fightindex = utility.RandomInt(minFight, maxFight)
+			return self.GetFightQuestFromIndex(fightindex)
+		else
+			return Fight04
+		endIf
+	elseIf playerRank == 2
+		minFight = 5
+		maxFight = 9
+		int fightindex = utility.RandomInt(minFight, maxFight)
+		return self.GetFightQuestFromIndex(fightindex)
+	elseIf playerRank == 3
+		int animalFight = utility.RandomInt(0, 2)
+		if animalFight == 0
+			minFight = 7
+			maxFight = 9
+			int fightindex = utility.RandomInt(minFight, maxFight)
+			if fightindex == 9
+				fightindex = 10
+			endIf
+			return self.GetFightQuestFromIndex(fightindex)
+		else
+			return Fight11
+		endIf
+	else
+		int fightRoll = utility.RandomInt(1, 10)
+		if fightRoll <= 3
+			if utility.RandomInt(0, 1)
+				return Fight08
+			else
+				return Fight10
+			endIf
+		elseIf fightRoll <= 9
+			return Fight13
+		else
+			return Fight12
+		endIf
+	endIf
+	return none
+endFunction
+
+</pre>
+</div>
+
+<div class="psc-sample">
+<span class="sample">asm\arenascript.pas</span>
+<pre>
+.info
+	.source "ArenaScript.psc"
+	.modifyTime 1329001576 ;2012-02-12 00:06:16
+	.compileTime 1360782901 ;2013-02-13 20:15:01
+	.user "builds"
+	.computer "BUILDFARM09"
+.endInfo
+.userFlagsRef
+	.flag hidden 0 ;0x00000001
+	.flag conditional 1 ;0x00000002
+.endUserFlagsRef
+.objectTable
+	.object ArenaScript Quest
+		.userFlags 2 ;conditional 
+		.docString ""
+		.autoState 
+		.variableTable
+			.variable ::Level0Fights_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Level3Fights_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::FightsToNextLevel_var int
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::NextWagerFightIsExotic_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::Fight03_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant08_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant04_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::PointerQuest_var quest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::RewardDue_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::ArenaWagerFighterQuest_var quest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight08_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::NextWagerFight_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant03_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight12_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable _maxFights int
+				.userFlags 0 ;none
+				.initialValue 13
+			.endVariable
+			.variable ::NumberOfPlayerFights_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::SpecialFightDB_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::PlayerGotTheSkinny_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::CurrentFight_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Wave4Keyword_var keyword
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Wave3Keyword_var keyword
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight05_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::WagerAmount_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::PlayerWonWager_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::Fight13_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Gold_var miscobject
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::ArenaFaction_var faction
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Wave1Keyword_var keyword
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::DBFightWentAwry_var bool
+				.userFlags 2 ;conditional 
+				.initialValue false
+			.endVariable
+			.variable ::Fight02_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant09_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant05_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::CombatOngoing_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::Level1Fights_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Level2Fights_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable _spawnPoint02 ObjectReference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::SpecialFightJail_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Wave5Keyword_var keyword
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight07_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight11_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::EastmarchCrimeFaction_var faction
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::SelfLoathing_var faction
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable _spawnPoint03 ObjectReference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::LinkedDoorKeyword_var keyword
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::WagerOngoing_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::Combatant07_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::NextWagerFightIsToughAnimals_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::PlayerChoseTheField_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::NextWagerFightIsEasyAnimals_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::Fight09_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant02_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable _spawnPoint05 ObjectReference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight04_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::TransitionFight_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight01_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::CombatPreSet_var bool
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::DB03_var quest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::PacifyFaction_var faction
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant06_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::EastmarchJail_var quest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::ArrestOffset_var int
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable _spawnPoint04 ObjectReference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Wave2Keyword_var keyword
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::LoanerShield_var armor
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Gate1_var objectreference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::LoanerSword_var weapon
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::TransitionCombatant_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Gate2_var objectreference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Gate3_var objectreference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant10_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight06_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::PitDoor_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Combatant01_var referencealias
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::Fight10_var arenacombatquest
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+			.variable ::WagerResolutionRequired_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable ::NextWagerFightIsPeople_var bool
+				.userFlags 2 ;conditional 
+				.initialValue none
+			.endVariable
+			.variable _spawnPoint01 ObjectReference
+				.userFlags 0 ;none
+				.initialValue none
+			.endVariable
+		.endVariableTable
+		.propertyTable
+			.property WagerAmount int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::WagerAmount_var
+			.endProperty
+			.property SpecialFightDB ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::SpecialFightDB_var
+			.endProperty
+			.property LoanerShield Armor auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::LoanerShield_var
+			.endProperty
+			.property NextWagerFightIsPeople bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::NextWagerFightIsPeople_var
+			.endProperty
+			.property ArenaFaction Faction auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::ArenaFaction_var
+			.endProperty
+			.property EastmarchCrimeFaction Faction auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::EastmarchCrimeFaction_var
+			.endProperty
+			.property Gate1 ObjectReference auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Gate1_var
+			.endProperty
+			.property PitDoor ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::PitDoor_var
+			.endProperty
+			.property EastmarchJail Quest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::EastmarchJail_var
+			.endProperty
+			.property CombatOngoing bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::CombatOngoing_var
+			.endProperty
+			.property DB03 Quest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::DB03_var
+			.endProperty
+			.property Fight13 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight13_var
+			.endProperty
+			.property TransitionFight ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::TransitionFight_var
+			.endProperty
+			.property SelfLoathing Faction auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::SelfLoathing_var
+			.endProperty
+			.property Combatant10 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant10_var
+			.endProperty
+			.property Gate2 ObjectReference auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Gate2_var
+			.endProperty
+			.property Fight12 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight12_var
+			.endProperty
+			.property Wave4Keyword Keyword auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Wave4Keyword_var
+			.endProperty
+			.property Wave2Keyword Keyword auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Wave2Keyword_var
+			.endProperty
+			.property NextWagerFightIsEasyAnimals bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::NextWagerFightIsEasyAnimals_var
+			.endProperty
+			.property Gate3 ObjectReference auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Gate3_var
+			.endProperty
+			.property NextWagerFightIsExotic bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::NextWagerFightIsExotic_var
+			.endProperty
+			.property Level0Fights int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Level0Fights_var
+			.endProperty
+			.property NumberOfPlayerFights int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::NumberOfPlayerFights_var
+			.endProperty
+			.property NextWagerFight ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::NextWagerFight_var
+			.endProperty
+			.property Fight04 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight04_var
+			.endProperty
+			.property Combatant02 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant02_var
+			.endProperty
+			.property Combatant07 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant07_var
+			.endProperty
+			.property Fight01 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight01_var
+			.endProperty
+			.property PlayerChoseTheField bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::PlayerChoseTheField_var
+			.endProperty
+			.property Combatant09 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant09_var
+			.endProperty
+			.property Fight05 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight05_var
+			.endProperty
+			.property Combatant03 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant03_var
+			.endProperty
+			.property SpecialFightJail ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::SpecialFightJail_var
+			.endProperty
+			.property CurrentFight ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::CurrentFight_var
+			.endProperty
+			.property Wave1Keyword Keyword auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Wave1Keyword_var
+			.endProperty
+			.property Combatant08 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant08_var
+			.endProperty
+			.property RewardDue bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::RewardDue_var
+			.endProperty
+			.property TransitionCombatant ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::TransitionCombatant_var
+			.endProperty
+			.property Level3Fights int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Level3Fights_var
+			.endProperty
+			.property Combatant06 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant06_var
+			.endProperty
+			.property WagerResolutionRequired bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::WagerResolutionRequired_var
+			.endProperty
+			.property Fight11 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight11_var
+			.endProperty
+			.property Combatant05 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant05_var
+			.endProperty
+			.property Fight03 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight03_var
+			.endProperty
+			.property Fight10 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight10_var
+			.endProperty
+			.property Fight09 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight09_var
+			.endProperty
+			.property PacifyFaction Faction auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::PacifyFaction_var
+			.endProperty
+			.property Level2Fights int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Level2Fights_var
+			.endProperty
+			.property Fight06 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight06_var
+			.endProperty
+			.property NextWagerFightIsToughAnimals bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::NextWagerFightIsToughAnimals_var
+			.endProperty
+			.property Combatant04 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant04_var
+			.endProperty
+			.property Fight08 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight08_var
+			.endProperty
+			.property ArenaWagerFighterQuest Quest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::ArenaWagerFighterQuest_var
+			.endProperty
+			.property LoanerSword Weapon auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::LoanerSword_var
+			.endProperty
+			.property PlayerWonWager bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::PlayerWonWager_var
+			.endProperty
+			.property Wave5Keyword Keyword auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Wave5Keyword_var
+			.endProperty
+			.property PlayerGotTheSkinny bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::PlayerGotTheSkinny_var
+			.endProperty
+			.property Fight02 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight02_var
+			.endProperty
+			.property Level1Fights int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Level1Fights_var
+			.endProperty
+			.property DBFightWentAwry bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::DBFightWentAwry_var
+			.endProperty
+			.property Wave3Keyword Keyword auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Wave3Keyword_var
+			.endProperty
+			.property ArrestOffset int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::ArrestOffset_var
+			.endProperty
+			.property CombatPreSet bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::CombatPreSet_var
+			.endProperty
+			.property Gold MiscObject auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Gold_var
+			.endProperty
+			.property WagerOngoing bool auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::WagerOngoing_var
+			.endProperty
+			.property FightsToNextLevel int auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::FightsToNextLevel_var
+			.endProperty
+			.property Fight07 ArenaCombatQuest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Fight07_var
+			.endProperty
+			.property Combatant01 ReferenceAlias auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::Combatant01_var
+			.endProperty
+			.property PointerQuest Quest auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::PointerQuest_var
+			.endProperty
+			.property LinkedDoorKeyword Keyword auto
+				.userFlags 0 ;none
+				.docString ""
+				.autovar ::LinkedDoorKeyword_var
+			.endProperty
+		.endPropertyTable
+		.stateTable
+			.state 
+				.function RegisterCombatant
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+						.param fighter ObjectReference
+					.endParamTable
+					.localTable
+						.local ::temp76 actor
+						.local ::nonevar NONE
+						.local ::temp77 arenacombatquest
+						.local ::temp78 bool
+						.local ::temp79 bool
+					.endLocalTable
+					.code
+						; line 528
+						cast ::temp76 fighter 
+						callmethod AddToFaction ::temp76 ::nonevar ::PacifyFaction_var ;1 variable args
+						; line 530
+						cast ::temp77 none 
+						cmp_eq ::temp78 ::CurrentFight_var ::temp77 
+						not ::temp78 ::temp78 
+						cast ::temp78 ::temp78 
+						jmpf ::temp78 _label0
+						cast ::temp77 ::CurrentFight_var 
+						propget IsTransitionFight ::temp77 ::temp79 
+						cast ::temp78 ::temp79 
+					_label0:
+						jmpf ::temp78 _label1
+						; line 531
+						callmethod RegisterTransitionCombatant self ::nonevar fighter ;1 variable args
+						; line 532
+						return none 
+						jmp _label1
+						; line 535
+					_label1:
+						callmethod ForceRefIfEmpty ::Combatant01_var ::temp79 fighter ;1 variable args
+						jmpf ::temp79 _label2
+						jmp _label3
+						; line 537
+					_label2:
+						callmethod ForceRefIfEmpty ::Combatant02_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label4
+						jmp _label3
+						; line 539
+					_label4:
+						callmethod ForceRefIfEmpty ::Combatant03_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label5
+						jmp _label3
+						; line 541
+					_label5:
+						callmethod ForceRefIfEmpty ::Combatant04_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label6
+						jmp _label3
+						; line 543
+					_label6:
+						callmethod ForceRefIfEmpty ::Combatant05_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label7
+						jmp _label3
+						; line 545
+					_label7:
+						callmethod ForceRefIfEmpty ::Combatant06_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label8
+						jmp _label3
+						; line 547
+					_label8:
+						callmethod ForceRefIfEmpty ::Combatant07_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label9
+						jmp _label3
+						; line 549
+					_label9:
+						callmethod ForceRefIfEmpty ::Combatant08_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label10
+						jmp _label3
+						; line 551
+					_label10:
+						callmethod ForceRefIfEmpty ::Combatant09_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label11
+						jmp _label3
+						; line 553
+					_label11:
+						callmethod ForceRefIfEmpty ::Combatant10_var ::temp78 fighter ;1 variable args
+						jmpf ::temp78 _label3
+						jmp _label3
+					_label3
+					.endCode
+				.endFunction ;RegisterCombatant
+				.function Promote
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp26 actor
+						.local ::nonevar NONE
+						.local ::temp27 int
+						.local ::temp28 bool
+						.local ::temp29 bool
+						.local rank int
+					.endLocalTable
+					.code
+						; line 310
+						callstatic game GetPlayer ::temp26 ;0 variable args
+						callmethod ModFactionRank ::temp26 ::nonevar ::ArenaFaction_var 1 ;2 variable args
+						; line 311
+						callstatic game GetPlayer ::temp26 ;0 variable args
+						callmethod GetFactionRank ::temp26 ::temp27 ::ArenaFaction_var ;1 variable args
+						assign rank ::temp27 
+						; line 312
+						cmp_eq ::temp28 rank 1 
+						jmpf ::temp28 _label0
+						; line 313
+						assign ::FightsToNextLevel_var ::Level1Fights_var 
+						jmp _label1
+						; line 314
+					_label0:
+						cmp_eq ::temp29 rank 2 
+						jmpf ::temp29 _label2
+						; line 315
+						assign ::FightsToNextLevel_var ::Level2Fights_var 
+						jmp _label1
+						; line 316
+					_label2:
+						cmp_eq ::temp29 rank 3 
+						jmpf ::temp29 _label3
+						; line 317
+						assign ::FightsToNextLevel_var ::Level3Fights_var 
+						jmp _label1
+						; line 318
+					_label3:
+						cmp_eq ::temp29 rank 4 
+						jmpf ::temp29 _label1
+						; line 319
+						assign ::FightsToNextLevel_var 2147483647 
+						jmp _label1
+					_label1
+					.endCode
+				.endFunction ;Promote
+				.function RegisterTransitionCombatant
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+						.param fighter ObjectReference
+					.endParamTable
+					.localTable
+						.local ::temp57 ObjectReference
+						.local ::temp58 ObjectReference
+						.local ::temp59 bool
+						.local ::nonevar NONE
+						.local ::temp60 actor
+					.endLocalTable
+					.code
+						; line 466
+						callmethod GetReference ::TransitionCombatant_var ::temp57 ;0 variable args
+						cast ::temp58 none 
+						cmp_eq ::temp59 ::temp57 ::temp58 
+						not ::temp59 ::temp59 
+						jmpf ::temp59 _label0
+						; line 468
+						return none 
+						jmp _label0
+						; line 471
+					_label0:
+						callmethod ForceRefTo ::TransitionCombatant_var ::nonevar fighter ;1 variable args
+						; line 472
+						callmethod GetActorReference ::TransitionCombatant_var ::temp60 ;0 variable args
+						callmethod SetNoBleedoutRecovery ::temp60 ::nonevar true ;1 variable args
+					.endCode
+				.endFunction ;RegisterTransitionCombatant
+				.function EndWagerFight
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp14 arenawagerfighterquestscript
+						.local ::temp15 referencealias
+						.local ::temp16 actor
+						.local ::temp17 bool
+						.local ::nonevar NONE
+						.local fieldWon bool
+					.endLocalTable
+					.code
+						; line 225
+						cast ::temp14 ::ArenaWagerFighterQuest_var 
+						propget fighter ::temp14 ::temp15 
+						callmethod GetActorReference ::temp15 ::temp16 ;0 variable args
+						callmethod IsDead ::temp16 ::temp17 ;0 variable args
+						assign fieldWon ::temp17 
+						; line 226
+						callmethod Stop ::NextWagerFight_var ::nonevar ;0 variable args
+						; line 228
+						cmp_eq ::temp17 ::PlayerChoseTheField_var fieldWon 
+						jmpf ::temp17 _label0
+						; line 229
+						assign ::PlayerWonWager_var true 
+						jmp _label1
+						; line 232
+					_label0:
+						assign ::PlayerWonWager_var false 
+						; line 236
+					_label1:
+						assign ::WagerResolutionRequired_var true 
+					.endCode
+				.endFunction ;EndWagerFight
+				.function GotoState
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString "Function that switches this object to the specified state"
+					.return NONE
+					.paramTable
+						.param newState String
+					.endParamTable
+					.localTable
+						.local ::nonevar NONE
+					.endLocalTable
+					.code
+						callmethod onEndState self ::nonevar ;0 variable args
+						assign ::state newState 
+						callmethod onBeginState self ::nonevar ;0 variable args
+					.endCode
+				.endFunction ;GotoState
+				.function GetKeywordForWave
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return keyword
+					.paramTable
+						.param wave int
+					.endParamTable
+					.localTable
+						.local ::temp61 bool
+						.local ::temp62 bool
+						.local ::temp63 keyword
+					.endLocalTable
+					.code
+						; line 476
+						cmp_eq ::temp61 wave 1 
+						jmpf ::temp61 _label0
+						; line 477
+						return ::Wave1Keyword_var 
+						jmp _label1
+						; line 478
+					_label0:
+						cmp_eq ::temp62 wave 2 
+						jmpf ::temp62 _label2
+						; line 479
+						return ::Wave2Keyword_var 
+						jmp _label1
+						; line 480
+					_label2:
+						cmp_eq ::temp62 wave 3 
+						jmpf ::temp62 _label3
+						; line 481
+						return ::Wave3Keyword_var 
+						jmp _label1
+						; line 482
+					_label3:
+						cmp_eq ::temp62 wave 4 
+						jmpf ::temp62 _label4
+						; line 483
+						return ::Wave4Keyword_var 
+						jmp _label1
+						; line 484
+					_label4:
+						cmp_eq ::temp62 wave 5 
+						jmpf ::temp62 _label5
+						; line 485
+						return ::Wave5Keyword_var 
+						jmp _label1
+						; line 487
+					_label5:
+						cast ::temp63 none 
+						return ::temp63 
+					_label1
+					.endCode
+				.endFunction ;GetKeywordForWave
+				.function PlayerJoin
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp9 bool
+						.local ::temp11 actor
+						.local ::nonevar NONE
+						.local ::temp10 bool
+					.endLocalTable
+					.code
+						; line 209
+						callmethod IsRunning ::PointerQuest_var ::temp9 ;0 variable args
+						jmpf ::temp9 _label0
+						; line 210
+						callmethod SetStage ::PointerQuest_var ::temp10 20 ;1 variable args
+						jmp _label0
+						; line 212
+					_label0:
+						callstatic game GetPlayer ::temp11 ;0 variable args
+						callmethod AddToFaction ::temp11 ::nonevar ::ArenaFaction_var ;1 variable args
+						; line 213
+						assign ::NumberOfPlayerFights_var 0 
+						; line 214
+						assign ::FightsToNextLevel_var ::Level0Fights_var 
+					.endCode
+				.endFunction ;PlayerJoin
+				.function PlayerAvoidedWager
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+					.endLocalTable
+					.code
+						; line 253
+						assign ::PlayerChoseTheField_var false 
+						; line 254
+						assign ::WagerOngoing_var false 
+					.endCode
+				.endFunction ;PlayerAvoidedWager
+				.function CombatOver
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp49 ObjectReference
+						.local ::temp50 int
+						.local ::nonevar NONE
+					.endLocalTable
+					.code
+						; line 426
+						jmpf ::WagerOngoing_var _label0
+						; line 427
+						callmethod EndWagerFight self ::nonevar ;0 variable args
+						; line 428
+						return none 
+						jmp _label0
+						; line 430
+					_label0:
+						callmethod Stop ::CurrentFight_var ::nonevar ;0 variable args
+						; line 431
+						callmethod GetReference ::PitDoor_var ::temp49 ;0 variable args
+						callmethod Lock ::temp49 ::nonevar false false ;2 variable args
+						; line 432
+						assign ::CombatOngoing_var false 
+						; line 433
+						assign ::RewardDue_var true 
+						; line 434
+						iadd ::temp50 ::NumberOfPlayerFights_var 1 
+						assign ::NumberOfPlayerFights_var ::temp50 
+					.endCode
+				.endFunction ;CombatOver
+				.function ResolveWager
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp18 actor
+						.local ::temp19 int
+						.local ::temp20 form
+						.local ::nonevar NONE
+					.endLocalTable
+					.code
+						; line 241
+						jmpf ::PlayerWonWager_var _label0
+						; line 242
+						callstatic game GetPlayer ::temp18 ;0 variable args
+						imul ::temp19 ::WagerAmount_var 2 
+						cast ::temp20 ::Gold_var 
+						callmethod AddItem ::temp18 ::nonevar ::temp20 ::temp19 false ;3 variable args
+						jmp _label0
+						; line 245
+					_label0:
+						callmethod CleanupBodies self ::nonevar ;0 variable args
+						; line 246
+						assign ::WagerOngoing_var false 
+						; line 247
+						assign ::WagerResolutionRequired_var false 
+						; line 248
+						callmethod Stop ::ArenaWagerFighterQuest_var ::nonevar ;0 variable args
+						; line 249
+						callmethod PickNextWagerFight self ::nonevar ::NextWagerFight_var ;1 variable args
+					.endCode
+				.endFunction ;ResolveWager
+				.function StartWagerFight
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp21 bool
+					.endLocalTable
+					.code
+						; line 258
+						callmethod Start ::NextWagerFight_var ::temp21 ;0 variable args
+						; line 259
+						callmethod Start ::ArenaWagerFighterQuest_var ::temp21 ;0 variable args
+						; line 260
+						assign ::CombatPreSet_var true 
+					.endCode
+				.endFunction ;StartWagerFight
+				.function StartCombat
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp30 int
+						.local ::temp31 bool
+						.local ::temp32 bool
+						.local ::temp35 bool
+						.local ::temp37 ObjectReference
+						.local ::temp33 actor
+						.local ::temp34 form
+						.local ::nonevar NONE
+						.local ::temp36 arenacombatquest
+					.endLocalTable
+					.code
+						; line 325
+						callmethod GetStage ::DB03_var ::temp30 ;0 variable args
+						cmp_lte ::temp31 20 ::temp30 
+						cast ::temp31 ::temp31 
+						jmpf ::temp31 _label0
+						callmethod GetStage ::DB03_var ::temp30 ;0 variable args
+						cmp_gt ::temp32 40 ::temp30 
+						cast ::temp31 ::temp32 
+					_label0:
+						jmpf ::temp31 _label1
+						; line 326
+						assign ::CurrentFight_var ::SpecialFightDB_var 
+						; line 327
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerSword_var 
+						callmethod GetItemCount ::temp33 ::temp30 ::temp34 ;1 variable args
+						cmp_lt ::temp32 ::temp30 1 
+						jmpf ::temp32 _label2
+						; line 328
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerSword_var 
+						callmethod AddItem ::temp33 ::nonevar ::temp34 1 false ;3 variable args
+						jmp _label2
+						; line 330
+					_label2:
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerShield_var 
+						callmethod GetItemCount ::temp33 ::temp30 ::temp34 ;1 variable args
+						cmp_lt ::temp32 ::temp30 1 
+						jmpf ::temp32 _label3
+						; line 331
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerShield_var 
+						callmethod AddItem ::temp33 ::nonevar ::temp34 1 false ;3 variable args
+						jmp _label3
+						; line 333
+					_label3:
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerSword_var 
+						callmethod EquipItem ::temp33 ::nonevar ::temp34 false false ;3 variable args
+						; line 334
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerShield_var 
+						callmethod EquipItem ::temp33 ::nonevar ::temp34 false false ;3 variable args
+						jmp _label4
+						; line 335
+					_label1:
+						callmethod GetStage ::EastmarchJail_var ::temp30 ;0 variable args
+						cmp_eq ::temp32 20 ::temp30 
+						cast ::temp32 ::temp32 
+						jmpf ::temp32 _label5
+						callmethod IsRunning ::EastmarchJail_var ::temp35 ;0 variable args
+						cast ::temp32 ::temp35 
+					_label5:
+						jmpf ::temp32 _label6
+						; line 337
+						assign ::CurrentFight_var ::SpecialFightJail_var 
+						; line 338
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerSword_var 
+						callmethod AddItem ::temp33 ::nonevar ::temp34 1 false ;3 variable args
+						; line 339
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerShield_var 
+						callmethod AddItem ::temp33 ::nonevar ::temp34 1 false ;3 variable args
+						; line 340
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerSword_var 
+						callmethod EquipItem ::temp33 ::nonevar ::temp34 false false ;3 variable args
+						; line 341
+						callstatic game GetPlayer ::temp33 ;0 variable args
+						cast ::temp34 ::LoanerShield_var 
+						callmethod EquipItem ::temp33 ::nonevar ::temp34 false false ;3 variable args
+						jmp _label4
+						; line 343
+					_label6:
+						callmethod PickNextFight self ::temp36 0 ;1 variable args
+						assign ::CurrentFight_var ::temp36 
+						; line 346
+					_label4:
+						callmethod Start ::CurrentFight_var ::temp35 ;0 variable args
+						; line 347
+						assign ::CombatPreSet_var true 
+						; line 348
+						callmethod GetReference ::PitDoor_var ::temp37 ;0 variable args
+						callmethod Lock ::temp37 ::nonevar false false ;2 variable args
+						; line 349
+						assign ::CombatOngoing_var true 
+					.endCode
+				.endFunction ;StartCombat
+				.function GetFightQuestFromIndex
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return arenacombatquest
+					.paramTable
+						.param questIndex int
+					.endParamTable
+					.localTable
+						.local ::temp0 bool
+						.local ::temp1 bool
+						.local ::temp2 arenacombatquest
+					.endLocalTable
+					.code
+						; line 113
+						cmp_eq ::temp0 questIndex 1 
+						jmpf ::temp0 _label0
+						; line 114
+						return ::Fight01_var 
+						jmp _label1
+						; line 115
+					_label0:
+						cmp_eq ::temp1 questIndex 2 
+						jmpf ::temp1 _label2
+						; line 116
+						return ::Fight02_var 
+						jmp _label1
+						; line 117
+					_label2:
+						cmp_eq ::temp1 questIndex 3 
+						jmpf ::temp1 _label3
+						; line 118
+						return ::Fight03_var 
+						jmp _label1
+						; line 119
+					_label3:
+						cmp_eq ::temp1 questIndex 4 
+						jmpf ::temp1 _label4
+						; line 120
+						return ::Fight04_var 
+						jmp _label1
+						; line 121
+					_label4:
+						cmp_eq ::temp1 questIndex 5 
+						jmpf ::temp1 _label5
+						; line 122
+						return ::Fight05_var 
+						jmp _label1
+						; line 123
+					_label5:
+						cmp_eq ::temp1 questIndex 6 
+						jmpf ::temp1 _label6
+						; line 124
+						return ::Fight06_var 
+						jmp _label1
+						; line 125
+					_label6:
+						cmp_eq ::temp1 questIndex 7 
+						jmpf ::temp1 _label7
+						; line 126
+						return ::Fight07_var 
+						jmp _label1
+						; line 127
+					_label7:
+						cmp_eq ::temp1 questIndex 8 
+						jmpf ::temp1 _label8
+						; line 128
+						return ::Fight08_var 
+						jmp _label1
+						; line 129
+					_label8:
+						cmp_eq ::temp1 questIndex 9 
+						jmpf ::temp1 _label9
+						; line 130
+						return ::Fight09_var 
+						jmp _label1
+						; line 131
+					_label9:
+						cmp_eq ::temp1 questIndex 10 
+						jmpf ::temp1 _label10
+						; line 132
+						return ::Fight10_var 
+						jmp _label1
+						; line 133
+					_label10:
+						cmp_eq ::temp1 questIndex 11 
+						jmpf ::temp1 _label11
+						; line 134
+						return ::Fight11_var 
+						jmp _label1
+						; line 135
+					_label11:
+						cmp_eq ::temp1 questIndex 12 
+						jmpf ::temp1 _label12
+						; line 136
+						return ::Fight12_var 
+						jmp _label1
+						; line 137
+					_label12:
+						cmp_eq ::temp1 questIndex 13 
+						jmpf ::temp1 _label13
+						; line 138
+						return ::Fight13_var 
+						jmp _label1
+						; line 140
+					_label13:
+						cast ::temp2 none 
+						return ::temp2 
+					_label1
+					.endCode
+				.endFunction ;GetFightQuestFromIndex
+				.function CleanupBodies
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp80 bool
+						.local ::temp81 ObjectReference
+						.local ::temp82 ObjectReference
+						.local ::temp83 actor
+						.local ::nonevar NONE
+						.local ref actor
+					.endLocalTable
+					.code
+						; line 562
+						callmethod _CleanupBody self ::temp80 ::Combatant01_var ;1 variable args
+						jmpf ::temp80 _label0
+						jmp _label0
+						; line 565
+					_label0:
+						callmethod _CleanupBody self ::temp80 ::Combatant02_var ;1 variable args
+						jmpf ::temp80 _label1
+						jmp _label1
+						; line 568
+					_label1:
+						callmethod _CleanupBody self ::temp80 ::Combatant03_var ;1 variable args
+						jmpf ::temp80 _label2
+						jmp _label2
+						; line 571
+					_label2:
+						callmethod _CleanupBody self ::temp80 ::Combatant04_var ;1 variable args
+						jmpf ::temp80 _label3
+						jmp _label3
+						; line 574
+					_label3:
+						callmethod _CleanupBody self ::temp80 ::Combatant05_var ;1 variable args
+						jmpf ::temp80 _label4
+						jmp _label4
+						; line 577
+					_label4:
+						callmethod _CleanupBody self ::temp80 ::Combatant06_var ;1 variable args
+						jmpf ::temp80 _label5
+						jmp _label5
+						; line 580
+					_label5:
+						callmethod _CleanupBody self ::temp80 ::Combatant07_var ;1 variable args
+						jmpf ::temp80 _label6
+						jmp _label6
+						; line 583
+					_label6:
+						callmethod _CleanupBody self ::temp80 ::Combatant08_var ;1 variable args
+						jmpf ::temp80 _label7
+						jmp _label7
+						; line 586
+					_label7:
+						callmethod _CleanupBody self ::temp80 ::Combatant09_var ;1 variable args
+						jmpf ::temp80 _label8
+						jmp _label8
+						; line 589
+					_label8:
+						callmethod _CleanupBody self ::temp80 ::Combatant10_var ;1 variable args
+						jmpf ::temp80 _label9
+						jmp _label9
+						; line 594
+					_label9:
+						callmethod GetReference ::TransitionCombatant_var ::temp81 ;0 variable args
+						cast ::temp82 none 
+						cmp_eq ::temp80 ::temp81 ::temp82 
+						not ::temp80 ::temp80 
+						jmpf ::temp80 _label10
+						; line 596
+						callmethod GetActorReference ::TransitionCombatant_var ::temp83 ;0 variable args
+						assign ref ::temp83 
+						; line 597
+						callstatic game GetPlayer ::temp83 ;0 variable args
+						callmethod RemoveFromFaction ::temp83 ::nonevar ::SelfLoathing_var ;1 variable args
+						; line 598
+						callmethod RemoveFromFaction ref ::nonevar ::SelfLoathing_var ;1 variable args
+						; line 599
+						callmethod SetFactionRank ref ::nonevar ::ArenaFaction_var 4 ;2 variable args
+						; line 600
+						callmethod SetNoBleedoutRecovery ref ::nonevar false ;1 variable args
+						; line 601
+						callmethod Clear ::TransitionCombatant_var ::nonevar ;0 variable args
+						jmp _label10
+						; line 605
+					_label10:
+						cast ::temp82 none 
+						assign _spawnPoint01 ::temp82 
+						; line 606
+						cast ::temp81 none 
+						assign _spawnPoint02 ::temp81 
+						; line 607
+						cast ::temp82 none 
+						assign _spawnPoint03 ::temp82 
+						; line 608
+						cast ::temp81 none 
+						assign _spawnPoint04 ::temp81 
+						; line 609
+						cast ::temp82 none 
+						assign _spawnPoint05 ::temp82 
+						; line 612
+						callmethod SetOpen ::Gate1_var ::nonevar false ;1 variable args
+						; line 613
+						callmethod SetOpen ::Gate2_var ::nonevar false ;1 variable args
+						; line 614
+						callmethod SetOpen ::Gate3_var ::nonevar false ;1 variable args
+					.endCode
+				.endFunction ;CleanupBodies
+				.function _CleanupBody
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return bool
+					.paramTable
+						.param combatant referencealias
+					.endParamTable
+					.localTable
+						.local ::temp84 ObjectReference
+						.local ::temp85 ObjectReference
+						.local ::temp86 bool
+						.local ::temp87 actor
+						.local ::nonevar NONE
+						.local ref actor
+						.local ::temp88 bool
+					.endLocalTable
+					.code
+						; line 618
+						callmethod GetReference combatant ::temp84 ;0 variable args
+						cast ::temp85 none 
+						cmp_eq ::temp86 ::temp84 ::temp85 
+						not ::temp86 ::temp86 
+						jmpf ::temp86 _label0
+						; line 619
+						callmethod GetActorReference combatant ::temp87 ;0 variable args
+						assign ref ::temp87 
+						; line 620
+						callmethod Clear combatant ::nonevar ;0 variable args
+						; line 622
+						jmpf ::WagerOngoing_var _label1
+						; line 624
+						callmethod Delete ref ::nonevar ;0 variable args
+						jmp _label2
+						; line 627
+					_label1:
+						callmethod IsDead ref ::temp88 ;0 variable args
+						jmpf ::temp88 _label3
+						; line 628
+						callmethod Delete ref ::nonevar ;0 variable args
+						jmp _label2
+						; line 630
+					_label3:
+						callmethod MoveToMyEditorLocation ref ::nonevar ;0 variable args
+						; line 631
+						callmethod ResetHealthAndLimbs ref ::nonevar ;0 variable args
+						; line 634
+					_label2:
+						return true 
+						jmp _label4
+						; line 636
+					_label0:
+						return false 
+					_label4
+					.endCode
+				.endFunction ;_CleanupBody
+				.function Reward
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp51 ObjectReference
+						.local ::nonevar NONE
+						.local ::temp52 int
+						.local ::temp53 bool
+						.local ::temp54 bool
+						.local ::temp55 actor
+						.local ::temp56 form
+					.endLocalTable
+					.code
+						; line 438
+						callmethod GetReference ::PitDoor_var ::temp51 ;0 variable args
+						callmethod Lock ::temp51 ::nonevar true false ;2 variable args
+						; line 439
+						callmethod CleanupBodies self ::nonevar ;0 variable args
+						; line 441
+						callmethod GetStage ::EastmarchJail_var ::temp52 ;0 variable args
+						cmp_eq ::temp53 20 ::temp52 
+						cast ::temp53 ::temp53 
+						jmpf ::temp53 _label0
+						callmethod IsRunning ::EastmarchJail_var ::temp54 ;0 variable args
+						cast ::temp53 ::temp54 
+					_label0:
+						jmpf ::temp53 _label1
+						; line 443
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						cast ::temp56 ::LoanerSword_var 
+						callmethod UnequipItem ::temp55 ::nonevar ::temp56 false false ;3 variable args
+						; line 444
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						cast ::temp56 ::LoanerShield_var 
+						callmethod UnequipItem ::temp55 ::nonevar ::temp56 false false ;3 variable args
+						; line 445
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						cast ::temp56 ::LoanerSword_var 
+						callmethod RemoveItem ::temp55 ::nonevar ::temp56 1 false none ;4 variable args
+						; line 446
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						cast ::temp56 ::LoanerShield_var 
+						callmethod RemoveItem ::temp55 ::nonevar ::temp56 1 false none ;4 variable args
+						; line 447
+						callmethod SetCrimeGold ::EastmarchCrimeFaction_var ::nonevar 0 ;1 variable args
+						; line 448
+						callmethod SetCrimeGoldViolent ::EastmarchCrimeFaction_var ::nonevar 0 ;1 variable args
+						; line 450
+						callmethod SetStage ::EastmarchJail_var ::temp54 200 ;1 variable args
+						jmp _label2
+						; line 451
+					_label1:
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						callmethod GetFactionRank ::temp55 ::temp52 ::ArenaFaction_var ;1 variable args
+						comp_gte ::temp54 ::temp52 4 
+						jmpf ::temp54 _label3
+						; line 453
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						cast ::temp56 ::Gold_var 
+						callmethod AddItem ::temp55 ::nonevar ::temp56 100 false ;3 variable args
+						jmp _label2
+						; line 454
+					_label3:
+						cmp_lte ::temp54 ::FightsToNextLevel_var 0 
+						jmpf ::temp54 _label4
+						; line 456
+						callmethod Promote self ::nonevar ;0 variable args
+						jmp _label2
+						; line 459
+					_label4:
+						callstatic game GetPlayer ::temp55 ;0 variable args
+						cast ::temp56 ::Gold_var 
+						callmethod AddItem ::temp55 ::nonevar ::temp56 100 false ;3 variable args
+						; line 460
+						isub ::temp52 ::FightsToNextLevel_var 1 
+						assign ::FightsToNextLevel_var ::temp52 
+						; line 462
+					_label2:
+						assign ::RewardDue_var false 
+					.endCode
+				.endFunction ;Reward
+				.function PlaceBet
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+						.param amount int
+					.endParamTable
+					.localTable
+						.local ::temp12 actor
+						.local ::temp13 form
+						.local ::nonevar NONE
+					.endLocalTable
+					.code
+						; line 218
+						assign ::WagerOngoing_var true 
+						; line 219
+						assign ::WagerAmount_var amount 
+						; line 220
+						callstatic game GetPlayer ::temp12 ;0 variable args
+						cast ::temp13 ::Gold_var 
+						callmethod RemoveItem ::temp12 ::nonevar ::temp13 ::WagerAmount_var false none ;4 variable args
+					.endCode
+				.endFunction ;PlaceBet
+				.function RegisterSpawnPoint
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+						.param spawnMarker ObjectReference
+					.endParamTable
+					.localTable
+						.local ::temp73 ObjectReference
+						.local ::temp74 bool
+						.local ::temp75 bool
+					.endLocalTable
+					.code
+						; line 511
+						cast ::temp73 none 
+						cmp_eq ::temp74 _spawnPoint01 ::temp73 
+						jmpf ::temp74 _label0
+						; line 512
+						assign _spawnPoint01 spawnMarker 
+						jmp _label1
+						; line 513
+					_label0:
+						cast ::temp73 none 
+						cmp_eq ::temp75 _spawnPoint02 ::temp73 
+						jmpf ::temp75 _label2
+						; line 514
+						assign _spawnPoint02 spawnMarker 
+						jmp _label1
+						; line 515
+					_label2:
+						cast ::temp73 none 
+						cmp_eq ::temp75 _spawnPoint03 ::temp73 
+						jmpf ::temp75 _label3
+						; line 516
+						assign _spawnPoint03 spawnMarker 
+						jmp _label1
+						; line 517
+					_label3:
+						cast ::temp73 none 
+						cmp_eq ::temp75 _spawnPoint04 ::temp73 
+						jmpf ::temp75 _label4
+						; line 518
+						assign _spawnPoint04 spawnMarker 
+						jmp _label1
+						; line 519
+					_label4:
+						cast ::temp73 none 
+						cmp_eq ::temp75 _spawnPoint05 ::temp73 
+						jmpf ::temp75 _label1
+						; line 520
+						assign _spawnPoint05 spawnMarker 
+						jmp _label1
+					_label1
+					.endCode
+				.endFunction ;RegisterSpawnPoint
+				.function GetIndexFromFightQuest
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return int
+					.paramTable
+						.param rQuest arenacombatquest
+					.endParamTable
+					.localTable
+						.local ::temp3 bool
+						.local ::temp4 bool
+					.endLocalTable
+					.code
+						; line 145
+						cmp_eq ::temp3 rQuest ::Fight01_var 
+						jmpf ::temp3 _label0
+						; line 146
+						return 1 
+						jmp _label1
+						; line 147
+					_label0:
+						cmp_eq ::temp4 rQuest ::Fight02_var 
+						jmpf ::temp4 _label2
+						; line 148
+						return 2 
+						jmp _label1
+						; line 149
+					_label2:
+						cmp_eq ::temp4 rQuest ::Fight03_var 
+						jmpf ::temp4 _label3
+						; line 150
+						return 3 
+						jmp _label1
+						; line 151
+					_label3:
+						cmp_eq ::temp4 rQuest ::Fight04_var 
+						jmpf ::temp4 _label4
+						; line 152
+						return 4 
+						jmp _label1
+						; line 153
+					_label4:
+						cmp_eq ::temp4 rQuest ::Fight05_var 
+						jmpf ::temp4 _label5
+						; line 154
+						return 5 
+						jmp _label1
+						; line 155
+					_label5:
+						cmp_eq ::temp4 rQuest ::Fight06_var 
+						jmpf ::temp4 _label6
+						; line 156
+						return 6 
+						jmp _label1
+						; line 157
+					_label6:
+						cmp_eq ::temp4 rQuest ::Fight07_var 
+						jmpf ::temp4 _label7
+						; line 158
+						return 7 
+						jmp _label1
+						; line 159
+					_label7:
+						cmp_eq ::temp4 rQuest ::Fight08_var 
+						jmpf ::temp4 _label8
+						; line 160
+						return 8 
+						jmp _label1
+						; line 161
+					_label8:
+						cmp_eq ::temp4 rQuest ::Fight09_var 
+						jmpf ::temp4 _label9
+						; line 162
+						return 9 
+						jmp _label1
+						; line 163
+					_label9:
+						cmp_eq ::temp4 rQuest ::Fight10_var 
+						jmpf ::temp4 _label10
+						; line 164
+						return 10 
+						jmp _label1
+						; line 165
+					_label10:
+						cmp_eq ::temp4 rQuest ::Fight11_var 
+						jmpf ::temp4 _label11
+						; line 166
+						return 11 
+						jmp _label1
+						; line 167
+					_label11:
+						cmp_eq ::temp4 rQuest ::Fight12_var 
+						jmpf ::temp4 _label12
+						; line 168
+						return 12 
+						jmp _label1
+						; line 169
+					_label12:
+						cmp_eq ::temp4 rQuest ::Fight13_var 
+						jmpf ::temp4 _label13
+						; line 170
+						return 13 
+						jmp _label1
+						; line 172
+					_label13:
+						return 0 
+					_label1
+					.endCode
+				.endFunction ;GetIndexFromFightQuest
+				.function GetDoorForWave
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return ObjectReference
+					.paramTable
+						.param wave int
+					.endParamTable
+					.localTable
+						.local ::temp64 keyword
+						.local ::temp65 bool
+						.local ::temp67 bool
+						.local toMatch keyword
+						.local ::temp66 ObjectReference
+						.local ::temp68 ObjectReference
+						.local ::temp69 ObjectReference
+						.local ::temp70 ObjectReference
+						.local ::temp71 ObjectReference
+						.local ::temp72 ObjectReference
+					.endLocalTable
+					.code
+						; line 492
+						callmethod GetKeywordForWave self ::temp64 wave ;1 variable args
+						assign toMatch ::temp64 
+						; line 494
+						callmethod HasKeyword _spawnPoint01 ::temp65 toMatch ;1 variable args
+						jmpf ::temp65 _label0
+						; line 495
+						callmethod GetLinkedRef _spawnPoint01 ::temp66 ::LinkedDoorKeyword_var ;1 variable args
+						return ::temp66 
+						jmp _label1
+						; line 496
+					_label0:
+						callmethod HasKeyword _spawnPoint02 ::temp67 toMatch ;1 variable args
+						jmpf ::temp67 _label2
+						; line 497
+						callmethod GetLinkedRef _spawnPoint02 ::temp68 ::LinkedDoorKeyword_var ;1 variable args
+						return ::temp68 
+						jmp _label1
+						; line 498
+					_label2:
+						callmethod HasKeyword _spawnPoint03 ::temp67 toMatch ;1 variable args
+						jmpf ::temp67 _label3
+						; line 499
+						callmethod GetLinkedRef _spawnPoint03 ::temp69 ::LinkedDoorKeyword_var ;1 variable args
+						return ::temp69 
+						jmp _label1
+						; line 500
+					_label3:
+						callmethod HasKeyword _spawnPoint04 ::temp67 toMatch ;1 variable args
+						jmpf ::temp67 _label4
+						; line 501
+						callmethod GetLinkedRef _spawnPoint04 ::temp70 ::LinkedDoorKeyword_var ;1 variable args
+						return ::temp70 
+						jmp _label1
+						; line 502
+					_label4:
+						callmethod HasKeyword _spawnPoint05 ::temp67 toMatch ;1 variable args
+						jmpf ::temp67 _label5
+						; line 503
+						callmethod GetLinkedRef _spawnPoint05 ::temp71 ::LinkedDoorKeyword_var ;1 variable args
+						return ::temp71 
+						jmp _label1
+						; line 505
+					_label5:
+						cast ::temp72 none 
+						return ::temp72 
+					_label1
+					.endCode
+				.endFunction ;GetDoorForWave
+				.function PickNextWagerFight
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+						.param lastFight arenacombatquest
+					.endParamTable
+					.localTable
+						.local ::temp22 arenacombatquest
+						.local ::temp23 bool
+						.local ::temp25 bool
+						.local lastFightIndex int
+						.local ::temp24 int
+						.local fightIndex int
+					.endLocalTable
+					.code
+						; line 264
+						assign lastFightIndex -1 
+						; line 265
+						cast ::temp22 none 
+						cmp_eq ::temp23 lastFight ::temp22 
+						not ::temp23 ::temp23 
+						jmpf ::temp23 _label0
+						; line 266
+						callmethod GetIndexFromFightQuest self ::temp24 lastFight ;1 variable args
+						assign lastFightIndex ::temp24 
+						jmp _label0
+						; line 268
+					_label0:
+						assign fightIndex lastFightIndex 
+						; line 269
+					_label2:
+						cmp_eq ::temp23 fightIndex lastFightIndex 
+						jmpf ::temp23 _label1
+						; line 270
+						callstatic utility RandomInt ::temp24 1 _maxFights ;2 variable args
+						assign fightIndex ::temp24 
+						jmp _label2
+						; line 272
+					_label1:
+						callmethod GetFightQuestFromIndex self ::temp22 fightIndex ;1 variable args
+						assign ::NextWagerFight_var ::temp22 
+						; line 274
+						assign ::NextWagerFightIsToughAnimals_var false 
+						; line 275
+						assign ::NextWagerFightIsEasyAnimals_var false 
+						; line 276
+						assign ::NextWagerFightIsPeople_var false 
+						; line 277
+						assign ::NextWagerFightIsExotic_var false 
+						; line 279
+						cmp_eq ::temp23 ::NextWagerFight_var ::Fight01_var 
+						jmpf ::temp23 _label3
+						; line 280
+						assign ::NextWagerFightIsEasyAnimals_var true 
+						jmp _label4
+						; line 281
+					_label3:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight02_var 
+						jmpf ::temp25 _label5
+						; line 282
+						assign ::NextWagerFightIsEasyAnimals_var true 
+						jmp _label4
+						; line 283
+					_label5:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight03_var 
+						jmpf ::temp25 _label6
+						; line 284
+						assign ::NextWagerFightIsEasyAnimals_var true 
+						jmp _label4
+						; line 285
+					_label6:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight04_var 
+						jmpf ::temp25 _label7
+						; line 286
+						assign ::NextWagerFightIsPeople_var true 
+						jmp _label4
+						; line 287
+					_label7:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight05_var 
+						jmpf ::temp25 _label8
+						; line 288
+						assign ::NextWagerFightIsToughAnimals_var true 
+						jmp _label4
+						; line 289
+					_label8:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight06_var 
+						jmpf ::temp25 _label9
+						; line 290
+						assign ::NextWagerFightIsToughAnimals_var true 
+						jmp _label4
+						; line 291
+					_label9:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight07_var 
+						jmpf ::temp25 _label10
+						; line 292
+						assign ::NextWagerFightIsToughAnimals_var true 
+						jmp _label4
+						; line 293
+					_label10:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight08_var 
+						jmpf ::temp25 _label11
+						; line 294
+						assign ::NextWagerFightIsToughAnimals_var true 
+						jmp _label4
+						; line 295
+					_label11:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight09_var 
+						jmpf ::temp25 _label12
+						; line 296
+						assign ::NextWagerFightIsPeople_var true 
+						jmp _label4
+						; line 297
+					_label12:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight10_var 
+						jmpf ::temp25 _label13
+						; line 298
+						assign ::NextWagerFightIsExotic_var true 
+						jmp _label4
+						; line 299
+					_label13:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight11_var 
+						jmpf ::temp25 _label14
+						; line 300
+						assign ::NextWagerFightIsPeople_var true 
+						jmp _label4
+						; line 301
+					_label14:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight12_var 
+						jmpf ::temp25 _label15
+						; line 302
+						assign ::NextWagerFightIsExotic_var true 
+						jmp _label4
+						; line 303
+					_label15:
+						cmp_eq ::temp25 ::NextWagerFight_var ::Fight13_var 
+						jmpf ::temp25 _label4
+						; line 304
+						assign ::NextWagerFightIsPeople_var true 
+						jmp _label4
+					_label4
+					.endCode
+				.endFunction ;PickNextWagerFight
+				.function GetCombatantAlias
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return referencealias
+					.paramTable
+						.param index int
+					.endParamTable
+					.localTable
+						.local ::temp5 bool
+						.local ::temp6 bool
+						.local ::temp7 referencealias
+					.endLocalTable
+					.code
+						; line 177
+						cmp_eq ::temp5 index 1 
+						jmpf ::temp5 _label0
+						; line 178
+						return ::Combatant01_var 
+						jmp _label1
+						; line 179
+					_label0:
+						cmp_eq ::temp6 index 2 
+						jmpf ::temp6 _label2
+						; line 180
+						return ::Combatant02_var 
+						jmp _label1
+						; line 181
+					_label2:
+						cmp_eq ::temp6 index 3 
+						jmpf ::temp6 _label3
+						; line 182
+						return ::Combatant03_var 
+						jmp _label1
+						; line 183
+					_label3:
+						cmp_eq ::temp6 index 4 
+						jmpf ::temp6 _label4
+						; line 184
+						return ::Combatant04_var 
+						jmp _label1
+						; line 185
+					_label4:
+						cmp_eq ::temp6 index 5 
+						jmpf ::temp6 _label5
+						; line 186
+						return ::Combatant05_var 
+						jmp _label1
+						; line 187
+					_label5:
+						cmp_eq ::temp6 index 6 
+						jmpf ::temp6 _label6
+						; line 188
+						return ::Combatant06_var 
+						jmp _label1
+						; line 189
+					_label6:
+						cmp_eq ::temp6 index 7 
+						jmpf ::temp6 _label7
+						; line 190
+						return ::Combatant07_var 
+						jmp _label1
+						; line 191
+					_label7:
+						cmp_eq ::temp6 index 8 
+						jmpf ::temp6 _label8
+						; line 192
+						return ::Combatant08_var 
+						jmp _label1
+						; line 193
+					_label8:
+						cmp_eq ::temp6 index 9 
+						jmpf ::temp6 _label9
+						; line 194
+						return ::Combatant09_var 
+						jmp _label1
+						; line 195
+					_label9:
+						cmp_eq ::temp6 index 10 
+						jmpf ::temp6 _label10
+						; line 196
+						return ::Combatant10_var 
+						jmp _label1
+						; line 198
+					_label10:
+						cast ::temp7 none 
+						return ::temp7 
+					_label1
+					.endCode
+				.endFunction ;GetCombatantAlias
+				.function GetState
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString "Function that returns the current state"
+					.return String
+					.paramTable
+					.endParamTable
+					.localTable
+					.endLocalTable
+					.code
+						return ::state 
+					.endCode
+				.endFunction ;GetState
+				.function Setup
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return NONE
+					.paramTable
+					.endParamTable
+					.localTable
+						.local ::temp8 arenacombatquest
+						.local ::nonevar NONE
+					.endLocalTable
+					.code
+						; line 204
+						assign ::WagerOngoing_var false 
+						; line 205
+						cast ::temp8 none 
+						callmethod PickNextWagerFight self ::nonevar ::temp8 ;1 variable args
+					.endCode
+				.endFunction ;Setup
+				.function PickNextFight
+					 ; function type 0
+					.userFlags 0 ;none
+					.docString ""
+					.return arenacombatquest
+					.paramTable
+						.param offset int
+					.endParamTable
+					.localTable
+						.local ::temp38 actor
+						.local ::temp39 int
+						.local ::temp40 bool
+						.local ::temp42 bool
+						.local ::temp48 arenacombatquest
+						.local minFight int
+						.local maxFight int
+						.local playerRank int
+						.local ::temp41 arenacombatquest
+						.local fightIndex int
+						.local ::temp43 bool
+						.local humanFight bool
+						.local ::temp44 arenacombatquest
+						.local ::mangled_fightindex_0 int
+						.local ::temp45 arenacombatquest
+						.local ::mangled_fightindex_1 int
+						.local animalFight int
+						.local ::temp46 bool
+						.local ::temp47 arenacombatquest
+						.local ::mangled_fightindex_2 int
+						.local fightRoll int
+					.endLocalTable
+					.code
+						; line 353
+						assign minFight -1 
+						; line 354
+						assign maxFight -1 
+						; line 355
+						callstatic game GetPlayer ::temp38 ;0 variable args
+						callmethod GetFactionRank ::temp38 ::temp39 ::ArenaFaction_var ;1 variable args
+						assign playerRank ::temp39 
+						; line 357
+						cmp_lte ::temp40 ::FightsToNextLevel_var 0 
+						jmpf ::temp40 _label0
+						; line 360
+						return ::TransitionFight_var 
+						jmp _label0
+						; line 363
+					_label0:
+						cmp_eq ::temp40 playerRank 0 
+						jmpf ::temp40 _label1
+						; line 365
+						assign minFight 1 
+						; line 366
+						assign maxFight 3 
+						; line 367
+						callstatic utility RandomInt ::temp39 minFight maxFight ;2 variable args
+						assign fightIndex ::temp39 
+						; line 369
+						callmethod GetFightQuestFromIndex self ::temp41 fightIndex ;1 variable args
+						return ::temp41 
+						jmp _label2
+						; line 370
+					_label1:
+						cmp_eq ::temp42 playerRank 1 
+						jmpf ::temp42 _label3
+						; line 372
+						callstatic utility RandomInt ::temp39 0 2 ;2 variable args
+						cast ::temp43 ::temp39 
+						assign humanFight ::temp43 
+						; line 373
+						not ::temp43 humanFight 
+						jmpf ::temp43 _label4
+						; line 374
+						assign minFight 2 
+						; line 375
+						assign maxFight 3 
+						; line 376
+						callstatic utility RandomInt ::temp39 minFight maxFight ;2 variable args
+						assign ::mangled_fightindex_0 ::temp39 
+						; line 378
+						callmethod GetFightQuestFromIndex self ::temp44 ::mangled_fightindex_0 ;1 variable args
+						return ::temp44 
+						jmp _label5
+						; line 381
+					_label4:
+						return ::Fight04_var 
+					_label5:
+						jmp _label2
+						; line 383
+					_label3:
+						cmp_eq ::temp43 playerRank 2 
+						jmpf ::temp43 _label6
+						; line 385
+						assign minFight 5 
+						; line 386
+						assign maxFight 9 
+						; line 387
+						callstatic utility RandomInt ::temp39 minFight maxFight ;2 variable args
+						assign ::mangled_fightindex_1 ::temp39 
+						; line 389
+						callmethod GetFightQuestFromIndex self ::temp45 ::mangled_fightindex_1 ;1 variable args
+						return ::temp45 
+						jmp _label2
+						; line 390
+					_label6:
+						cmp_eq ::temp42 playerRank 3 
+						jmpf ::temp42 _label7
+						; line 392
+						callstatic utility RandomInt ::temp39 0 2 ;2 variable args
+						assign animalFight ::temp39 
+						; line 393
+						cmp_eq ::temp43 animalFight 0 
+						jmpf ::temp43 _label8
+						; line 394
+						assign minFight 7 
+						; line 395
+						assign maxFight 9 
+						; line 396
+						callstatic utility RandomInt ::temp39 minFight maxFight ;2 variable args
+						assign ::mangled_fightindex_2 ::temp39 
+						; line 397
+						cmp_eq ::temp46 ::mangled_fightindex_2 9 
+						jmpf ::temp46 _label9
+						; line 398
+						assign ::mangled_fightindex_2 10 
+						jmp _label9
+						; line 401
+					_label9:
+						callmethod GetFightQuestFromIndex self ::temp47 ::mangled_fightindex_2 ;1 variable args
+						return ::temp47 
+						jmp _label10
+						; line 404
+					_label8:
+						return ::Fight11_var 
+					_label10:
+						jmp _label2
+						; line 408
+					_label7:
+						callstatic utility RandomInt ::temp39 1 10 ;2 variable args
+						assign fightRoll ::temp39 
+						; line 409
+						cmp_lte ::temp46 fightRoll 3 
+						jmpf ::temp46 _label11
+						; line 410
+						callstatic utility RandomInt ::temp39 0 1 ;2 variable args
+						jmpf ::temp39 _label12
+						; line 411
+						return ::Fight08_var 
+						jmp _label13
+						; line 413
+					_label12:
+						return ::Fight10_var 
+					_label13:
+						jmp _label2
+						; line 415
+					_label11:
+						cmp_lte ::temp43 fightRoll 9 
+						jmpf ::temp43 _label14
+						; line 416
+						return ::Fight13_var 
+						jmp _label2
+						; line 418
+					_label14:
+						return ::Fight12_var 
+						; line 422
+					_label2:
+						cast ::temp48 none 
+						return ::temp48 
+					.endCode
+				.endFunction ;PickNextFight
+			.endState
+		.endStateTable
+	.endObject
+.endObjectTable
+</pre>
+</div>
+
+<p>Decompiling a file with assembly comments</p>
+<div class="command-line">Champollion.exe bsa\out\scripts\arenascript.pex -c</div>
+<div class="output">
+<pre>
+bsa\out\scripts\arenascript.pex decompiled to .\arenascript.psc
+1 files processed in 0.0190011 s
+</pre>
+</div>
+<div class="psc-sample">
+<span class="sample">arenascript.psc</span>
+<pre>
+;/ Decompiled by Champollion V1.0.0
+Source   : ArenaScript.psc
+Modified : 2012-02-12 00:06:16
+Compiled : 2013-02-13 20:15:01
+User     : builds
+Computer : BUILDFARM09
+/;
+scriptName ArenaScript extends Quest conditional
+
+;-- Properties --------------------------------------
+int property WagerAmount auto
+ArenaCombatQuest property SpecialFightDB auto
+Armor property LoanerShield auto
+bool property NextWagerFightIsPeople auto conditional
+Faction property ArenaFaction auto
+Faction property EastmarchCrimeFaction auto
+ObjectReference property Gate1 auto
+ReferenceAlias property PitDoor auto
+Quest property EastmarchJail auto
+bool property CombatOngoing auto conditional
+Quest property DB03 auto
+ArenaCombatQuest property Fight13 auto
+ArenaCombatQuest property TransitionFight auto
+Faction property SelfLoathing auto
+ReferenceAlias property Combatant10 auto
+ObjectReference property Gate2 auto
+ArenaCombatQuest property Fight12 auto
+Keyword property Wave4Keyword auto
+Keyword property Wave2Keyword auto
+bool property NextWagerFightIsEasyAnimals auto conditional
+ObjectReference property Gate3 auto
+bool property NextWagerFightIsExotic auto conditional
+int property Level0Fights auto
+int property NumberOfPlayerFights auto
+ArenaCombatQuest property NextWagerFight auto
+ArenaCombatQuest property Fight04 auto
+ReferenceAlias property Combatant02 auto
+ReferenceAlias property Combatant07 auto
+ArenaCombatQuest property Fight01 auto
+bool property PlayerChoseTheField auto conditional
+ReferenceAlias property Combatant09 auto
+ArenaCombatQuest property Fight05 auto
+ReferenceAlias property Combatant03 auto
+ArenaCombatQuest property SpecialFightJail auto
+ArenaCombatQuest property CurrentFight auto
+Keyword property Wave1Keyword auto
+ReferenceAlias property Combatant08 auto
+bool property RewardDue auto conditional
+ReferenceAlias property TransitionCombatant auto
+int property Level3Fights auto
+ReferenceAlias property Combatant06 auto
+bool property WagerResolutionRequired auto conditional
+ArenaCombatQuest property Fight11 auto
+ReferenceAlias property Combatant05 auto
+ArenaCombatQuest property Fight03 auto
+ArenaCombatQuest property Fight10 auto
+ArenaCombatQuest property Fight09 auto
+Faction property PacifyFaction auto
+int property Level2Fights auto
+ArenaCombatQuest property Fight06 auto
+bool property NextWagerFightIsToughAnimals auto conditional
+ReferenceAlias property Combatant04 auto
+ArenaCombatQuest property Fight08 auto
+Quest property ArenaWagerFighterQuest auto
+Weapon property LoanerSword auto
+bool property PlayerWonWager auto conditional
+Keyword property Wave5Keyword auto
+bool property PlayerGotTheSkinny auto conditional
+ArenaCombatQuest property Fight02 auto
+int property Level1Fights auto
+bool property DBFightWentAwry = false auto conditional
+Keyword property Wave3Keyword auto
+int property ArrestOffset auto
+bool property CombatPreSet auto
+MiscObject property Gold auto
+bool property WagerOngoing auto conditional
+int property FightsToNextLevel auto conditional
+ArenaCombatQuest property Fight07 auto
+ReferenceAlias property Combatant01 auto
+Quest property PointerQuest auto
+Keyword property LinkedDoorKeyword auto
+
+;-- Variables ---------------------------------------
+; int ::Level0Fights_var
+; int ::Level3Fights_var
+; int ::FightsToNextLevel_var conditional
+; bool ::NextWagerFightIsExotic_var conditional
+; arenacombatquest ::Fight03_var
+; referencealias ::Combatant08_var
+; referencealias ::Combatant04_var
+; quest ::PointerQuest_var
+; bool ::RewardDue_var conditional
+; quest ::ArenaWagerFighterQuest_var
+; arenacombatquest ::Fight08_var
+; arenacombatquest ::NextWagerFight_var
+; referencealias ::Combatant03_var
+; arenacombatquest ::Fight12_var
+int _maxFights = 13
+; int ::NumberOfPlayerFights_var
+; arenacombatquest ::SpecialFightDB_var
+; bool ::PlayerGotTheSkinny_var conditional
+; arenacombatquest ::CurrentFight_var
+; keyword ::Wave4Keyword_var
+; keyword ::Wave3Keyword_var
+; arenacombatquest ::Fight05_var
+; int ::WagerAmount_var
+; bool ::PlayerWonWager_var conditional
+; arenacombatquest ::Fight13_var
+; miscobject ::Gold_var
+; faction ::ArenaFaction_var
+; keyword ::Wave1Keyword_var
+; bool ::DBFightWentAwry_var = false conditional
+; arenacombatquest ::Fight02_var
+; referencealias ::Combatant09_var
+; referencealias ::Combatant05_var
+; bool ::CombatOngoing_var conditional
+; int ::Level1Fights_var
+; int ::Level2Fights_var
+ObjectReference _spawnPoint02
+; arenacombatquest ::SpecialFightJail_var
+; keyword ::Wave5Keyword_var
+; arenacombatquest ::Fight07_var
+; arenacombatquest ::Fight11_var
+; faction ::EastmarchCrimeFaction_var
+; faction ::SelfLoathing_var
+ObjectReference _spawnPoint03
+; keyword ::LinkedDoorKeyword_var
+; bool ::WagerOngoing_var conditional
+; referencealias ::Combatant07_var
+; bool ::NextWagerFightIsToughAnimals_var conditional
+; bool ::PlayerChoseTheField_var conditional
+; bool ::NextWagerFightIsEasyAnimals_var conditional
+; arenacombatquest ::Fight09_var
+; referencealias ::Combatant02_var
+ObjectReference _spawnPoint05
+; arenacombatquest ::Fight04_var
+; arenacombatquest ::TransitionFight_var
+; arenacombatquest ::Fight01_var
+; bool ::CombatPreSet_var
+; quest ::DB03_var
+; faction ::PacifyFaction_var
+; referencealias ::Combatant06_var
+; quest ::EastmarchJail_var
+; int ::ArrestOffset_var
+ObjectReference _spawnPoint04
+; keyword ::Wave2Keyword_var
+; armor ::LoanerShield_var
+; objectreference ::Gate1_var
+; weapon ::LoanerSword_var
+; referencealias ::TransitionCombatant_var
+; objectreference ::Gate2_var
+; objectreference ::Gate3_var
+; referencealias ::Combatant10_var
+; arenacombatquest ::Fight06_var
+; referencealias ::PitDoor_var
+; referencealias ::Combatant01_var
+; arenacombatquest ::Fight10_var
+; bool ::WagerResolutionRequired_var conditional
+; bool ::NextWagerFightIsPeople_var conditional
+ObjectReference _spawnPoint01
+
+;-- Functions ---------------------------------------
+
+function RegisterCombatant(ObjectReference fighter)
+
+	;actor ::temp76
+	;NONE ::nonevar
+	;arenacombatquest ::temp77
+	;bool ::temp78
+	;bool ::temp79
+	
+	; 000 : cast ::temp76 fighter 
+	; 001 : callmethod AddToFaction ::temp76 ::nonevar ::PacifyFaction_var 
+	(fighter as actor).AddToFaction(PacifyFaction)
+	; 002 : cast ::temp77 none 
+	; 003 : cmp_eq ::temp78 ::CurrentFight_var ::temp77 
+	; 004 : not ::temp78 ::temp78 
+	; 005 : cast ::temp78 ::temp78 
+	; 006 : jmpf ::temp78 010
+	; 007 : cast ::temp77 ::CurrentFight_var 
+	; 008 : propget IsTransitionFight ::temp77 ::temp79 
+	; 009 : cast ::temp78 ::temp79 
+	; 010 : jmpf ::temp78 014
+	if CurrentFight != none && (CurrentFight as arenacombatquest).IsTransitionFight
+		; 011 : callmethod RegisterTransitionCombatant self ::nonevar fighter 
+		self.RegisterTransitionCombatant(fighter)
+		; 012 : return none 
+		return 
+	; 013 : jmp 014
+	endIf
+	; 014 : callmethod ForceRefIfEmpty ::Combatant01_var ::temp79 fighter 
+	; 015 : jmpf ::temp79 017
+	if Combatant01.ForceRefIfEmpty(fighter)
+		
+	; 016 : jmp 044
+	; 017 : callmethod ForceRefIfEmpty ::Combatant02_var ::temp78 fighter 
+	; 018 : jmpf ::temp78 020
+	elseIf Combatant02.ForceRefIfEmpty(fighter)
+		
+	; 019 : jmp 044
+	; 020 : callmethod ForceRefIfEmpty ::Combatant03_var ::temp78 fighter 
+	; 021 : jmpf ::temp78 023
+	elseIf Combatant03.ForceRefIfEmpty(fighter)
+		
+	; 022 : jmp 044
+	; 023 : callmethod ForceRefIfEmpty ::Combatant04_var ::temp78 fighter 
+	; 024 : jmpf ::temp78 026
+	elseIf Combatant04.ForceRefIfEmpty(fighter)
+		
+	; 025 : jmp 044
+	; 026 : callmethod ForceRefIfEmpty ::Combatant05_var ::temp78 fighter 
+	; 027 : jmpf ::temp78 029
+	elseIf Combatant05.ForceRefIfEmpty(fighter)
+		
+	; 028 : jmp 044
+	; 029 : callmethod ForceRefIfEmpty ::Combatant06_var ::temp78 fighter 
+	; 030 : jmpf ::temp78 032
+	elseIf Combatant06.ForceRefIfEmpty(fighter)
+		
+	; 031 : jmp 044
+	; 032 : callmethod ForceRefIfEmpty ::Combatant07_var ::temp78 fighter 
+	; 033 : jmpf ::temp78 035
+	elseIf Combatant07.ForceRefIfEmpty(fighter)
+		
+	; 034 : jmp 044
+	; 035 : callmethod ForceRefIfEmpty ::Combatant08_var ::temp78 fighter 
+	; 036 : jmpf ::temp78 038
+	elseIf Combatant08.ForceRefIfEmpty(fighter)
+		
+	; 037 : jmp 044
+	; 038 : callmethod ForceRefIfEmpty ::Combatant09_var ::temp78 fighter 
+	; 039 : jmpf ::temp78 041
+	elseIf Combatant09.ForceRefIfEmpty(fighter)
+		
+	; 040 : jmp 044
+	; 041 : callmethod ForceRefIfEmpty ::Combatant10_var ::temp78 fighter 
+	; 042 : jmpf ::temp78 044
+	elseIf Combatant10.ForceRefIfEmpty(fighter)
+		
+	; 000 : cast ::temp76 fighter 
+	endIf
+endFunction
+
+function Promote()
+
+	;actor ::temp26
+	;NONE ::nonevar
+	;int ::temp27
+	;bool ::temp28
+	;bool ::temp29
+	
+	; 000 : callstatic game GetPlayer ::temp26 
+	; 001 : callmethod ModFactionRank ::temp26 ::nonevar ::ArenaFaction_var 1 
+	game.GetPlayer().ModFactionRank(ArenaFaction, 1)
+	; 002 : callstatic game GetPlayer ::temp26 
+	; 003 : callmethod GetFactionRank ::temp26 ::temp27 ::ArenaFaction_var 
+	; 004 : assign rank ::temp27 
+	int rank = game.GetPlayer().GetFactionRank(ArenaFaction)
+	; 005 : cmp_eq ::temp28 rank 1 
+	; 006 : jmpf ::temp28 009
+	if rank == 1
+		; 007 : assign ::FightsToNextLevel_var ::Level1Fights_var 
+		FightsToNextLevel = Level1Fights
+	; 008 : jmp 021
+	; 009 : cmp_eq ::temp29 rank 2 
+	; 010 : jmpf ::temp29 013
+	elseIf rank == 2
+		; 011 : assign ::FightsToNextLevel_var ::Level2Fights_var 
+		FightsToNextLevel = Level2Fights
+	; 012 : jmp 021
+	; 013 : cmp_eq ::temp29 rank 3 
+	; 014 : jmpf ::temp29 017
+	elseIf rank == 3
+		; 015 : assign ::FightsToNextLevel_var ::Level3Fights_var 
+		FightsToNextLevel = Level3Fights
+	; 016 : jmp 021
+	; 017 : cmp_eq ::temp29 rank 4 
+	; 018 : jmpf ::temp29 021
+	elseIf rank == 4
+		; 019 : assign ::FightsToNextLevel_var 2147483647 
+		FightsToNextLevel = 2147483647
+	; 020 : jmp 021
+	endIf
+endFunction
+
+function RegisterTransitionCombatant(ObjectReference fighter)
+
+	;ObjectReference ::temp57
+	;ObjectReference ::temp58
+	;bool ::temp59
+	;NONE ::nonevar
+	;actor ::temp60
+	
+	; 000 : callmethod GetReference ::TransitionCombatant_var ::temp57 
+	; 001 : cast ::temp58 none 
+	; 002 : cmp_eq ::temp59 ::temp57 ::temp58 
+	; 003 : not ::temp59 ::temp59 
+	; 004 : jmpf ::temp59 007
+	if TransitionCombatant.GetReference() != none
+		; 005 : return none 
+		return 
+	; 006 : jmp 007
+	endIf
+	; 007 : callmethod ForceRefTo ::TransitionCombatant_var ::nonevar fighter 
+	TransitionCombatant.ForceRefTo(fighter)
+	; 008 : callmethod GetActorReference ::TransitionCombatant_var ::temp60 
+	; 009 : callmethod SetNoBleedoutRecovery ::temp60 ::nonevar true 
+	TransitionCombatant.GetActorReference().SetNoBleedoutRecovery(true)
+endFunction
+
+function EndWagerFight()
+
+	;arenawagerfighterquestscript ::temp14
+	;referencealias ::temp15
+	;actor ::temp16
+	;bool ::temp17
+	;NONE ::nonevar
+	
+	; 000 : cast ::temp14 ::ArenaWagerFighterQuest_var 
+	; 001 : propget fighter ::temp14 ::temp15 
+	; 002 : callmethod GetActorReference ::temp15 ::temp16 
+	; 003 : callmethod IsDead ::temp16 ::temp17 
+	; 004 : assign fieldWon ::temp17 
+	bool fieldWon = (ArenaWagerFighterQuest as arenawagerfighterquestscript).fighter.GetActorReference().IsDead()
+	; 005 : callmethod Stop ::NextWagerFight_var ::nonevar 
+	NextWagerFight.Stop()
+	; 006 : cmp_eq ::temp17 ::PlayerChoseTheField_var fieldWon 
+	; 007 : jmpf ::temp17 010
+	if PlayerChoseTheField == fieldWon
+		; 008 : assign ::PlayerWonWager_var true 
+		PlayerWonWager = true
+	; 009 : jmp 011
+	else
+		; 010 : assign ::PlayerWonWager_var false 
+		PlayerWonWager = false
+	endIf
+	; 011 : assign ::WagerResolutionRequired_var true 
+	WagerResolutionRequired = true
+endFunction
+
+; Skipped compiler generated GotoState
+
+keyword function GetKeywordForWave(int wave)
+
+	;bool ::temp61
+	;bool ::temp62
+	;keyword ::temp63
+	
+	; 000 : cmp_eq ::temp61 wave 1 
+	; 001 : jmpf ::temp61 004
+	if wave == 1
+		; 002 : return ::Wave1Keyword_var 
+		return Wave1Keyword
+	; 003 : jmp 022
+	; 004 : cmp_eq ::temp62 wave 2 
+	; 005 : jmpf ::temp62 008
+	elseIf wave == 2
+		; 006 : return ::Wave2Keyword_var 
+		return Wave2Keyword
+	; 007 : jmp 022
+	; 008 : cmp_eq ::temp62 wave 3 
+	; 009 : jmpf ::temp62 012
+	elseIf wave == 3
+		; 010 : return ::Wave3Keyword_var 
+		return Wave3Keyword
+	; 011 : jmp 022
+	; 012 : cmp_eq ::temp62 wave 4 
+	; 013 : jmpf ::temp62 016
+	elseIf wave == 4
+		; 014 : return ::Wave4Keyword_var 
+		return Wave4Keyword
+	; 015 : jmp 022
+	; 016 : cmp_eq ::temp62 wave 5 
+	; 017 : jmpf ::temp62 020
+	elseIf wave == 5
+		; 018 : return ::Wave5Keyword_var 
+		return Wave5Keyword
+	; 019 : jmp 022
+	else
+		; 020 : cast ::temp63 none 
+		; 021 : return ::temp63 
+		return none
+	endIf
+endFunction
+
+function PlayerJoin()
+
+	;bool ::temp9
+	;actor ::temp11
+	;NONE ::nonevar
+	;bool ::temp10
+	
+	; 000 : callmethod IsRunning ::PointerQuest_var ::temp9 
+	; 001 : jmpf ::temp9 004
+	if PointerQuest.IsRunning()
+		; 002 : callmethod SetStage ::PointerQuest_var ::temp10 20 
+		PointerQuest.SetStage(20)
+	; 003 : jmp 004
+	endIf
+	; 004 : callstatic game GetPlayer ::temp11 
+	; 005 : callmethod AddToFaction ::temp11 ::nonevar ::ArenaFaction_var 
+	game.GetPlayer().AddToFaction(ArenaFaction)
+	; 006 : assign ::NumberOfPlayerFights_var 0 
+	NumberOfPlayerFights = 0
+	; 007 : assign ::FightsToNextLevel_var ::Level0Fights_var 
+	FightsToNextLevel = Level0Fights
+endFunction
+
+function PlayerAvoidedWager()
+
+	
+	; 000 : assign ::PlayerChoseTheField_var false 
+	PlayerChoseTheField = false
+	; 001 : assign ::WagerOngoing_var false 
+	WagerOngoing = false
+endFunction
+
+function CombatOver()
+
+	;ObjectReference ::temp49
+	;int ::temp50
+	;NONE ::nonevar
+	
+	; 000 : jmpf ::WagerOngoing_var 004
+	if WagerOngoing
+		; 001 : callmethod EndWagerFight self ::nonevar 
+		self.EndWagerFight()
+		; 002 : return none 
+		return 
+	; 003 : jmp 004
+	endIf
+	; 004 : callmethod Stop ::CurrentFight_var ::nonevar 
+	CurrentFight.Stop()
+	; 005 : callmethod GetReference ::PitDoor_var ::temp49 
+	; 006 : callmethod Lock ::temp49 ::nonevar false false 
+	PitDoor.GetReference().Lock(false, false)
+	; 007 : assign ::CombatOngoing_var false 
+	CombatOngoing = false
+	; 008 : assign ::RewardDue_var true 
+	RewardDue = true
+	; 009 : iadd ::temp50 ::NumberOfPlayerFights_var 1 
+	; 010 : assign ::NumberOfPlayerFights_var ::temp50 
+	NumberOfPlayerFights += 1
+endFunction
+
+function ResolveWager()
+
+	;actor ::temp18
+	;int ::temp19
+	;form ::temp20
+	;NONE ::nonevar
+	
+	; 000 : jmpf ::PlayerWonWager_var 006
+	if PlayerWonWager
+		; 001 : callstatic game GetPlayer ::temp18 
+		; 002 : imul ::temp19 ::WagerAmount_var 2 
+		; 003 : cast ::temp20 ::Gold_var 
+		; 004 : callmethod AddItem ::temp18 ::nonevar ::temp20 ::temp19 false 
+		game.GetPlayer().AddItem(Gold as form, WagerAmount * 2, false)
+	; 005 : jmp 006
+	endIf
+	; 006 : callmethod CleanupBodies self ::nonevar 
+	self.CleanupBodies()
+	; 007 : assign ::WagerOngoing_var false 
+	WagerOngoing = false
+	; 008 : assign ::WagerResolutionRequired_var false 
+	WagerResolutionRequired = false
+	; 009 : callmethod Stop ::ArenaWagerFighterQuest_var ::nonevar 
+	ArenaWagerFighterQuest.Stop()
+	; 010 : callmethod PickNextWagerFight self ::nonevar ::NextWagerFight_var 
+	self.PickNextWagerFight(NextWagerFight)
+endFunction
+
+function StartWagerFight()
+
+	;bool ::temp21
+	
+	; 000 : callmethod Start ::NextWagerFight_var ::temp21 
+	NextWagerFight.Start()
+	; 001 : callmethod Start ::ArenaWagerFighterQuest_var ::temp21 
+	ArenaWagerFighterQuest.Start()
+	; 002 : assign ::CombatPreSet_var true 
+	CombatPreSet = true
+endFunction
+
+function StartCombat()
+
+	;int ::temp30
+	;bool ::temp31
+	;bool ::temp32
+	;bool ::temp35
+	;ObjectReference ::temp37
+	;actor ::temp33
+	;form ::temp34
+	;NONE ::nonevar
+	;arenacombatquest ::temp36
+	
+	; 000 : callmethod GetStage ::DB03_var ::temp30 
+	; 001 : cmp_lte ::temp31 20 ::temp30 
+	; 002 : cast ::temp31 ::temp31 
+	; 003 : jmpf ::temp31 007
+	; 004 : callmethod GetStage ::DB03_var ::temp30 
+	; 005 : cmp_gt ::temp32 40 ::temp30 
+	; 006 : cast ::temp31 ::temp32 
+	; 007 : jmpf ::temp31 034
+	if 20 <= DB03.GetStage() && 40 > DB03.GetStage()
+		; 008 : assign ::CurrentFight_var ::SpecialFightDB_var 
+		CurrentFight = SpecialFightDB
+		; 009 : callstatic game GetPlayer ::temp33 
+		; 010 : cast ::temp34 ::LoanerSword_var 
+		; 011 : callmethod GetItemCount ::temp33 ::temp30 ::temp34 
+		; 012 : cmp_lt ::temp32 ::temp30 1 
+		; 013 : jmpf ::temp32 018
+		if game.GetPlayer().GetItemCount(LoanerSword as form) < 1
+			; 014 : callstatic game GetPlayer ::temp33 
+			; 015 : cast ::temp34 ::LoanerSword_var 
+			; 016 : callmethod AddItem ::temp33 ::nonevar ::temp34 1 false 
+			game.GetPlayer().AddItem(LoanerSword as form, 1, false)
+		; 017 : jmp 018
+		endIf
+		; 018 : callstatic game GetPlayer ::temp33 
+		; 019 : cast ::temp34 ::LoanerShield_var 
+		; 020 : callmethod GetItemCount ::temp33 ::temp30 ::temp34 
+		; 021 : cmp_lt ::temp32 ::temp30 1 
+		; 022 : jmpf ::temp32 027
+		if game.GetPlayer().GetItemCount(LoanerShield as form) < 1
+			; 023 : callstatic game GetPlayer ::temp33 
+			; 024 : cast ::temp34 ::LoanerShield_var 
+			; 025 : callmethod AddItem ::temp33 ::nonevar ::temp34 1 false 
+			game.GetPlayer().AddItem(LoanerShield as form, 1, false)
+		; 026 : jmp 027
+		endIf
+		; 027 : callstatic game GetPlayer ::temp33 
+		; 028 : cast ::temp34 ::LoanerSword_var 
+		; 029 : callmethod EquipItem ::temp33 ::nonevar ::temp34 false false 
+		game.GetPlayer().EquipItem(LoanerSword as form, false, false)
+		; 030 : callstatic game GetPlayer ::temp33 
+		; 031 : cast ::temp34 ::LoanerShield_var 
+		; 032 : callmethod EquipItem ::temp33 ::nonevar ::temp34 false false 
+		game.GetPlayer().EquipItem(LoanerShield as form, false, false)
+	; 033 : jmp 057
+	; 034 : callmethod GetStage ::EastmarchJail_var ::temp30 
+	; 035 : cmp_eq ::temp32 20 ::temp30 
+	; 036 : cast ::temp32 ::temp32 
+	; 037 : jmpf ::temp32 040
+	; 038 : callmethod IsRunning ::EastmarchJail_var ::temp35 
+	; 039 : cast ::temp32 ::temp35 
+	; 040 : jmpf ::temp32 055
+	elseIf 20 == EastmarchJail.GetStage() && EastmarchJail.IsRunning()
+		; 041 : assign ::CurrentFight_var ::SpecialFightJail_var 
+		CurrentFight = SpecialFightJail
+		; 042 : callstatic game GetPlayer ::temp33 
+		; 043 : cast ::temp34 ::LoanerSword_var 
+		; 044 : callmethod AddItem ::temp33 ::nonevar ::temp34 1 false 
+		game.GetPlayer().AddItem(LoanerSword as form, 1, false)
+		; 045 : callstatic game GetPlayer ::temp33 
+		; 046 : cast ::temp34 ::LoanerShield_var 
+		; 047 : callmethod AddItem ::temp33 ::nonevar ::temp34 1 false 
+		game.GetPlayer().AddItem(LoanerShield as form, 1, false)
+		; 048 : callstatic game GetPlayer ::temp33 
+		; 049 : cast ::temp34 ::LoanerSword_var 
+		; 050 : callmethod EquipItem ::temp33 ::nonevar ::temp34 false false 
+		game.GetPlayer().EquipItem(LoanerSword as form, false, false)
+		; 051 : callstatic game GetPlayer ::temp33 
+		; 052 : cast ::temp34 ::LoanerShield_var 
+		; 053 : callmethod EquipItem ::temp33 ::nonevar ::temp34 false false 
+		game.GetPlayer().EquipItem(LoanerShield as form, false, false)
+	; 054 : jmp 057
+	else
+		; 055 : callmethod PickNextFight self ::temp36 0 
+		; 056 : assign ::CurrentFight_var ::temp36 
+		CurrentFight = self.PickNextFight(0)
+	endIf
+	; 057 : callmethod Start ::CurrentFight_var ::temp35 
+	CurrentFight.Start()
+	; 058 : assign ::CombatPreSet_var true 
+	CombatPreSet = true
+	; 059 : callmethod GetReference ::PitDoor_var ::temp37 
+	; 060 : callmethod Lock ::temp37 ::nonevar false false 
+	PitDoor.GetReference().Lock(false, false)
+	; 061 : assign ::CombatOngoing_var true 
+	CombatOngoing = true
+endFunction
+
+arenacombatquest function GetFightQuestFromIndex(int questIndex)
+
+	;bool ::temp0
+	;bool ::temp1
+	;arenacombatquest ::temp2
+	
+	; 000 : cmp_eq ::temp0 questIndex 1 
+	; 001 : jmpf ::temp0 004
+	if questIndex == 1
+		; 002 : return ::Fight01_var 
+		return Fight01
+	; 003 : jmp 054
+	; 004 : cmp_eq ::temp1 questIndex 2 
+	; 005 : jmpf ::temp1 008
+	elseIf questIndex == 2
+		; 006 : return ::Fight02_var 
+		return Fight02
+	; 007 : jmp 054
+	; 008 : cmp_eq ::temp1 questIndex 3 
+	; 009 : jmpf ::temp1 012
+	elseIf questIndex == 3
+		; 010 : return ::Fight03_var 
+		return Fight03
+	; 011 : jmp 054
+	; 012 : cmp_eq ::temp1 questIndex 4 
+	; 013 : jmpf ::temp1 016
+	elseIf questIndex == 4
+		; 014 : return ::Fight04_var 
+		return Fight04
+	; 015 : jmp 054
+	; 016 : cmp_eq ::temp1 questIndex 5 
+	; 017 : jmpf ::temp1 020
+	elseIf questIndex == 5
+		; 018 : return ::Fight05_var 
+		return Fight05
+	; 019 : jmp 054
+	; 020 : cmp_eq ::temp1 questIndex 6 
+	; 021 : jmpf ::temp1 024
+	elseIf questIndex == 6
+		; 022 : return ::Fight06_var 
+		return Fight06
+	; 023 : jmp 054
+	; 024 : cmp_eq ::temp1 questIndex 7 
+	; 025 : jmpf ::temp1 028
+	elseIf questIndex == 7
+		; 026 : return ::Fight07_var 
+		return Fight07
+	; 027 : jmp 054
+	; 028 : cmp_eq ::temp1 questIndex 8 
+	; 029 : jmpf ::temp1 032
+	elseIf questIndex == 8
+		; 030 : return ::Fight08_var 
+		return Fight08
+	; 031 : jmp 054
+	; 032 : cmp_eq ::temp1 questIndex 9 
+	; 033 : jmpf ::temp1 036
+	elseIf questIndex == 9
+		; 034 : return ::Fight09_var 
+		return Fight09
+	; 035 : jmp 054
+	; 036 : cmp_eq ::temp1 questIndex 10 
+	; 037 : jmpf ::temp1 040
+	elseIf questIndex == 10
+		; 038 : return ::Fight10_var 
+		return Fight10
+	; 039 : jmp 054
+	; 040 : cmp_eq ::temp1 questIndex 11 
+	; 041 : jmpf ::temp1 044
+	elseIf questIndex == 11
+		; 042 : return ::Fight11_var 
+		return Fight11
+	; 043 : jmp 054
+	; 044 : cmp_eq ::temp1 questIndex 12 
+	; 045 : jmpf ::temp1 048
+	elseIf questIndex == 12
+		; 046 : return ::Fight12_var 
+		return Fight12
+	; 047 : jmp 054
+	; 048 : cmp_eq ::temp1 questIndex 13 
+	; 049 : jmpf ::temp1 052
+	elseIf questIndex == 13
+		; 050 : return ::Fight13_var 
+		return Fight13
+	; 051 : jmp 054
+	else
+		; 052 : cast ::temp2 none 
+		; 053 : return ::temp2 
+		return none
+	endIf
+endFunction
+
+function CleanupBodies()
+
+	;bool ::temp80
+	;ObjectReference ::temp81
+	;ObjectReference ::temp82
+	;actor ::temp83
+	;NONE ::nonevar
+	
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	; 001 : jmpf ::temp80 003
+	if self._CleanupBody(Combatant01)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 003 : callmethod _CleanupBody self ::temp80 ::Combatant02_var 
+	; 004 : jmpf ::temp80 006
+	if self._CleanupBody(Combatant02)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 006 : callmethod _CleanupBody self ::temp80 ::Combatant03_var 
+	; 007 : jmpf ::temp80 009
+	if self._CleanupBody(Combatant03)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 009 : callmethod _CleanupBody self ::temp80 ::Combatant04_var 
+	; 010 : jmpf ::temp80 012
+	if self._CleanupBody(Combatant04)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 012 : callmethod _CleanupBody self ::temp80 ::Combatant05_var 
+	; 013 : jmpf ::temp80 015
+	if self._CleanupBody(Combatant05)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 015 : callmethod _CleanupBody self ::temp80 ::Combatant06_var 
+	; 016 : jmpf ::temp80 018
+	if self._CleanupBody(Combatant06)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 018 : callmethod _CleanupBody self ::temp80 ::Combatant07_var 
+	; 019 : jmpf ::temp80 021
+	if self._CleanupBody(Combatant07)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 021 : callmethod _CleanupBody self ::temp80 ::Combatant08_var 
+	; 022 : jmpf ::temp80 024
+	if self._CleanupBody(Combatant08)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 024 : callmethod _CleanupBody self ::temp80 ::Combatant09_var 
+	; 025 : jmpf ::temp80 027
+	if self._CleanupBody(Combatant09)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 027 : callmethod _CleanupBody self ::temp80 ::Combatant10_var 
+	; 028 : jmpf ::temp80 030
+	if self._CleanupBody(Combatant10)
+		
+	; 000 : callmethod _CleanupBody self ::temp80 ::Combatant01_var 
+	endIf
+	; 030 : callmethod GetReference ::TransitionCombatant_var ::temp81 
+	; 031 : cast ::temp82 none 
+	; 032 : cmp_eq ::temp80 ::temp81 ::temp82 
+	; 033 : not ::temp80 ::temp80 
+	; 034 : jmpf ::temp80 044
+	if TransitionCombatant.GetReference() != none
+		; 035 : callmethod GetActorReference ::TransitionCombatant_var ::temp83 
+		; 036 : assign ref ::temp83 
+		actor ref = TransitionCombatant.GetActorReference()
+		; 037 : callstatic game GetPlayer ::temp83 
+		; 038 : callmethod RemoveFromFaction ::temp83 ::nonevar ::SelfLoathing_var 
+		game.GetPlayer().RemoveFromFaction(SelfLoathing)
+		; 039 : callmethod RemoveFromFaction ref ::nonevar ::SelfLoathing_var 
+		ref.RemoveFromFaction(SelfLoathing)
+		; 040 : callmethod SetFactionRank ref ::nonevar ::ArenaFaction_var 4 
+		ref.SetFactionRank(ArenaFaction, 4)
+		; 041 : callmethod SetNoBleedoutRecovery ref ::nonevar false 
+		ref.SetNoBleedoutRecovery(false)
+		; 042 : callmethod Clear ::TransitionCombatant_var ::nonevar 
+		TransitionCombatant.Clear()
+	; 043 : jmp 044
+	endIf
+	; 044 : cast ::temp82 none 
+	; 045 : assign _spawnPoint01 ::temp82 
+	_spawnPoint01 = none
+	; 046 : cast ::temp81 none 
+	; 047 : assign _spawnPoint02 ::temp81 
+	_spawnPoint02 = none
+	; 048 : cast ::temp82 none 
+	; 049 : assign _spawnPoint03 ::temp82 
+	_spawnPoint03 = none
+	; 050 : cast ::temp81 none 
+	; 051 : assign _spawnPoint04 ::temp81 
+	_spawnPoint04 = none
+	; 052 : cast ::temp82 none 
+	; 053 : assign _spawnPoint05 ::temp82 
+	_spawnPoint05 = none
+	; 054 : callmethod SetOpen ::Gate1_var ::nonevar false 
+	Gate1.SetOpen(false)
+	; 055 : callmethod SetOpen ::Gate2_var ::nonevar false 
+	Gate2.SetOpen(false)
+	; 056 : callmethod SetOpen ::Gate3_var ::nonevar false 
+	Gate3.SetOpen(false)
+endFunction
+
+bool function _CleanupBody(referencealias combatant)
+
+	;ObjectReference ::temp84
+	;ObjectReference ::temp85
+	;bool ::temp86
+	;actor ::temp87
+	;NONE ::nonevar
+	;bool ::temp88
+	
+	; 000 : callmethod GetReference combatant ::temp84 
+	; 001 : cast ::temp85 none 
+	; 002 : cmp_eq ::temp86 ::temp84 ::temp85 
+	; 003 : not ::temp86 ::temp86 
+	; 004 : jmpf ::temp86 019
+	if combatant.GetReference() != none
+		; 005 : callmethod GetActorReference combatant ::temp87 
+		; 006 : assign ref ::temp87 
+		actor ref = combatant.GetActorReference()
+		; 007 : callmethod Clear combatant ::nonevar 
+		combatant.Clear()
+		; 008 : jmpf ::WagerOngoing_var 011
+		if WagerOngoing
+			; 009 : callmethod Delete ref ::nonevar 
+			ref.Delete()
+		; 010 : jmp 017
+		; 011 : callmethod IsDead ref ::temp88 
+		; 012 : jmpf ::temp88 015
+		elseIf ref.IsDead()
+			; 013 : callmethod Delete ref ::nonevar 
+			ref.Delete()
+		; 014 : jmp 017
+		else
+			; 015 : callmethod MoveToMyEditorLocation ref ::nonevar 
+			ref.MoveToMyEditorLocation()
+			; 016 : callmethod ResetHealthAndLimbs ref ::nonevar 
+			ref.ResetHealthAndLimbs()
+		endIf
+		; 017 : return true 
+		return true
+	; 018 : jmp 020
+	else
+		; 019 : return false 
+		return false
+	endIf
+endFunction
+
+function Reward()
+
+	;ObjectReference ::temp51
+	;NONE ::nonevar
+	;int ::temp52
+	;bool ::temp53
+	;bool ::temp54
+	;actor ::temp55
+	;form ::temp56
+	
+	; 000 : callmethod GetReference ::PitDoor_var ::temp51 
+	; 001 : callmethod Lock ::temp51 ::nonevar true false 
+	PitDoor.GetReference().Lock(true, false)
+	; 002 : callmethod CleanupBodies self ::nonevar 
+	self.CleanupBodies()
+	; 003 : callmethod GetStage ::EastmarchJail_var ::temp52 
+	; 004 : cmp_eq ::temp53 20 ::temp52 
+	; 005 : cast ::temp53 ::temp53 
+	; 006 : jmpf ::temp53 009
+	; 007 : callmethod IsRunning ::EastmarchJail_var ::temp54 
+	; 008 : cast ::temp53 ::temp54 
+	; 009 : jmpf ::temp53 026
+	if 20 == EastmarchJail.GetStage() && EastmarchJail.IsRunning()
+		; 010 : callstatic game GetPlayer ::temp55 
+		; 011 : cast ::temp56 ::LoanerSword_var 
+		; 012 : callmethod UnequipItem ::temp55 ::nonevar ::temp56 false false 
+		game.GetPlayer().UnequipItem(LoanerSword as form, false, false)
+		; 013 : callstatic game GetPlayer ::temp55 
+		; 014 : cast ::temp56 ::LoanerShield_var 
+		; 015 : callmethod UnequipItem ::temp55 ::nonevar ::temp56 false false 
+		game.GetPlayer().UnequipItem(LoanerShield as form, false, false)
+		; 016 : callstatic game GetPlayer ::temp55 
+		; 017 : cast ::temp56 ::LoanerSword_var 
+		; 018 : callmethod RemoveItem ::temp55 ::nonevar ::temp56 1 false none 
+		game.GetPlayer().RemoveItem(LoanerSword as form, 1, false, none)
+		; 019 : callstatic game GetPlayer ::temp55 
+		; 020 : cast ::temp56 ::LoanerShield_var 
+		; 021 : callmethod RemoveItem ::temp55 ::nonevar ::temp56 1 false none 
+		game.GetPlayer().RemoveItem(LoanerShield as form, 1, false, none)
+		; 022 : callmethod SetCrimeGold ::EastmarchCrimeFaction_var ::nonevar 0 
+		EastmarchCrimeFaction.SetCrimeGold(0)
+		; 023 : callmethod SetCrimeGoldViolent ::EastmarchCrimeFaction_var ::nonevar 0 
+		EastmarchCrimeFaction.SetCrimeGoldViolent(0)
+		; 024 : callmethod SetStage ::EastmarchJail_var ::temp54 200 
+		EastmarchJail.SetStage(200)
+	; 025 : jmp 043
+	; 026 : callstatic game GetPlayer ::temp55 
+	; 027 : callmethod GetFactionRank ::temp55 ::temp52 ::ArenaFaction_var 
+	; 028 : comp_gte ::temp54 ::temp52 4 
+	; 029 : jmpf ::temp54 034
+	elseIf game.GetPlayer().GetFactionRank(ArenaFaction) >= 4
+		; 030 : callstatic game GetPlayer ::temp55 
+		; 031 : cast ::temp56 ::Gold_var 
+		; 032 : callmethod AddItem ::temp55 ::nonevar ::temp56 100 false 
+		game.GetPlayer().AddItem(Gold as form, 100, false)
+	; 033 : jmp 043
+	; 034 : cmp_lte ::temp54 ::FightsToNextLevel_var 0 
+	; 035 : jmpf ::temp54 038
+	elseIf FightsToNextLevel <= 0
+		; 036 : callmethod Promote self ::nonevar 
+		self.Promote()
+	; 037 : jmp 043
+	else
+		; 038 : callstatic game GetPlayer ::temp55 
+		; 039 : cast ::temp56 ::Gold_var 
+		; 040 : callmethod AddItem ::temp55 ::nonevar ::temp56 100 false 
+		game.GetPlayer().AddItem(Gold as form, 100, false)
+		; 041 : isub ::temp52 ::FightsToNextLevel_var 1 
+		; 042 : assign ::FightsToNextLevel_var ::temp52 
+		FightsToNextLevel -= 1
+	endIf
+	; 043 : assign ::RewardDue_var false 
+	RewardDue = false
+endFunction
+
+function PlaceBet(int amount)
+
+	;actor ::temp12
+	;form ::temp13
+	;NONE ::nonevar
+	
+	; 000 : assign ::WagerOngoing_var true 
+	WagerOngoing = true
+	; 001 : assign ::WagerAmount_var amount 
+	WagerAmount = amount
+	; 002 : callstatic game GetPlayer ::temp12 
+	; 003 : cast ::temp13 ::Gold_var 
+	; 004 : callmethod RemoveItem ::temp12 ::nonevar ::temp13 ::WagerAmount_var false none 
+	game.GetPlayer().RemoveItem(Gold as form, WagerAmount, false, none)
+endFunction
+
+function RegisterSpawnPoint(ObjectReference spawnMarker)
+
+	;ObjectReference ::temp73
+	;bool ::temp74
+	;bool ::temp75
+	
+	; 000 : cast ::temp73 none 
+	; 001 : cmp_eq ::temp74 _spawnPoint01 ::temp73 
+	; 002 : jmpf ::temp74 005
+	if _spawnPoint01 == none
+		; 003 : assign _spawnPoint01 spawnMarker 
+		_spawnPoint01 = spawnMarker
+	; 004 : jmp 025
+	; 005 : cast ::temp73 none 
+	; 006 : cmp_eq ::temp75 _spawnPoint02 ::temp73 
+	; 007 : jmpf ::temp75 010
+	elseIf _spawnPoint02 == none
+		; 008 : assign _spawnPoint02 spawnMarker 
+		_spawnPoint02 = spawnMarker
+	; 009 : jmp 025
+	; 010 : cast ::temp73 none 
+	; 011 : cmp_eq ::temp75 _spawnPoint03 ::temp73 
+	; 012 : jmpf ::temp75 015
+	elseIf _spawnPoint03 == none
+		; 013 : assign _spawnPoint03 spawnMarker 
+		_spawnPoint03 = spawnMarker
+	; 014 : jmp 025
+	; 015 : cast ::temp73 none 
+	; 016 : cmp_eq ::temp75 _spawnPoint04 ::temp73 
+	; 017 : jmpf ::temp75 020
+	elseIf _spawnPoint04 == none
+		; 018 : assign _spawnPoint04 spawnMarker 
+		_spawnPoint04 = spawnMarker
+	; 019 : jmp 025
+	; 020 : cast ::temp73 none 
+	; 021 : cmp_eq ::temp75 _spawnPoint05 ::temp73 
+	; 022 : jmpf ::temp75 025
+	elseIf _spawnPoint05 == none
+		; 023 : assign _spawnPoint05 spawnMarker 
+		_spawnPoint05 = spawnMarker
+	; 024 : jmp 025
+	endIf
+endFunction
+
+int function GetIndexFromFightQuest(arenacombatquest rQuest)
+
+	;bool ::temp3
+	;bool ::temp4
+	
+	; 000 : cmp_eq ::temp3 rQuest ::Fight01_var 
+	; 001 : jmpf ::temp3 004
+	if rQuest == Fight01
+		; 002 : return 1 
+		return 1
+	; 003 : jmp 053
+	; 004 : cmp_eq ::temp4 rQuest ::Fight02_var 
+	; 005 : jmpf ::temp4 008
+	elseIf rQuest == Fight02
+		; 006 : return 2 
+		return 2
+	; 007 : jmp 053
+	; 008 : cmp_eq ::temp4 rQuest ::Fight03_var 
+	; 009 : jmpf ::temp4 012
+	elseIf rQuest == Fight03
+		; 010 : return 3 
+		return 3
+	; 011 : jmp 053
+	; 012 : cmp_eq ::temp4 rQuest ::Fight04_var 
+	; 013 : jmpf ::temp4 016
+	elseIf rQuest == Fight04
+		; 014 : return 4 
+		return 4
+	; 015 : jmp 053
+	; 016 : cmp_eq ::temp4 rQuest ::Fight05_var 
+	; 017 : jmpf ::temp4 020
+	elseIf rQuest == Fight05
+		; 018 : return 5 
+		return 5
+	; 019 : jmp 053
+	; 020 : cmp_eq ::temp4 rQuest ::Fight06_var 
+	; 021 : jmpf ::temp4 024
+	elseIf rQuest == Fight06
+		; 022 : return 6 
+		return 6
+	; 023 : jmp 053
+	; 024 : cmp_eq ::temp4 rQuest ::Fight07_var 
+	; 025 : jmpf ::temp4 028
+	elseIf rQuest == Fight07
+		; 026 : return 7 
+		return 7
+	; 027 : jmp 053
+	; 028 : cmp_eq ::temp4 rQuest ::Fight08_var 
+	; 029 : jmpf ::temp4 032
+	elseIf rQuest == Fight08
+		; 030 : return 8 
+		return 8
+	; 031 : jmp 053
+	; 032 : cmp_eq ::temp4 rQuest ::Fight09_var 
+	; 033 : jmpf ::temp4 036
+	elseIf rQuest == Fight09
+		; 034 : return 9 
+		return 9
+	; 035 : jmp 053
+	; 036 : cmp_eq ::temp4 rQuest ::Fight10_var 
+	; 037 : jmpf ::temp4 040
+	elseIf rQuest == Fight10
+		; 038 : return 10 
+		return 10
+	; 039 : jmp 053
+	; 040 : cmp_eq ::temp4 rQuest ::Fight11_var 
+	; 041 : jmpf ::temp4 044
+	elseIf rQuest == Fight11
+		; 042 : return 11 
+		return 11
+	; 043 : jmp 053
+	; 044 : cmp_eq ::temp4 rQuest ::Fight12_var 
+	; 045 : jmpf ::temp4 048
+	elseIf rQuest == Fight12
+		; 046 : return 12 
+		return 12
+	; 047 : jmp 053
+	; 048 : cmp_eq ::temp4 rQuest ::Fight13_var 
+	; 049 : jmpf ::temp4 052
+	elseIf rQuest == Fight13
+		; 050 : return 13 
+		return 13
+	; 051 : jmp 053
+	else
+		; 052 : return 0 
+		return 0
+	endIf
+endFunction
+
+ObjectReference function GetDoorForWave(int wave)
+
+	;keyword ::temp64
+	;bool ::temp65
+	;bool ::temp67
+	;ObjectReference ::temp66
+	;ObjectReference ::temp68
+	;ObjectReference ::temp69
+	;ObjectReference ::temp70
+	;ObjectReference ::temp71
+	;ObjectReference ::temp72
+	
+	; 000 : callmethod GetKeywordForWave self ::temp64 wave 
+	; 001 : assign toMatch ::temp64 
+	keyword toMatch = self.GetKeywordForWave(wave)
+	; 002 : callmethod HasKeyword _spawnPoint01 ::temp65 toMatch 
+	; 003 : jmpf ::temp65 007
+	if _spawnPoint01.HasKeyword(toMatch)
+		; 004 : callmethod GetLinkedRef _spawnPoint01 ::temp66 ::LinkedDoorKeyword_var 
+		; 005 : return ::temp66 
+		return _spawnPoint01.GetLinkedRef(LinkedDoorKeyword)
+	; 006 : jmp 029
+	; 007 : callmethod HasKeyword _spawnPoint02 ::temp67 toMatch 
+	; 008 : jmpf ::temp67 012
+	elseIf _spawnPoint02.HasKeyword(toMatch)
+		; 009 : callmethod GetLinkedRef _spawnPoint02 ::temp68 ::LinkedDoorKeyword_var 
+		; 010 : return ::temp68 
+		return _spawnPoint02.GetLinkedRef(LinkedDoorKeyword)
+	; 011 : jmp 029
+	; 012 : callmethod HasKeyword _spawnPoint03 ::temp67 toMatch 
+	; 013 : jmpf ::temp67 017
+	elseIf _spawnPoint03.HasKeyword(toMatch)
+		; 014 : callmethod GetLinkedRef _spawnPoint03 ::temp69 ::LinkedDoorKeyword_var 
+		; 015 : return ::temp69 
+		return _spawnPoint03.GetLinkedRef(LinkedDoorKeyword)
+	; 016 : jmp 029
+	; 017 : callmethod HasKeyword _spawnPoint04 ::temp67 toMatch 
+	; 018 : jmpf ::temp67 022
+	elseIf _spawnPoint04.HasKeyword(toMatch)
+		; 019 : callmethod GetLinkedRef _spawnPoint04 ::temp70 ::LinkedDoorKeyword_var 
+		; 020 : return ::temp70 
+		return _spawnPoint04.GetLinkedRef(LinkedDoorKeyword)
+	; 021 : jmp 029
+	; 022 : callmethod HasKeyword _spawnPoint05 ::temp67 toMatch 
+	; 023 : jmpf ::temp67 027
+	elseIf _spawnPoint05.HasKeyword(toMatch)
+		; 024 : callmethod GetLinkedRef _spawnPoint05 ::temp71 ::LinkedDoorKeyword_var 
+		; 025 : return ::temp71 
+		return _spawnPoint05.GetLinkedRef(LinkedDoorKeyword)
+	; 026 : jmp 029
+	else
+		; 027 : cast ::temp72 none 
+		; 028 : return ::temp72 
+		return none
+	endIf
+endFunction
+
+function PickNextWagerFight(arenacombatquest lastFight)
+
+	;arenacombatquest ::temp22
+	;bool ::temp23
+	;bool ::temp25
+	;int ::temp24
+	
+	; 000 : assign lastFightIndex -1 
+	int lastFightIndex = -1
+	; 001 : cast ::temp22 none 
+	; 002 : cmp_eq ::temp23 lastFight ::temp22 
+	; 003 : not ::temp23 ::temp23 
+	; 004 : jmpf ::temp23 008
+	if lastFight != none
+		; 005 : callmethod GetIndexFromFightQuest self ::temp24 lastFight 
+		; 006 : assign lastFightIndex ::temp24 
+		lastFightIndex = self.GetIndexFromFightQuest(lastFight)
+	; 007 : jmp 008
+	endIf
+	; 008 : assign fightIndex lastFightIndex 
+	int fightIndex = lastFightIndex
+	; 009 : cmp_eq ::temp23 fightIndex lastFightIndex 
+	; 010 : jmpf ::temp23 014
+	while fightIndex == lastFightIndex
+		; 011 : callstatic utility RandomInt ::temp24 1 _maxFights 
+		; 012 : assign fightIndex ::temp24 
+		fightIndex = utility.RandomInt(1, _maxFights)
+	; 013 : jmp 009
+	endWhile
+	; 014 : callmethod GetFightQuestFromIndex self ::temp22 fightIndex 
+	; 015 : assign ::NextWagerFight_var ::temp22 
+	NextWagerFight = self.GetFightQuestFromIndex(fightIndex)
+	; 016 : assign ::NextWagerFightIsToughAnimals_var false 
+	NextWagerFightIsToughAnimals = false
+	; 017 : assign ::NextWagerFightIsEasyAnimals_var false 
+	NextWagerFightIsEasyAnimals = false
+	; 018 : assign ::NextWagerFightIsPeople_var false 
+	NextWagerFightIsPeople = false
+	; 019 : assign ::NextWagerFightIsExotic_var false 
+	NextWagerFightIsExotic = false
+	; 020 : cmp_eq ::temp23 ::NextWagerFight_var ::Fight01_var 
+	; 021 : jmpf ::temp23 024
+	if NextWagerFight == Fight01
+		; 022 : assign ::NextWagerFightIsEasyAnimals_var true 
+		NextWagerFightIsEasyAnimals = true
+	; 023 : jmp 072
+	; 024 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight02_var 
+	; 025 : jmpf ::temp25 028
+	elseIf NextWagerFight == Fight02
+		; 026 : assign ::NextWagerFightIsEasyAnimals_var true 
+		NextWagerFightIsEasyAnimals = true
+	; 027 : jmp 072
+	; 028 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight03_var 
+	; 029 : jmpf ::temp25 032
+	elseIf NextWagerFight == Fight03
+		; 030 : assign ::NextWagerFightIsEasyAnimals_var true 
+		NextWagerFightIsEasyAnimals = true
+	; 031 : jmp 072
+	; 032 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight04_var 
+	; 033 : jmpf ::temp25 036
+	elseIf NextWagerFight == Fight04
+		; 034 : assign ::NextWagerFightIsPeople_var true 
+		NextWagerFightIsPeople = true
+	; 035 : jmp 072
+	; 036 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight05_var 
+	; 037 : jmpf ::temp25 040
+	elseIf NextWagerFight == Fight05
+		; 038 : assign ::NextWagerFightIsToughAnimals_var true 
+		NextWagerFightIsToughAnimals = true
+	; 039 : jmp 072
+	; 040 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight06_var 
+	; 041 : jmpf ::temp25 044
+	elseIf NextWagerFight == Fight06
+		; 042 : assign ::NextWagerFightIsToughAnimals_var true 
+		NextWagerFightIsToughAnimals = true
+	; 043 : jmp 072
+	; 044 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight07_var 
+	; 045 : jmpf ::temp25 048
+	elseIf NextWagerFight == Fight07
+		; 046 : assign ::NextWagerFightIsToughAnimals_var true 
+		NextWagerFightIsToughAnimals = true
+	; 047 : jmp 072
+	; 048 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight08_var 
+	; 049 : jmpf ::temp25 052
+	elseIf NextWagerFight == Fight08
+		; 050 : assign ::NextWagerFightIsToughAnimals_var true 
+		NextWagerFightIsToughAnimals = true
+	; 051 : jmp 072
+	; 052 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight09_var 
+	; 053 : jmpf ::temp25 056
+	elseIf NextWagerFight == Fight09
+		; 054 : assign ::NextWagerFightIsPeople_var true 
+		NextWagerFightIsPeople = true
+	; 055 : jmp 072
+	; 056 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight10_var 
+	; 057 : jmpf ::temp25 060
+	elseIf NextWagerFight == Fight10
+		; 058 : assign ::NextWagerFightIsExotic_var true 
+		NextWagerFightIsExotic = true
+	; 059 : jmp 072
+	; 060 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight11_var 
+	; 061 : jmpf ::temp25 064
+	elseIf NextWagerFight == Fight11
+		; 062 : assign ::NextWagerFightIsPeople_var true 
+		NextWagerFightIsPeople = true
+	; 063 : jmp 072
+	; 064 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight12_var 
+	; 065 : jmpf ::temp25 068
+	elseIf NextWagerFight == Fight12
+		; 066 : assign ::NextWagerFightIsExotic_var true 
+		NextWagerFightIsExotic = true
+	; 067 : jmp 072
+	; 068 : cmp_eq ::temp25 ::NextWagerFight_var ::Fight13_var 
+	; 069 : jmpf ::temp25 072
+	elseIf NextWagerFight == Fight13
+		; 070 : assign ::NextWagerFightIsPeople_var true 
+		NextWagerFightIsPeople = true
+	; 071 : jmp 072
+	endIf
+endFunction
+
+referencealias function GetCombatantAlias(int index)
+
+	;bool ::temp5
+	;bool ::temp6
+	;referencealias ::temp7
+	
+	; 000 : cmp_eq ::temp5 index 1 
+	; 001 : jmpf ::temp5 004
+	if index == 1
+		; 002 : return ::Combatant01_var 
+		return Combatant01
+	; 003 : jmp 042
+	; 004 : cmp_eq ::temp6 index 2 
+	; 005 : jmpf ::temp6 008
+	elseIf index == 2
+		; 006 : return ::Combatant02_var 
+		return Combatant02
+	; 007 : jmp 042
+	; 008 : cmp_eq ::temp6 index 3 
+	; 009 : jmpf ::temp6 012
+	elseIf index == 3
+		; 010 : return ::Combatant03_var 
+		return Combatant03
+	; 011 : jmp 042
+	; 012 : cmp_eq ::temp6 index 4 
+	; 013 : jmpf ::temp6 016
+	elseIf index == 4
+		; 014 : return ::Combatant04_var 
+		return Combatant04
+	; 015 : jmp 042
+	; 016 : cmp_eq ::temp6 index 5 
+	; 017 : jmpf ::temp6 020
+	elseIf index == 5
+		; 018 : return ::Combatant05_var 
+		return Combatant05
+	; 019 : jmp 042
+	; 020 : cmp_eq ::temp6 index 6 
+	; 021 : jmpf ::temp6 024
+	elseIf index == 6
+		; 022 : return ::Combatant06_var 
+		return Combatant06
+	; 023 : jmp 042
+	; 024 : cmp_eq ::temp6 index 7 
+	; 025 : jmpf ::temp6 028
+	elseIf index == 7
+		; 026 : return ::Combatant07_var 
+		return Combatant07
+	; 027 : jmp 042
+	; 028 : cmp_eq ::temp6 index 8 
+	; 029 : jmpf ::temp6 032
+	elseIf index == 8
+		; 030 : return ::Combatant08_var 
+		return Combatant08
+	; 031 : jmp 042
+	; 032 : cmp_eq ::temp6 index 9 
+	; 033 : jmpf ::temp6 036
+	elseIf index == 9
+		; 034 : return ::Combatant09_var 
+		return Combatant09
+	; 035 : jmp 042
+	; 036 : cmp_eq ::temp6 index 10 
+	; 037 : jmpf ::temp6 040
+	elseIf index == 10
+		; 038 : return ::Combatant10_var 
+		return Combatant10
+	; 039 : jmp 042
+	else
+		; 040 : cast ::temp7 none 
+		; 041 : return ::temp7 
+		return none
+	endIf
+endFunction
+
+; Skipped compiler generated GetState
+
+function Setup()
+
+	;arenacombatquest ::temp8
+	;NONE ::nonevar
+	
+	; 000 : assign ::WagerOngoing_var false 
+	WagerOngoing = false
+	; 001 : cast ::temp8 none 
+	; 002 : callmethod PickNextWagerFight self ::nonevar ::temp8 
+	self.PickNextWagerFight(none)
+endFunction
+
+arenacombatquest function PickNextFight(int offset)
+
+	;actor ::temp38
+	;int ::temp39
+	;bool ::temp40
+	;bool ::temp42
+	;arenacombatquest ::temp48
+	;arenacombatquest ::temp41
+	;bool ::temp43
+	;arenacombatquest ::temp44
+	;arenacombatquest ::temp45
+	;bool ::temp46
+	;arenacombatquest ::temp47
+	
+	; 000 : assign minFight -1 
+	int minFight = -1
+	; 001 : assign maxFight -1 
+	int maxFight = -1
+	; 002 : callstatic game GetPlayer ::temp38 
+	; 003 : callmethod GetFactionRank ::temp38 ::temp39 ::ArenaFaction_var 
+	; 004 : assign playerRank ::temp39 
+	int playerRank = game.GetPlayer().GetFactionRank(ArenaFaction)
+	; 005 : cmp_lte ::temp40 ::FightsToNextLevel_var 0 
+	; 006 : jmpf ::temp40 009
+	if FightsToNextLevel <= 0
+		; 007 : return ::TransitionFight_var 
+		return TransitionFight
+	; 008 : jmp 009
+	endIf
+	; 009 : cmp_eq ::temp40 playerRank 0 
+	; 010 : jmpf ::temp40 018
+	if playerRank == 0
+		; 011 : assign minFight 1 
+		minFight = 1
+		; 012 : assign maxFight 3 
+		maxFight = 3
+		; 013 : callstatic utility RandomInt ::temp39 minFight maxFight 
+		; 014 : assign fightIndex ::temp39 
+		int fightIndex = utility.RandomInt(minFight, maxFight)
+		; 015 : callmethod GetFightQuestFromIndex self ::temp41 fightIndex 
+		; 016 : return ::temp41 
+		return self.GetFightQuestFromIndex(fightIndex)
+	; 017 : jmp 077
+	; 018 : cmp_eq ::temp42 playerRank 1 
+	; 019 : jmpf ::temp42 034
+	elseIf playerRank == 1
+		; 020 : callstatic utility RandomInt ::temp39 0 2 
+		; 021 : cast ::temp43 ::temp39 
+		; 022 : assign humanFight ::temp43 
+		bool humanFight = utility.RandomInt(0, 2) as bool
+		; 023 : not ::temp43 humanFight 
+		; 024 : jmpf ::temp43 032
+		if !humanFight
+			; 025 : assign minFight 2 
+			minFight = 2
+			; 026 : assign maxFight 3 
+			maxFight = 3
+			; 027 : callstatic utility RandomInt ::temp39 minFight maxFight 
+			; 028 : assign ::mangled_fightindex_0 ::temp39 
+			int fightindex = utility.RandomInt(minFight, maxFight)
+			; 029 : callmethod GetFightQuestFromIndex self ::temp44 ::mangled_fightindex_0 
+			; 030 : return ::temp44 
+			return self.GetFightQuestFromIndex(fightindex)
+		; 031 : jmp 033
+		else
+			; 032 : return ::Fight04_var 
+			return Fight04
+		endIf
+	; 033 : jmp 077
+	; 034 : cmp_eq ::temp43 playerRank 2 
+	; 035 : jmpf ::temp43 043
+	elseIf playerRank == 2
+		; 036 : assign minFight 5 
+		minFight = 5
+		; 037 : assign maxFight 9 
+		maxFight = 9
+		; 038 : callstatic utility RandomInt ::temp39 minFight maxFight 
+		; 039 : assign ::mangled_fightindex_1 ::temp39 
+		int fightindex = utility.RandomInt(minFight, maxFight)
+		; 040 : callmethod GetFightQuestFromIndex self ::temp45 ::mangled_fightindex_1 
+		; 041 : return ::temp45 
+		return self.GetFightQuestFromIndex(fightindex)
+	; 042 : jmp 077
+	; 043 : cmp_eq ::temp42 playerRank 3 
+	; 044 : jmpf ::temp42 062
+	elseIf playerRank == 3
+		; 045 : callstatic utility RandomInt ::temp39 0 2 
+		; 046 : assign animalFight ::temp39 
+		int animalFight = utility.RandomInt(0, 2)
+		; 047 : cmp_eq ::temp43 animalFight 0 
+		; 048 : jmpf ::temp43 060
+		if animalFight == 0
+			; 049 : assign minFight 7 
+			minFight = 7
+			; 050 : assign maxFight 9 
+			maxFight = 9
+			; 051 : callstatic utility RandomInt ::temp39 minFight maxFight 
+			; 052 : assign ::mangled_fightindex_2 ::temp39 
+			int fightindex = utility.RandomInt(minFight, maxFight)
+			; 053 : cmp_eq ::temp46 ::mangled_fightindex_2 9 
+			; 054 : jmpf ::temp46 057
+			if fightindex == 9
+				; 055 : assign ::mangled_fightindex_2 10 
+				fightindex = 10
+			; 056 : jmp 057
+			endIf
+			; 057 : callmethod GetFightQuestFromIndex self ::temp47 ::mangled_fightindex_2 
+			; 058 : return ::temp47 
+			return self.GetFightQuestFromIndex(fightindex)
+		; 059 : jmp 061
+		else
+			; 060 : return ::Fight11_var 
+			return Fight11
+		endIf
+	; 049 : assign minFight 7 
+	else
+		; 062 : callstatic utility RandomInt ::temp39 1 10 
+		; 063 : assign fightRoll ::temp39 
+		int fightRoll = utility.RandomInt(1, 10)
+		; 064 : cmp_lte ::temp46 fightRoll 3 
+		; 065 : jmpf ::temp46 072
+		if fightRoll <= 3
+			; 066 : callstatic utility RandomInt ::temp39 0 1 
+			; 067 : jmpf ::temp39 070
+			if utility.RandomInt(0, 1)
+				; 068 : return ::Fight08_var 
+				return Fight08
+			; 069 : jmp 071
+			else
+				; 070 : return ::Fight10_var 
+				return Fight10
+			endIf
+		; 071 : jmp 077
+		; 072 : cmp_lte ::temp43 fightRoll 9 
+		; 073 : jmpf ::temp43 076
+		elseIf fightRoll <= 9
+			; 074 : return ::Fight13_var 
+			return Fight13
+		; 075 : jmp 077
+		else
+			; 076 : return ::Fight12_var 
+			return Fight12
+		endIf
+	endIf
+	; 077 : cast ::temp48 none 
+	; 078 : return ::temp48 
+	return none
+endFunction
+</pre>
+</div>
+
+<p>Decompiling a whole directory in a subdirectory, in parallel mode</p>
+<div class="command-line">Champollion.exe bsa\out\scripts -p decompiled -t &gt; output.txt</div>
+<div class="psc-sample">
+<span class="sample">Extract of output.txt</span>
+<pre>
+...
+bsa\out\scripts\wiremoveitem01script.pex decompiled to decompiled\wiremoveitem01script.psc
+bsa\out\scripts\wiremoveitem02itemscript.pex decompiled to decompiled\wiremoveitem02itemscript.psc
+bsa\out\scripts\wiremoveitem02script.pex decompiled to decompiled\wiremoveitem02script.psc
+bsa\out\scripts\wiremoveitem03bystanderscript.pex decompiled to decompiled\wiremoveitem03bystanderscript.psc
+bsa\out\scripts\wiremoveitem03script.pex decompiled to decompiled\wiremoveitem03script.psc
+bsa\out\scripts\wiremoveitem04script.pex decompiled to decompiled\wiremoveitem04script.psc
+bsa\out\scripts\wiremoveitem05itemscript.pex decompiled to decompiled\wiremoveitem05itemscript.psc
+bsa\out\scripts\wiremoveitem05script.pex decompiled to decompiled\wiremoveitem05script.psc
+bsa\out\scripts\wisabotage.pex decompiled to decompiled\wisabotage.psc
+bsa\out\scripts\wiskillincrease02.pex decompiled to decompiled\wiskillincrease02.psc
+bsa\out\scripts\wispactorscript.pex decompiled to decompiled\wispactorscript.psc
+bsa\out\scripts\wispcorescript.pex decompiled to decompiled\wispcorescript.psc
+bsa\out\scripts\wispshadeactorscript.pex decompiled to decompiled\wispshadeactorscript.psc
+bsa\out\scripts\witavernplayerscript.pex decompiled to decompiled\witavernplayerscript.psc
+bsa\out\scripts\witavernscript.pex decompiled to decompiled\witavernscript.psc
+bsa\out\scripts\witchlightactorscript.pex decompiled to decompiled\witchlightactorscript.psc
+bsa\out\scripts\witestscript.pex decompiled to decompiled\witestscript.psc
+bsa\out\scripts\withief01script.pex decompiled to decompiled\withief01script.psc
+bsa\out\scripts\withief01thiefscript.pex decompiled to decompiled\withief01thiefscript.psc
+bsa\out\scripts\withiefscript.pex decompiled to decompiled\withiefscript.psc
+bsa\out\scripts\woodchoppingscript.pex decompiled to decompiled\woodchoppingscript.psc
+bsa\out\scripts\woodpilescript.pex decompiled to decompiled\woodpilescript.psc
+bsa\out\scripts\wordofpower.pex decompiled to decompiled\wordofpower.psc
+bsa\out\scripts\wordwalllistenerquestscript.pex decompiled to decompiled\wordwalllistenerquestscript.psc
+bsa\out\scripts\wordwalltrigger02script.pex decompiled to decompiled\wordwalltrigger02script.psc
+bsa\out\scripts\wordwalltriggerbleakfallsscript.pex decompiled to decompiled\wordwalltriggerbleakfallsscript.psc
+bsa\out\scripts\wordwalltriggerscript.pex decompiled to decompiled\wordwalltriggerscript.psc
+bsa\out\scripts\worldinteractionsscript.pex decompiled to decompiled\worldinteractionsscript.psc
+bsa\out\scripts\worldspace.pex decompiled to decompiled\worldspace.psc
+bsa\out\scripts\woundrefonload.pex decompiled to decompiled\woundrefonload.psc
+bsa\out\scripts\wrdrawbridge01script.pex decompiled to decompiled\wrdrawbridge01script.psc
+bsa\out\scripts\wuuthradscript.pex decompiled to decompiled\wuuthradscript.psc
+10026 files processed in 2.49614 s
+</pre>
+</div>
+
+<h1>Limitations</h1>
+<p>Champollion works by detecting the pattern used by the Papyrus compiler in the compilation process.
+So it only works correctly with files produced by the compiler provided by Bethesda (Not that there are others out there).</p>
+<p>The Event and Function are not distinguished in the PEX binary, so all Event are decompiled as Function. It doesn't seem to be a problem to recompile correctly the script.</p>
+<p>The assembly produced by the -a flag is only intended to serve as references, and will not work with the PapyrusAssembler tool.</p>
+
+<h1>Thanks</h1>
+<ul>
+<li>Bethesda for game as fun to play as to mod and tweak.</li>
+<li>The folks at <a href="http://www.uesp.net">The UESPWiki</a> for the PEX binary format description</li>
+<li>The people of <a href="http://http://skyrim.nexusmods.com">NexusMod</a> for giving me a lot of new mods to play with.</li>
+<li>steklok for pointing out a problem with the array.find and array.rfind functions</li>
+</ul>
+
+<h1>Further reading</h1>
+<ul>
+<li><a href="http://www.creationkit.com/Category:Papyrus">Papyrus Reference</a></li>
+<li><a href="http://www.uesp.net/wiki/Tes5Mod:Compiled_Script_File_Format">Tes5Mod:Compiled Script File Format</a></li>
+</body>
+
+</html>

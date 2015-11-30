@@ -1,0 +1,5 @@
+1.0.1
+ - Fixed two missing opcodes for array_findelement and array_rfindelement
+ 
+1.0.0
+ - Initial release
