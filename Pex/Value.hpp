@@ -1,5 +1,4 @@
-#ifndef VALUE_HPP
-#define VALUE_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -73,5 +72,3 @@ protected:
 };
 
 }
-
-#endif // VALUE_HPP

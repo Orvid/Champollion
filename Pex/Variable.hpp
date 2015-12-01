@@ -1,5 +1,4 @@
-#ifndef VARIABLE_HPP
-#define VARIABLE_HPP
+#pragma once
 
 #include <vector>
 
@@ -44,4 +43,3 @@ public:
 };
 
 }
-#endif // VARIABLE_HPP

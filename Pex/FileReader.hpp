@@ -1,5 +1,4 @@
-#ifndef FILEREADER_HPP
-#define FILEREADER_HPP
+#pragma once
 
 #include <cstdint>
 #include <ctime>
@@ -57,4 +56,3 @@ private:
     std::ifstream m_File;
 };
 }
-#endif // FILEREADER_HPP

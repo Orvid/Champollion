@@ -1,5 +1,4 @@
-#ifndef DEBUGINFO_HPP
-#define DEBUGINFO_HPP
+#pragma once
 
 #include <ctime>
 #include <cstdint>
@@ -159,4 +158,3 @@ private:
     StructOrders m_StructOrder;
 };
 }
-#endif // DEBUGINFO_HPP

@@ -1,5 +1,4 @@
-#ifndef NAMEDITEM_HPP
-#define NAMEDITEM_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -25,5 +24,3 @@ protected:
     StringTable::Index m_Name;
 };
 }
-
-#endif // NAMEDITEM_HPP

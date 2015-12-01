@@ -1,5 +1,4 @@
-#ifndef ASMCODER_HPP
-#define ASMCODER_HPP
+#pragma once
 
 #include "Coder.hpp"
 
@@ -35,4 +34,3 @@ protected:
 
 };
 }
-#endif // ASMCODER_HPP

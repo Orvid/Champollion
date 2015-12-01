@@ -1,5 +1,4 @@
-#ifndef CODER_HPP
-#define CODER_HPP
+#pragma once
 
 #include <memory>
 
@@ -35,4 +34,3 @@ protected:
     std::unique_ptr<OutputWriter> m_Writer;
 };
 }
-#endif // CODER_HPP

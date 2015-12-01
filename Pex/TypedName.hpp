@@ -1,5 +1,4 @@
-#ifndef TYPEDNAME_HPP
-#define TYPEDNAME_HPP
+#pragma once
 
 #include <vector>
 
@@ -24,5 +23,3 @@ public:
 
 typedef std::vector<TypedName> TypedNames;
 }
-
-#endif // TYPEDNAME_HPP

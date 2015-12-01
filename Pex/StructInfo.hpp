@@ -1,11 +1,10 @@
-#ifndef STRUCTINFO_HPP
-#define STRUCTINFO_HPP
+#pragma once
 
 #include <vector>
 
-#include "StringTable.hpp"
 #include "DocumentedItem.hpp"
 #include "NamedItem.hpp"
+#include "StringTable.hpp"
 #include "TypedItem.hpp"
 #include "UserFlagged.hpp"
 #include "Value.hpp"
@@ -53,6 +52,3 @@ private:
 typedef std::vector<StructInfo> StructInfos;
 
 }
-
-#endif // STRUCTINFO_HPP
-

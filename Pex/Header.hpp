@@ -1,5 +1,4 @@
-#ifndef HEADER_HPP
-#define HEADER_HPP
+#pragma once
 
 #include <cstdint>
 #include <ctime>
@@ -50,5 +49,3 @@ protected:
     std::string m_ComputerName;
 };
 }
-
-#endif // HEADER_HPP

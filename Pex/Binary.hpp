@@ -1,5 +1,4 @@
-#ifndef BINARY_HPP
-#define BINARY_HPP
+#pragma once
 
 #include <string>
 
@@ -46,5 +45,3 @@ protected:
     Objects m_Objects;
 };
 }
-
-#endif // BINARY_HPP

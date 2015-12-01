@@ -1,5 +1,4 @@
-#ifndef STRINGTABLE_HPP
-#define STRINGTABLE_HPP
+#pragma once
 
 #include <vector>
 #include <string>
@@ -91,5 +90,3 @@ inline std::ostream& operator << (std::ostream& stream, const Pex::StringTable::
     }
     return stream;
 }
-
-#endif // STRINGTABLE_HPP

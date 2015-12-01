@@ -1,5 +1,4 @@
-#ifndef PSCCODER_HPP
-#define PSCCODER_HPP
+#pragma once
 
 #include "Coder.hpp"
 
@@ -35,4 +34,3 @@ protected:
     bool m_CommentAsm;
 };
 }
-#endif // PSCCODER_HPP

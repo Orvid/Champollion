@@ -1,5 +1,4 @@
-#ifndef PSCCODEGENERATOR_HPP
-#define PSCCODEGENERATOR_HPP
+#pragma once
 
 #include "Node/Visitor.hpp"
 #include "PscDecompiler.hpp"
@@ -25,7 +24,6 @@ public:
 
     virtual void visit(Node::Scope* node);
     virtual void visit(Node::BinaryOperator* node);
-
     virtual void visit(Node::UnaryOperator* node);
     virtual void visit(Node::Assign* node);
     virtual void visit(Node::AssignOperator* node);
@@ -50,9 +48,6 @@ protected:
     std::ostringstream m_Result;
     std::uint8_t m_Level;
     Decompiler::PscDecompiler* m_Decompiler;
-
 };
 
 }
-
-#endif // PSCCODEGENERATOR_HPP

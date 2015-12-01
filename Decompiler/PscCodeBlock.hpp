@@ -1,5 +1,4 @@
-#ifndef PSCCODEBLOC_HPP
-#define PSCCODEBLOC_HPP
+#pragma once
 
 #include <vector>
 
@@ -63,4 +62,3 @@ protected:
 };
 
 }
-#endif // PSCCODEBLOC_HPP

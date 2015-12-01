@@ -1,5 +1,4 @@
-#ifndef USERFLAGGED_HPP
-#define USERFLAGGED_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -21,5 +20,3 @@ protected:
     std::uint32_t m_UserFlags;
 };
 }
-
-#endif // USERFLAGGED_HPP

@@ -1,5 +1,4 @@
-#ifndef STREAMWRITER_HPP
-#define STREAMWRITER_HPP
+#pragma once
 
 #include <iostream>
 
@@ -19,5 +18,3 @@ protected:
     std::ostream& m_Stream;
 };
 }
-
-#endif // STREAMWRITER_HPP

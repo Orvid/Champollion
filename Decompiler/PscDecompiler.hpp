@@ -1,5 +1,4 @@
-#ifndef PSCDECOMPILER_HPP
-#define PSCDECOMPILER_HPP
+#pragma once
 
 #include <vector>
 #include <string>
@@ -86,4 +85,3 @@ protected:
     Pex::StringTable m_TempTable;
 };
 }
-#endif // PSCDECOMPILER_HPP

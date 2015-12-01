@@ -1,5 +1,4 @@
-#ifndef FUNCTION_HPP
-#define FUNCTION_HPP
+#pragma once
 
 #include <vector>
 
@@ -54,5 +53,3 @@ protected:
 
 typedef std::vector<Function> Functions;
 }
-
-#endif // FUNCTION_HPP

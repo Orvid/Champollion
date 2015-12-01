@@ -1,5 +1,4 @@
-#ifndef PROPERTY_HPP
-#define PROPERTY_HPP
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -75,5 +74,3 @@ protected:
 
 typedef std::vector<Property> Properties;
 }
-
-#endif // PROPERTY_HPP

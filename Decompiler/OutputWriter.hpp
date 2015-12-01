@@ -1,5 +1,4 @@
-#ifndef OUTPUTWRITER_HPP
-#define OUTPUTWRITER_HPP
+#pragma once
 
 #include <string>
 
@@ -21,5 +20,3 @@ public:
     virtual void writeLine(const std::string& line) = 0;
 };
 }
-
-#endif // OUTPUTWRITER_HPP

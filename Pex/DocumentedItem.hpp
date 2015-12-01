@@ -1,6 +1,4 @@
-#ifndef DOCUMENTEDITEM_HPP
-#define DOCUMENTEDITEM_HPP
-
+#pragma once
 
 #include <cstdint>
 
@@ -24,6 +22,3 @@ protected:
     StringTable::Index m_DocString;
 };
 }
-
-
-#endif // DOCUMENTEDITEM_HPP

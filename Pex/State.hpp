@@ -1,5 +1,4 @@
-#ifndef STATE_HPP
-#define STATE_HPP
+#pragma once
 
 #include <vector>
 
@@ -30,4 +29,3 @@ protected:
 typedef std::vector<State> States;
 
 }
-#endif // STATE_HPP

@@ -1,5 +1,4 @@
-#ifndef USERFLAG_HPP
-#define USERFLAG_HPP
+#pragma once
 
 #include <vector>
 #include <cstdint>
@@ -34,5 +33,3 @@ private:
 typedef std::vector<UserFlag> UserFlags;
 
 }
-
-#endif // USERFLAG_HPP

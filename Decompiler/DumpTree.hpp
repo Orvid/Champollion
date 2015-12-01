@@ -1,6 +1,4 @@
-#ifndef DUMPTREE_HPP
-#define DUMPTREE_HPP
-
+#pragma once
 
 namespace Decompiler
 {
@@ -263,5 +261,3 @@ public:
 };
 
 }
-
-#endif // DUMPTREE_HPP

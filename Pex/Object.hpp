@@ -1,5 +1,4 @@
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
+#pragma once
 
 #include <vector>
 #include <cstdint>
@@ -67,5 +66,3 @@ private:
 
 typedef std::vector<Object> Objects;
 }
-
-#endif // OBJECT_HPP

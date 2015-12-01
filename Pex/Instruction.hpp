@@ -1,5 +1,4 @@
-#ifndef INSTRUCTION_HPP
-#define INSTRUCTION_HPP
+#pragma once
 
 #include <vector>
 
@@ -96,5 +95,3 @@ protected:
 
 typedef std::vector<Instruction> Instructions;
 }
-
-#endif // INSTRUCTION_HPP

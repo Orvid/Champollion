@@ -1,5 +1,4 @@
-#ifndef TYPEDITEM_HPP
-#define TYPEDITEM_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -24,4 +23,3 @@ protected:
     StringTable::Index m_TypeName;
 };
 }
-#endif // TYPEDITEM_HPP
