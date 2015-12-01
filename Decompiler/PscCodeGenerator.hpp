@@ -19,7 +19,7 @@ class PscCodeGenerator : public Node::Visitor
 {
 public:
     PscCodeGenerator(Decompiler::PscDecompiler* decompiler);
-    virtual ~PscCodeGenerator();
+    virtual ~PscCodeGenerator() = default;
 
 
     virtual void visit(Node::Scope* node);
@@ -46,7 +46,7 @@ protected:
     void newLine();
 
     std::ostringstream m_Result;
-    std::uint8_t m_Level;
+    std::uint8_t m_Level{ 0 };
     Decompiler::PscDecompiler* m_Decompiler;
 };
 

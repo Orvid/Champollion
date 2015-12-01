@@ -1,13 +1,10 @@
 #pragma once
 
 #include <memory>
-
 #include <sstream>
 
 #include "OutputWriter.hpp"
 #include "Pex/Binary.hpp"
-
-
 
 namespace Decompiler {
 /**

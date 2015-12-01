@@ -5,15 +5,13 @@
 #include "Node/Nodes.hpp"
 #include "Node/WithNode.hpp"
 
-static inline
-bool isTempVar(const Pex::StringTable::Index& var)
+static bool isTempVar(const Pex::StringTable::Index& var)
 {
     auto& name = var.asString();
     return name.length() > 6 && name.substr(0, 6) == "::temp" && name.substr(name.length() - 4, 4) != "_var";
 }
 
-static inline
-std::string getVarName(const Pex::StringTable::Index& var)
+static std::string getVarName(const Pex::StringTable::Index& var)
 {
     auto& name = var.asString();
     if (name.length() > 6 && name.substr(0, 2) == "::" && name.substr(name.length() - 4, 4) == "_var")
@@ -26,16 +24,11 @@ std::string getVarName(const Pex::StringTable::Index& var)
 
 
 Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decompiler) :
-    m_Level(0),
     m_Decompiler(decompiler)
 {
     assert(decompiler);
 }
 
-Decompiler::PscCodeGenerator::~PscCodeGenerator()
-{
-
-}
 /*
 std::ostringstream& Disassembler::PscCodeGenerator::indent()
 {
