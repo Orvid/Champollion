@@ -29,13 +29,6 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
     assert(decompiler);
 }
 
-/*
-std::ostringstream& Disassembler::PscCodeGenerator::indent()
-{
-    std::ostringstream result;
-    return result;
-}
-*/
 void Decompiler::PscCodeGenerator::newLine()
 {
     m_Decompiler->push_back(m_Result.str());
@@ -263,8 +256,9 @@ void Decompiler::PscCodeGenerator::visit(Node::IdentifierString *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::While* node)
 {
-    m_Result << "while ";
+    m_Result << "while (";
     node->getCondition()->visit(this);
+    m_Result << ")";
     m_Level++;
     newLine();
     node->getBody()->visit(this);
@@ -274,13 +268,14 @@ void Decompiler::PscCodeGenerator::visit(Node::While* node)
     {
         m_Decompiler->decodeToAsm(m_Level, node->getBody()->back()->getEnd() + 1, node->getBody()->back()->getEnd() + 1);
     }
-    m_Result << "endWhile";
+    m_Result << "endwhile";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
 {
-    m_Result << "if ";
+    m_Result << "if (";
     node->getCondition()->visit(this);
+    m_Result << ")";
     m_Level++;
     newLine();
     node->getBody()->visit(this);
@@ -292,8 +287,9 @@ void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
     {
         m_Decompiler->decodeToAsm(m_Level, childNode->getBegin()-1, childNode->getEnd());
         auto elseIf = childNode->as<Node::IfElse>();
-        m_Result << "elseIf ";
+        m_Result << "elseif (";
         elseIf->getCondition()->visit(this);
+        m_Result << ")";
         m_Level++;
         newLine();
         elseIf->getBody()->visit(this);
@@ -311,7 +307,7 @@ void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
         m_Level--;
         newLine();
     }
-    m_Result << "endIf";
+    m_Result << "endif";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::Declare *node)
