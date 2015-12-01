@@ -192,14 +192,12 @@ void Decompiler::PscDecompiler::decodeToAsm(std::uint8_t level, size_t begin, si
  */
 void Decompiler::PscDecompiler::findVarTypes()
 {
+    for (auto& var : m_Object.getVariables())
+        m_VarTypes[var.getName().asIndex()] = var.getTypeName();
     for (auto& var : m_Function.getParams())
-    {
         m_VarTypes[var.getName().asIndex()] = var.getTypeName();
-    }
     for (auto& var : m_Function.getLocals())
-    {
         m_VarTypes[var.getName().asIndex()] = var.getTypeName();
-    }
 
     m_NoneVar = m_Object.getName().getTable()->findIdentifier("::nonevar");
 }
@@ -524,7 +522,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
 
             case Pex::OpCode::ARRAY_CREATE:
             {
-                node = std::make_shared<Node::ArrayCreate>(ip, args[0].getId(), fromValue(ip, args[0]), fromValue(ip, args[1]));
+                node = std::make_shared<Node::ArrayCreate>(ip, args[0].getId(), typeOfVar(args[0].getId()), fromValue(ip, args[1]));
             }
                 break;
             case Pex::OpCode::ARRAY_LENGTH:

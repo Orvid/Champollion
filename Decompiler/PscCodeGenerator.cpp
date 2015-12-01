@@ -201,9 +201,8 @@ void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayCreate* node)
 {
-    m_Result << "new ";
-    node->getType()->visit(this);
-    m_Result << "[";
+    std::string type = node->getType().asString();
+    m_Result << "new " << type.substr(0, type.length() - 2) << "[";
     node->getIndex()->visit(this);
     m_Result << "]";
 }

@@ -14,7 +14,7 @@ class ArrayCreate final :
     public FieldIndexNodeMixin<0>
 {
 public:
-    ArrayCreate(size_t ip, const Pex::StringTable::Index& result, BasePtr type, BasePtr size) :
+    ArrayCreate(size_t ip, const Pex::StringTable::Index& result, const Pex::StringTable::Index& type, BasePtr size) :
         Base(1, ip, 0, result),
         m_Type(type),
         FieldIndexNodeMixin(this, size)
@@ -28,10 +28,10 @@ public:
         visitor->visit(this);
     }
 
-    const BasePtr getType() const { return m_Type; }
+    const Pex::StringTable::Index& getType() const { return m_Type; }
 
 private:
-    const BasePtr m_Type;
+    const Pex::StringTable::Index& m_Type;
 };
 
 }
