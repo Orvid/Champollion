@@ -13,7 +13,7 @@ public:
     Scope() : Base(0, -1, 10) { }
     virtual ~Scope() = default;
 
-    virtual void visit(Visitor* visitor)
+    void visit(Visitor* visitor) override
     {
         assert(visitor);
         visitor->visit(this);

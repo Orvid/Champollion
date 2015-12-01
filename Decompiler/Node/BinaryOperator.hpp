@@ -25,15 +25,10 @@ public:
     }
     virtual ~BinaryOperator() = default;
 
-    virtual void visit(Visitor* visitor)
+    void visit(Visitor* visitor) override
     {
         assert(visitor);
         visitor->visit(this);
-    }
-
-    virtual void computeInstructionBounds()
-    {
-        Base::computeInstructionBounds();
     }
 
     const std::string& getOperator() const { return m_Op; }

@@ -22,7 +22,7 @@ public:
     }
     virtual ~Declare() = default;
 
-    virtual void visit(Visitor* visitor)
+    void visit(Visitor* visitor) override
     {
         assert(visitor);
         visitor->visit(this);

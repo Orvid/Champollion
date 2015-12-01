@@ -23,13 +23,13 @@ public:
     }
     virtual ~While() = default;
 
-    virtual void visit(Visitor* visitor)
+    void visit(Visitor* visitor) override
     {
         assert(visitor);
         visitor->visit(this);
     }
 
-    virtual void computeInstructionBounds()
+    void computeInstructionBounds() override
     {
         Base::computeInstructionBounds();
         if (getCondition()->getBegin() == -1 && getCondition()->getEnd() == -1 && getBody()->size() != 0)
