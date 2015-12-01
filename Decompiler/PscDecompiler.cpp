@@ -77,6 +77,11 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
 
         m_TempTable.push_back("find");
         m_TempTable.push_back("rfind");
+        m_TempTable.push_back("add");
+        m_TempTable.push_back("insert");
+        m_TempTable.push_back("removelast");
+        m_TempTable.push_back("remove");
+        m_TempTable.push_back("clear");
 
         //findReplacedVars();
         findVarTypes();
@@ -557,6 +562,16 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 node = callNode;
                 break;
             }
+            case Pex::OpCode::IS:
+            {
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "is", fromValue(ip, args[2]));
+                break;
+            }
+            case Pex::OpCode::STRUCT_CREATE:
+            {
+                node = std::make_shared<Node::Assign>(ip, fromValue(ip, args[0]), std::make_shared<Node::IdentifierString>(ip, "parent"));
+                break;
+            }
             case Pex::OpCode::STRUCT_GET:
             {
                 node = std::make_shared<Node::PropertyAccess>(ip, args[0].getId(), fromValue(ip, args[1]), args[2].getId());
@@ -564,13 +579,72 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             }
             case Pex::OpCode::STRUCT_SET:
             {
-                node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[2].getId());
-                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[0]));
+                node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), args[1].getId());
+                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
                 break;
             }
             case Pex::OpCode::ARRAY_FINDSTRUCT:
-            case Pex::OpCode::ARRAY_RFINDSTRUCT:
+            {
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("find"));
+                auto argNode = callNode->getParameters();
+                *argNode << fromValue(ip, args[2]);
+                *argNode << fromValue(ip, args[3]);
+                *argNode << fromValue(ip, args[4]);
+
+                node = callNode;
                 break;
+            }
+            case Pex::OpCode::ARRAY_RFINDSTRUCT:
+            {
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("rfind"));
+                auto argNode = callNode->getParameters();
+                *argNode << fromValue(ip, args[2]);
+                *argNode << fromValue(ip, args[3]);
+                *argNode << fromValue(ip, args[4]);
+
+                node = callNode;
+                break;
+            }
+            case Pex::OpCode::ARRAY_ADD:
+            {
+                auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("add"));
+                auto argNode = callNode->getParameters();
+                *argNode << fromValue(ip, args[1]);
+                *argNode << fromValue(ip, args[2]);
+
+                node = callNode;
+                break;
+            }
+            case Pex::OpCode::ARRAY_INSERT:
+            {
+                auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("insert"));
+                auto argNode = callNode->getParameters();
+                *argNode << fromValue(ip, args[1]);
+                *argNode << fromValue(ip, args[2]);
+
+                node = callNode;
+                break;
+            }
+            case Pex::OpCode::ARRAY_REMOVELAST:
+            {
+                node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("removelast"));
+                break;
+            }
+            case Pex::OpCode::ARRAY_REMOVE:
+            {
+                auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("remove"));
+                auto argNode = callNode->getParameters();
+                *argNode << fromValue(ip, args[1]);
+                *argNode << fromValue(ip, args[2]);
+
+                node = callNode;
+                break;
+            }
+            case Pex::OpCode::ARRAY_CLEAR:
+            {
+                node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("clear"));
+                break;
+            }
 
             }
             if (node)
