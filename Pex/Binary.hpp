@@ -1,6 +1,5 @@
 #ifndef BINARY_HPP
 #define BINARY_HPP
-#include "Pex_global.hpp"
 
 #include <string>
 
@@ -18,7 +17,7 @@ namespace Pex {
  * The Binary class reflect the content of a PEX file.
  *
  */
-class PEX_API Binary
+class Binary
 {
 public:
     Binary();

@@ -1,8 +1,6 @@
 #ifndef USERFLAGGED_HPP
 #define USERFLAGGED_HPP
 
-#include "Pex_global.hpp"
-
 #include <cstdint>
 
 namespace Pex {
@@ -10,7 +8,7 @@ namespace Pex {
  * @brief Base mixin for elements with User Flag.
  *
  */
-class PEX_API UserFlagged
+class UserFlagged
 {
 public:
     UserFlagged();

@@ -1,7 +1,6 @@
 #ifndef ASMCODER_HPP
 #define ASMCODER_HPP
 
-#include "Decompiler_Global.hpp"
 #include "Coder.hpp"
 
 namespace Decompiler {
@@ -9,7 +8,7 @@ namespace Decompiler {
 /**
  * @brief Write a PEX file as an ASM file.
  */
-class DECOMPILER_API AsmCoder :
+class AsmCoder :
         public Coder
 {
 public:

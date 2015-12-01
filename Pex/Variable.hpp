@@ -1,8 +1,6 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 
 #include "StringTable.hpp"
@@ -18,7 +16,7 @@ namespace Pex {
  *
  * The variable are defined at the object level.
  */
-class PEX_API Variable :
+class Variable :
         public NamedItem,
         public TypedItem,
         public UserFlagged
@@ -39,7 +37,7 @@ protected:
 
 };
 
-class PEX_API Variables : public std::vector<Variable>
+class Variables : public std::vector<Variable>
 {
 public:
     const Variable* findByName(const StringTable::Index& name) const;

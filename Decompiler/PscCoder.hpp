@@ -1,8 +1,6 @@
 #ifndef PSCCODER_HPP
 #define PSCCODER_HPP
 
-#include "Decompiler_Global.hpp"
-
 #include "Coder.hpp"
 
 
@@ -10,7 +8,7 @@ namespace Decompiler {
 /**
  * @brief Write a PEX file as a PSC file.
  */
-class DECOMPILER_API PscCoder :
+class PscCoder :
         public Coder
 {
 public:

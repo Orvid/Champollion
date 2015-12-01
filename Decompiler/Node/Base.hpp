@@ -1,8 +1,6 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-#include "../Decompiler_Global.hpp"
-
 #include <cstdint>
 #include <memory>
 #include <deque>

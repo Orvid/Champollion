@@ -1,7 +1,6 @@
 #ifndef OUTPUTWRITER_HPP
 #define OUTPUTWRITER_HPP
 
-#include "Decompiler_Global.hpp"
 #include <string>
 
 namespace Decompiler {
@@ -13,7 +12,7 @@ namespace Decompiler {
  * code generation objects.
  *
  */
-class DECOMPILER_API OutputWriter
+class OutputWriter
 {
 public:
     OutputWriter();

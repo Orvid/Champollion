@@ -1,8 +1,6 @@
 #ifndef STRINGTABLE_HPP
 #define STRINGTABLE_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 #include <string>
 #include <iostream>
@@ -18,7 +16,7 @@ namespace Pex {
  * which references the table and the numeric index.
  *
  */
-class PEX_API StringTable
+class StringTable
 {
 protected:
     typedef std::vector<std::string> Table;
@@ -34,7 +32,7 @@ public:
      * It contains both a pointer to the table and the value of the numeric index.
      *
      */
-    class PEX_API Index
+    class Index
     {
     public:
         static const std::uint16_t UNDEFINED  = 0xFFFF;

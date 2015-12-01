@@ -1,8 +1,6 @@
 #ifndef INSTRUCTION_HPP
 #define INSTRUCTION_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 
 #include "Value.hpp"
@@ -69,7 +67,7 @@ enum class OpCode {
  * @brief ByteCode Instruction.
  *
  */
-class PEX_API Instruction
+class Instruction
 {
 public:
     typedef std::vector<Value> Args;

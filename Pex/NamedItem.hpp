@@ -1,8 +1,6 @@
 #ifndef NAMEDITEM_HPP
 #define NAMEDITEM_HPP
 
-#include "Pex_global.hpp"
-
 #include <cstdint>
 
 #include "StringTable.hpp"
@@ -14,7 +12,7 @@ namespace Pex {
  *
  * This mixin defines the name field for named elements
  */
-class PEX_API NamedItem
+class NamedItem
 {
 public:
     NamedItem();

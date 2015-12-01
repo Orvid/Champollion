@@ -1,6 +1,5 @@
 #ifndef HEADER_HPP
 #define HEADER_HPP
-#include "Pex_global.hpp"
 
 #include <cstdint>
 #include <ctime>
@@ -14,7 +13,7 @@ namespace Pex {
  * or user/computer which compiled the binary
  *
  */
-class PEX_API Header
+class Header
 {
 public:
     Header();

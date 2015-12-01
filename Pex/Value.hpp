@@ -1,8 +1,6 @@
 #ifndef VALUE_HPP
 #define VALUE_HPP
 
-#include "Pex_global.hpp"
-
 #include <cstdint>
 
 #include "StringTable.hpp"
@@ -25,7 +23,7 @@ enum class ValueType : std::uint8_t
 /**
  * @brief Variant class managing value.
  */
-class PEX_API Value
+class Value
 {
 public:
     Value();

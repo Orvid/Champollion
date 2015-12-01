@@ -1,9 +1,0 @@
-DEFINES += _CRT_SECURE_NO_WARNINGS BOOST_LIB_DIAGNOSTIC
-
-INCLUDEPATH += F:\Software\boost_1_58_0
-INCLUDEPATH += F:/Qt/5.5/msvc2013_64/include
-LIBS += -LF:\Software\boost_1_58_0\lib64-msvc-12.0
-
-PREFIX = $$PWD/build
-
-VERSION = 1.0.1

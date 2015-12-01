@@ -1,8 +1,6 @@
 #ifndef FUNCTION_HPP
 #define FUNCTION_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 
 #include "StringTable.hpp"
@@ -21,7 +19,7 @@ namespace Pex {
  * It contains the function signature and the associated body.
  *
  */
-class PEX_API Function :
+class Function :
         public NamedItem,
         public UserFlagged,
         public DocumentedItem

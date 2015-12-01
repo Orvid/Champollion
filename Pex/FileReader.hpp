@@ -1,6 +1,5 @@
 #ifndef FILEREADER_HPP
 #define FILEREADER_HPP
-#include "Pex_global.hpp"
 
 #include <cstdint>
 #include <ctime>
@@ -16,7 +15,7 @@ namespace Pex {
  * The FileReader class provides a function to read a PEX file into a Binary structure.
  * The filename is provided as a parameter of the constructor.
  */
-class PEX_API FileReader
+class FileReader
 {
 public:
     FileReader(const std::string& fileName);

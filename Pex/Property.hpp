@@ -1,8 +1,6 @@
 #ifndef PROPERTY_HPP
 #define PROPERTY_HPP
 
-#include "Pex_global.hpp"
-
 #include <cstdint>
 #include <vector>
 
@@ -41,7 +39,7 @@ inline PropertyFlag operator&(PropertyFlag a, PropertyFlag b)
  * The getter and stter function are also stored here if they exists.
  *
  */
-class PEX_API Property :
+class Property :
         public NamedItem,
         public TypedItem,
         public UserFlagged,

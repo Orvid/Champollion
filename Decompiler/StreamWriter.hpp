@@ -1,14 +1,12 @@
 #ifndef STREAMWRITER_HPP
 #define STREAMWRITER_HPP
 
-#include "Decompiler_Global.hpp"
-
 #include <iostream>
 
 #include "OutputWriter.hpp"
 
 namespace Decompiler {
-class DECOMPILER_API StreamWriter :
+class StreamWriter :
         public OutputWriter
 {
 public:

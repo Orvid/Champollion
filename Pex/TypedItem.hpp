@@ -1,8 +1,6 @@
 #ifndef TYPEDITEM_HPP
 #define TYPEDITEM_HPP
 
-#include "Pex_global.hpp"
-
 #include <cstdint>
 
 #include "StringTable.hpp"
@@ -13,7 +11,7 @@ namespace Pex {
  *
  * This mixin defines the type name name field for typed elements
  */
-class PEX_API TypedItem
+class TypedItem
 {
 public:
     TypedItem();

@@ -1,5 +1,6 @@
 #include "DebugInfo.hpp"
 
+#include <algorithm>
 
 /**
  * @brief Default constructor

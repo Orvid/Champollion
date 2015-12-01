@@ -1,8 +1,6 @@
 #ifndef DEBUGINFO_HPP
 #define DEBUGINFO_HPP
 
-#include "Pex_global.hpp"
-
 #include <ctime>
 #include <cstdint>
 #include <vector>
@@ -21,7 +19,7 @@ namespace Pex {
  * For each function available in the object, the original source line number are also available.
  *
  */
-class PEX_API DebugInfo
+class DebugInfo
 {
 public:
 
@@ -46,7 +44,7 @@ public:
      * function, referenced by objet, state and name.
      *
      */
-    class PEX_API FunctionInfo
+    class FunctionInfo
     {
     public:
         typedef std::vector<std::uint16_t> LineNumbers;
@@ -79,7 +77,7 @@ public:
         LineNumbers m_LineNumbers;
     };
 
-    class PEX_API PropertyGroup :
+    class PropertyGroup :
             public UserFlagged
     {
     public:
@@ -109,7 +107,7 @@ public:
         Names m_Names;
     };
 
-    class PEX_API StructOrder
+    class StructOrder
     {
     public:
         typedef std::vector<StringTable::Index> Names;

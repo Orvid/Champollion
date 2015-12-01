@@ -219,8 +219,7 @@ void Pex::FileReader::read(Pex::Objects &objects)
     for(auto& object : objects)
     {
         object.setName(getSStringIndex());
-        auto size = getSUint32();
-        UNUSED(size);
+        (void)getSUint32();
 
         object.setParentClassName(getSStringIndex());
         object.setDocString(getSStringIndex());

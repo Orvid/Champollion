@@ -1,8 +1,6 @@
 #ifndef TYPEDNAME_HPP
 #define TYPEDNAME_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 
 #include "NamedItem.hpp"
@@ -15,7 +13,7 @@ namespace Pex {
  * This class associated a name and a type. Its can be used to declare variable or parameters.
  *
  */
-class PEX_API TypedName :
+class TypedName :
         public NamedItem,
         public TypedItem
 {

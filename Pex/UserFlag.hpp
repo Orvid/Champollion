@@ -1,6 +1,5 @@
 #ifndef USERFLAG_HPP
 #define USERFLAG_HPP
-#include "Pex_global.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -15,7 +14,7 @@ namespace Pex {
  * The User flag definition associate a name to a flag mask.
  * It can be used to decode user flags sets on items.
  */
-class PEX_API UserFlag :
+class UserFlag :
         public NamedItem
 {
 public:

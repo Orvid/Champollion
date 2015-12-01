@@ -1,8 +1,6 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 #include <cstdint>
 
@@ -24,7 +22,7 @@ namespace Pex {
  *
  *
  */
-class PEX_API Object :
+class Object :
         public NamedItem,
         public UserFlagged,
         public DocumentedItem

@@ -647,7 +647,7 @@ void Decompiler::PscDecompiler::rebuildExpression(Node::BasePtr scope)
                         return value.getType() == Pex::ValueType::Identifier && value.getId() == expressionGeneration->getResult();
                     })
                     .transform([&] (Node::Constant* node) {
-                        UNUSED(node);
+                        (void)node;
                         return expressionGeneration;
                     })
                     .on(expressionUse);

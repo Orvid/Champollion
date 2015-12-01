@@ -2,8 +2,6 @@
 #define DOCUMENTEDITEM_HPP
 
 
-#include "Pex_global.hpp"
-
 #include <cstdint>
 
 #include "StringTable.hpp"
@@ -13,7 +11,7 @@ namespace Pex {
  * @brief Base mixin for documented items, such as property or functions
  *
  */
-class PEX_API DocumentedItem
+class DocumentedItem
 {
 public:
     DocumentedItem();

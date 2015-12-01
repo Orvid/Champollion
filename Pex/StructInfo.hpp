@@ -1,8 +1,6 @@
 #ifndef STRUCTINFO_HPP
 #define STRUCTINFO_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 
 #include "StringTable.hpp"
@@ -14,11 +12,11 @@
 
 namespace Pex {
 
-class PEX_API StructInfo :
+class StructInfo :
         public NamedItem
 {
 public:
-    class PEX_API Member :
+    class Member :
             public DocumentedItem,
             public NamedItem,
             public TypedItem,

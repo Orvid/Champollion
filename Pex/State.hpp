@@ -1,8 +1,6 @@
 #ifndef STATE_HPP
 #define STATE_HPP
 
-#include "Pex_global.hpp"
-
 #include <vector>
 
 #include "StringTable.hpp"
@@ -15,7 +13,7 @@ namespace Pex {
  *
  * This class contains the elements for a state.
  */
-class PEX_API State :
+class State :
         public NamedItem
 {
 public:

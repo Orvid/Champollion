@@ -1,5 +1,6 @@
 #include "StringTable.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <sstream>
 #include <cassert>

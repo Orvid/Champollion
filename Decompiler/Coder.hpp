@@ -1,8 +1,6 @@
 #ifndef CODER_HPP
 #define CODER_HPP
 
-#include "Decompiler_Global.hpp"
-
 #include <memory>
 
 #include <sstream>
@@ -19,7 +17,7 @@ namespace Decompiler {
  * This base class handles the low level writing procedure
  * for class rewriting programs.
  */
-class DECOMPILER_API Coder
+class Coder
 {
 public:
     Coder(OutputWriter* writer);
