@@ -20,6 +20,7 @@
 #include "ArrayLength.hpp"
 #include "ArrayAccess.hpp"
 
+#include "StructCreate.hpp"
 
 #include "Constant.hpp"
 #include "IdentifierString.hpp"

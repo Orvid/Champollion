@@ -569,7 +569,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             }
             case Pex::OpCode::STRUCT_CREATE:
             {
-                node = std::make_shared<Node::Assign>(ip, fromValue(ip, args[0]), std::make_shared<Node::IdentifierString>(ip, "parent"));
+                node = std::make_shared<Node::StructCreate>(ip, args[0].getId(), typeOfVar(args[0].getId()));
                 break;
             }
             case Pex::OpCode::STRUCT_GET:

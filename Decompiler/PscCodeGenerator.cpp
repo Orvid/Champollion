@@ -199,6 +199,11 @@ void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node)
     m_Result << "." << node->getProperty();
 }
 
+void Decompiler::PscCodeGenerator::visit(Node::StructCreate* node)
+{
+    m_Result << "new " << node->getType().asString() << "()";
+}
+
 void Decompiler::PscCodeGenerator::visit(Node::ArrayCreate* node)
 {
     std::string type = node->getType().asString();

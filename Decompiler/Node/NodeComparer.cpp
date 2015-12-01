@@ -124,6 +124,14 @@ void Node::NodeComparer::visit(Node::PropertyAccess *node)
     m_Reference->visit(& m_Visitor);
 }
 
+void Node::NodeComparer::visit(Node::StructCreate *node)
+{
+    m_Visitor << (DynamicVisitor::LambdaArrayCreate)[&](ArrayCreate* ref, DynamicVisitor*) {
+        m_Result = ref->getType() == node->getType();
+    };
+    m_Reference->visit(&m_Visitor);
+}
+
 void Node::NodeComparer::visit(Node::ArrayCreate *node)
 {
     m_Visitor << (DynamicVisitor::LambdaArrayCreate)[&](ArrayCreate* ref, DynamicVisitor*) {

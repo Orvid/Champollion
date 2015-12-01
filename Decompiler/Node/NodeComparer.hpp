@@ -30,6 +30,7 @@ public:
     void visit(Node::Params* node) override;
     void visit(Node::Return* node) override;
     void visit(Node::PropertyAccess* node) override;
+    void visit(Node::StructCreate* node) override;
     void visit(Node::ArrayCreate* node) override;
     void visit(Node::ArrayLength* node) override;
     void visit(Node::ArrayAccess* node) override;

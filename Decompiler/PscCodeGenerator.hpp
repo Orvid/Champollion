@@ -33,6 +33,7 @@ public:
     virtual void visit(Node::Params* node);
     virtual void visit(Node::Return* node);
     virtual void visit(Node::PropertyAccess* node);
+    virtual void visit(Node::StructCreate* node);
     virtual void visit(Node::ArrayCreate* node);
     virtual void visit(Node::ArrayLength* node);
     virtual void visit(Node::ArrayAccess* node);
