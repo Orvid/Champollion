@@ -1,27 +1,37 @@
-#ifndef RETURN_HPP
-#define RETURN_HPP
+#pragma once
 
-#include <string>
+#include <cassert>
+#include <cstdint>
+#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
+#include "Visitor.hpp"
 
 namespace Node {
 
-class Return : public Base,
-        public FieldValueNodeMixin<0>
+class Return final :
+    public Base,
+    public FieldValueNodeMixin<0>
 {
 public:
-    Return(size_t ip, BasePtr expr);
-    virtual ~Return();
+    Return(size_t ip, BasePtr expr) :
+        Base(1, ip, 10),
+        FieldValueNodeMixin(this, expr)
+    {
+    }
+    virtual ~Return() = default;
 
-    static std::shared_ptr<Return> make(size_t ip, BasePtr expr);
+    static std::shared_ptr<Return> make(size_t ip, BasePtr expr)
+    {
+        return std::make_shared<Return>(ip, expr);
+    }
 
-    virtual void visit(Visitor* visitor);
-
-protected:
-
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 };
 
 }
-#endif // RETURN_HPP

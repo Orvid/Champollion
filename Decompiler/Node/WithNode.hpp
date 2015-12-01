@@ -1,12 +1,13 @@
-#ifndef WITHNODE_HPP
-#define WITHNODE_HPP
+#pragma once
 
-#include <functional>
-#include <deque>
-#include <cstddef>
 #include <cassert>
+#include <cstddef>
+#include <deque>
+#include <functional>
 
+#include "Base.hpp"
 #include "Visitor.hpp"
+
 namespace Node {
 
 template<typename T>
@@ -24,10 +25,7 @@ public:
 
         m_FilterFunction = [=] (T*) {return true;};
     }
-
-    ~WithNodeImplementation()
-    {
-    }
+    ~WithNodeImplementation() = default;
 
     WithNodeImplementation& select(FilterFunction selector)
     {
@@ -97,4 +95,3 @@ WithNodeImplementation<T> WithNode()
 }
 
 }
-#endif // WITHNODE_HPP

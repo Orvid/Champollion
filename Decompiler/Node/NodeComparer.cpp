@@ -2,24 +2,7 @@
 
 #include <cassert>
 
-Node::NodeComparer::NodeComparer(Node::BasePtr reference) :
-    m_Reference(reference),
-    m_Result(false)
-{
-    m_Visitor.common([&] (Base*, DynamicVisitor*) {});
-}
-
-Node::NodeComparer::~NodeComparer()
-{
-}
-
-bool Node::NodeComparer::getResult() const
-{
-    return m_Result;
-}
-
-static inline
-bool isSameChildren(Node::Base* ref, Node::Base* node)
+static bool isSameChildren(Node::Base* ref, Node::Base* node)
 {
     if (ref->size() == node->size())
     {
@@ -61,7 +44,6 @@ void Node::NodeComparer::visit(Node::UnaryOperator *node)
         {
             m_Result = isSameChildren(ref, node);
         }
-
     };
     m_Reference->visit(& m_Visitor);
 }
@@ -208,7 +190,6 @@ void Node::NodeComparer::visit(Node::Declare *node)
     };
     m_Reference->visit(& m_Visitor);
 }
-
 
 bool Node::isSameTree(Node::BasePtr left, Node::BasePtr right)
 {

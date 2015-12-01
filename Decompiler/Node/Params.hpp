@@ -1,22 +1,29 @@
-#ifndef PARAMS_HPP
-#define PARAMS_HPP
+#pragma once
+
+#include <cassert>
+#include <memory>
 
 #include "Base.hpp"
+#include "Visitor.hpp"
 
 namespace Node {
 
-class Params : public Base
+class Params final : public Base
 {
 public:
-    Params();
-    virtual ~Params();
+    Params() : Base(0, -1, 10) { }
+    virtual ~Params() = default;
 
-    static std::shared_ptr<Params> make();
+    static std::shared_ptr<Params> make()
+    {
+        return std::make_shared<Params>();
+    }
 
-    virtual void    visit(Visitor* visitor);
-
-protected:
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 };
-}
 
-#endif // PARAMS_HPP
+}

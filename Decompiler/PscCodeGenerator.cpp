@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "Node/Nodes.hpp"
 #include "Node/WithNode.hpp"
 
 static inline

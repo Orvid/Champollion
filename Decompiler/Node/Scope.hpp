@@ -1,22 +1,29 @@
-#ifndef SCOPE_HPP
-#define SCOPE_HPP
+#pragma once
+
+#include <cassert>
+#include <memory>
 
 #include "Base.hpp"
+#include "Visitor.hpp"
 
 namespace Node {
 
-class Scope : public Base
+class Scope final : public Base
 {
 public:
-    Scope();
-    virtual ~Scope();
+    Scope() : Base(0, -1, 10) { }
+    virtual ~Scope() = default;
 
-    static std::shared_ptr<Scope> make();
+    static std::shared_ptr<Scope> make()
+    {
+        return std::make_shared<Scope>();
+    }
 
-    virtual void    visit(Visitor* visitor);
-
-protected:
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 };
 
 }
-#endif // SCOPE_HPP

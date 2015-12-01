@@ -1,28 +1,38 @@
-#ifndef ARRAYLENGTH_HPP
-#define ARRAYLENGTH_HPP
+#pragma once
 
-
+#include <cassert>
+#include <cstdint>
+#include <memory>
 #include <string>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
+#include "Visitor.hpp"
 
 namespace Node {
 
-class ArrayLength : public Base,
-        public FieldArrayNodeMixin<0>
+class ArrayLength final :
+    public Base,
+    public FieldArrayNodeMixin<0>
 {
 public:
-    ArrayLength(size_t ip, const Pex::StringTable::Index& result, BasePtr array);
-    virtual ~ArrayLength();
+    ArrayLength(size_t ip, const Pex::StringTable::Index& result, BasePtr object) :
+        Base(1, ip, 0, result),
+        FieldArrayNodeMixin(this, object)
+    {
+    }
+    virtual ~ArrayLength() = default;
 
-    static std::shared_ptr<ArrayLength> make(size_t ip, const Pex::StringTable::Index& result, BasePtr array);
+    static std::shared_ptr<ArrayLength> make(size_t ip, const Pex::StringTable::Index& result, BasePtr object)
+    {
+        return std::make_shared<ArrayLength>(ip, result, object);
+    }
 
-    virtual void                        visit(Visitor* visitor);
-
-protected:
-
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 };
 
 }
-#endif // ARRAYLENGTH_HPP

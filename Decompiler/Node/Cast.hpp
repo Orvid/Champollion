@@ -1,29 +1,43 @@
-#ifndef CAST_HPP
-#define CAST_HPP
+#pragma once
 
-#include <string>
+#include <cassert>
+#include <cstdint>
+#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
+#include "Visitor.hpp"
 
 namespace Node {
 
-class Cast : public Base,
-        public FieldValueNodeMixin<0>
+class Cast final :
+    public Base,
+    public FieldValueNodeMixin<0>
 {
 public:
-    Cast(size_t ip, const Pex::StringTable::Index& result, BasePtr value, const Pex::StringTable::Index& type);
-    virtual ~Cast();
+    Cast(size_t ip, const Pex::StringTable::Index& result, BasePtr value, const Pex::StringTable::Index& type) :
+        Base(1, ip, 1, result),
+        FieldValueNodeMixin(this, value),
+        m_Type(type)
+    {
+    }
+    virtual ~Cast() = default;
 
-    static std::shared_ptr<Cast> make(size_t ip, const Pex::StringTable::Index& result, BasePtr value, const Pex::StringTable::Index& type);
+    static std::shared_ptr<Cast> make(size_t ip, const Pex::StringTable::Index& result, BasePtr value, const Pex::StringTable::Index& type)
+    {
+        return std::make_shared<Cast>(ip, result, value, type);
+    }
 
-    virtual void                            visit(Visitor* visitor);
-    const Pex::StringTable::Index&      getType();
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 
+    const Pex::StringTable::Index& getType() { return m_Type; }
 
-protected:
+private:
     Pex::StringTable::Index m_Type;
 };
 
 }
-#endif // CAST_HPP

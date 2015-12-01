@@ -1,19 +1,24 @@
-#ifndef NODECOMPARER_HPP
-#define NODECOMPARER_HPP
+#pragma once
 
 #include "Base.hpp"
+#include "Nodes.hpp"
 #include "Visitor.hpp"
 
 namespace Node {
 
-class NodeComparer :
-        public Visitor
+class NodeComparer final : public Visitor
 {
 public:
-    NodeComparer(BasePtr reference);
-    virtual ~NodeComparer();
+    NodeComparer(BasePtr reference) :
+        m_Reference(reference),
+        m_Result(false)
+    {
+        m_Visitor.common([&](Base*, DynamicVisitor*) {});
+    }
 
-    bool getResult() const;
+    virtual ~NodeComparer() = default;
+
+    bool getResult() const { return m_Result; }
 
     virtual void visit(Node::Scope* node);
     virtual void visit(Node::BinaryOperator* node);
@@ -41,10 +46,6 @@ protected:
     bool m_Result;
 };
 
-
 bool isSameTree(BasePtr left, BasePtr right);
 
 }
-
-
-#endif // NODECOMPARER_HPP

@@ -1,29 +1,40 @@
-#ifndef CONSTANT_HPP
-#define CONSTANT_HPP
+#pragma once
 
-#include "Pex/Value.hpp"
+#include <cassert>
+#include <cstdint>
+#include <memory>
 
 #include "Base.hpp"
-
+#include "Visitor.hpp"
+#include "Pex/Value.hpp"
 
 namespace Node {
 
-class Constant : public Base
+class Constant final : public Base
 {
 public:
-    Constant(size_t ip, const Pex::Value& constant);
-    virtual ~Constant();
+    Constant(size_t ip, const Pex::Value& constant) :
+        Base(0, ip, 0),
+        m_Constant(constant)
+    {
+    }
+    virtual ~Constant() = default;
 
-    static std::shared_ptr<Constant> make(size_t ip, const Pex::Value& constant);
+    static std::shared_ptr<Constant> make(size_t ip, const Pex::Value& constant)
+    {
+        return std::make_shared<Constant>(ip, constant);
+    }
 
-    virtual void                     visit(Visitor* visitor);
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 
-    const Pex::Value&            getConstant() const;
+    const Pex::Value& getConstant() const { return m_Constant; }
 
-protected:
+private:
     Pex::Value m_Constant;
 };
 
 }
-
-#endif // CONSTANT_HPP

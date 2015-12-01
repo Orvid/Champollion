@@ -1,9 +1,8 @@
-#ifndef BASE_HPP
-#define BASE_HPP
+#pragma once
 
 #include <cstdint>
-#include <memory>
 #include <deque>
+#include <memory>
 
 #include "Pex/Value.hpp"
 
@@ -19,7 +18,7 @@ class Base :
     public std::enable_shared_from_this<Base>
 {
 public:
-    Base(size_t childs, size_t ip, std::uint8_t precedence, const Pex::StringTable::Index& result = Pex::StringTable::Index());
+    Base(size_t childs, size_t ip, uint8_t precedence, const Pex::StringTable::Index& result = Pex::StringTable::Index());
     virtual ~Base();
 
     template<typename T>
@@ -34,12 +33,11 @@ public:
         return dynamic_cast<T*>(this);
     }
 
-    size_t getBegin() const;
-    size_t getEnd() const;
-    std::uint8_t getPrecedence() const;
-
-    const Pex::StringTable::Index& getResult() const;
-    void clearResult();
+    size_t getBegin() const { return m_Begin; }
+    size_t getEnd() const { return m_End; }
+    uint8_t getPrecedence() const { return m_Precedence; }
+    const Pex::StringTable::Index& getResult() const { return m_Result; }
+    void clearResult() { m_Result = Pex::StringTable::Index(); }
 
     bool isFinal() const;
 
@@ -60,14 +58,9 @@ protected:
     size_t m_Begin;
     size_t m_End;
     bool m_FixedSize;
-    std::uint8_t m_Precedence;
+    uint8_t m_Precedence;
     Pex::StringTable::Index m_Result;
-    Base* m_Parent;
-
+    Base* m_Parent{ nullptr };
 };
 
-
 }
-
-
-#endif // BASE_HPP

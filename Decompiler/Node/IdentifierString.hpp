@@ -1,25 +1,40 @@
-#ifndef IDENTIFIERSTRING_HPP
-#define IDENTIFIERSTRING_HPP
+#pragma once
 
+#include <cassert>
+#include <cstdint>
+#include <memory>
 #include <string>
+
 #include "Base.hpp"
+#include "Visitor.hpp"
 
 namespace Node {
 
-class IdentifierString : public Base
+class IdentifierString final : public Base
 {
 public:
-    IdentifierString(size_t ip, const std::string& identifier);
-    virtual ~IdentifierString();
+    IdentifierString(size_t ip, const std::string& identifier) :
+        Base(0, ip, 0),
+        m_Identifier(identifier)
+    {
+    }
+    virtual ~IdentifierString() = default;
 
-    static std::shared_ptr<IdentifierString> make(size_t ip, const std::string& identifier);
+    static std::shared_ptr<IdentifierString> make(size_t ip, const std::string& identifier)
+    {
+        return std::make_shared<IdentifierString>(ip, identifier);
+    }
 
-    virtual void                             visit(Visitor* visitor);
+    virtual void visit(Visitor* visitor)
+    {
+        assert(visitor);
+        visitor->visit(this);
+    }
 
-    const std::string&                       getIdentifier() const;
+    const std::string& getIdentifier() const { return m_Identifier; }
 
-protected:
+private:
     std::string m_Identifier;
 };
+
 }
-#endif // IDENTIFIERSTRING_HPP
