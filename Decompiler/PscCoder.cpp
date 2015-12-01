@@ -295,18 +295,6 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
 
         if (! function.isNative())
         {
-            /*
-            for (auto& local : function.getLocals())
-            {
-                auto name = local.getName().asString();
-                bool compilerGenerated  = (name.size() > 2 && name[0] == ':' && name[1] == ':');
-                if(m_CommentAsm || !compilerGenerated)
-                {
-                    write(indent(i+1) << (compilerGenerated?"; ":"") << local.getTypeName() << " " << name);
-                }
-            }
-            */
-            write("");
             for (auto& line : PscDecompiler(function, object, m_CommentAsm))
             {
                 write(indent(i+1) << line);
