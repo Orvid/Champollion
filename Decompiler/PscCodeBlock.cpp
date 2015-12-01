@@ -14,7 +14,7 @@ Decompiler::PscCodeBlock::PscCodeBlock(size_t begin, size_t end) :
     m_End(end),
     m_Next(END),
     m_OnFalse(END),
-    m_Scope(Node::Scope::make())
+    m_Scope(std::make_shared<Node::Scope>())
 {
 }
 

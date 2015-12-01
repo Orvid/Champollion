@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "Visitor.hpp"
@@ -19,11 +18,6 @@ public:
     {
     }
     virtual ~Constant() = default;
-
-    static std::shared_ptr<Constant> make(size_t ip, const Pex::Value& constant)
-    {
-        return std::make_shared<Constant>(ip, constant);
-    }
 
     virtual void visit(Visitor* visitor)
     {

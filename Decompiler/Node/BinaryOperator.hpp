@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 #include "Base.hpp"
@@ -25,11 +24,6 @@ public:
     {
     }
     virtual ~BinaryOperator() = default;
-
-    static std::shared_ptr<BinaryOperator> make(size_t ip, std::uint8_t precedence, const Pex::StringTable::Index& result, BasePtr left, const std::string& op, BasePtr right)
-    {
-        return std::make_shared<BinaryOperator>(ip, precedence, result, left, op, right);
-    }
 
     virtual void visit(Visitor* visitor)
     {

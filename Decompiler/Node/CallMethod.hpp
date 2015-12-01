@@ -16,19 +16,14 @@ class CallMethod final :
     public FieldParametersNodeMixin<1>
 {
 public:
-    CallMethod(size_t ip, const Pex::StringTable::Index& result, BasePtr& object, const Pex::StringTable::Index& method) :
+    CallMethod(size_t ip, const Pex::StringTable::Index& result, BasePtr object, const Pex::StringTable::Index& method) :
         Base(2, ip, 0, result),
         FieldObjectNodeMixin(this, object),
-        FieldParametersNodeMixin(this, Params::make()),
+        FieldParametersNodeMixin(this, std::make_shared<Params>()),
         m_Method(method)
     {
     }
     virtual ~CallMethod() = default;
-
-    static std::shared_ptr<CallMethod> make(size_t ip, const Pex::StringTable::Index& result, BasePtr object, const Pex::StringTable::Index& method)
-    {
-        return std::make_shared<CallMethod>(ip, result, object, method);
-    }
 
     virtual void visit(Visitor* visitor)
     {

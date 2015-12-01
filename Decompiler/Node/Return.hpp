@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -21,11 +20,6 @@ public:
     {
     }
     virtual ~Return() = default;
-
-    static std::shared_ptr<Return> make(size_t ip, BasePtr expr)
-    {
-        return std::make_shared<Return>(ip, expr);
-    }
 
     virtual void visit(Visitor* visitor)
     {

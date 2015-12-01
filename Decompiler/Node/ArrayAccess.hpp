@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -24,12 +23,7 @@ public:
     }
     virtual ~ArrayAccess() = default;
 
-    static std::shared_ptr<ArrayAccess> make(size_t ip, const Pex::StringTable::Index& result, BasePtr object, BasePtr index)
-    {
-        return std::make_shared<ArrayAccess>(ip, result, object, index);
-    }
-
-    virtual void visit(Visitor* visitor)
+    void visit(Visitor* visitor) override
     {
         assert(visitor);
         visitor->visit(this);

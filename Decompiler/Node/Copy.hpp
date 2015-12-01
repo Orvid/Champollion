@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -21,11 +20,6 @@ public:
     {
     }
     virtual ~Copy() = default;
-
-    static std::shared_ptr<Copy> make(size_t ip, const Pex::StringTable::Index& result, BasePtr value)
-    {
-        return std::make_shared<Copy>(ip, result, value);
-    }
 
     virtual void visit(Visitor* visitor)
     {

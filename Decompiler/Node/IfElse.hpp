@@ -23,16 +23,11 @@ public:
         Base(4, ip, 10),
         FieldConditionNodeMixin(this, condition),
         FieldBodyNodeMixin(this, body),
-        FieldElseNodeMixin(this, elseBody ? elseBody : Scope::make()),
-        FieldElseIfNodeMixin(this, Scope::make())
+        FieldElseNodeMixin(this, elseBody ? elseBody : std::make_shared<Scope>()),
+        FieldElseIfNodeMixin(this, std::make_shared<Scope>())
     {
     }
     virtual ~IfElse() = default;
-
-    static std::shared_ptr<IfElse> make(size_t ip, BasePtr condition, BasePtr body, BasePtr elseBody)
-    {
-        return std::make_shared<IfElse>(ip, condition, body, elseBody);
-    }
 
     virtual void visit(Visitor* visitor)
     {

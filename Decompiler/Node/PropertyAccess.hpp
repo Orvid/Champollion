@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -22,11 +21,6 @@ public:
     {
     }
     virtual ~PropertyAccess() = default;
-
-    static std::shared_ptr<PropertyAccess> make(size_t ip, const Pex::StringTable::Index& result, BasePtr object, const Pex::StringTable::Index& property)
-    {
-        return std::make_shared<PropertyAccess>(ip, result, object, property);
-    }
 
     virtual void visit(Visitor* visitor)
     {

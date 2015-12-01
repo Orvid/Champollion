@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 #include "Base.hpp"
@@ -25,11 +24,6 @@ public:
     {
     }
     virtual ~AssignOperator() = default;
-
-    static std::shared_ptr<AssignOperator> make(size_t ip, BasePtr destination, const std::string& op, BasePtr expr)
-    {
-        return std::make_shared<AssignOperator>(ip, destination, op, expr);
-    }
 
     virtual void visit(Visitor* visitor)
     {

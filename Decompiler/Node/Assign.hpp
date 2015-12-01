@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -23,11 +22,6 @@ public:
     {
     }
     virtual ~Assign() = default;
-
-    static std::shared_ptr<Assign> make(size_t ip, BasePtr destination, BasePtr value)
-    {
-        return std::make_shared<Assign>(ip, destination, value);
-    }
 
     virtual void visit(Visitor* visitor)
     {

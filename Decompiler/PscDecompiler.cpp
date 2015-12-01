@@ -373,46 +373,46 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             case Pex::OpCode::FADD:
             case Pex::OpCode::STRCAT:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), "+", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "+", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::ISUB:
             case Pex::OpCode::FSUB:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), "-", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "-", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::IMUL:
             case Pex::OpCode::FMUL:
             {
-                node = Node::BinaryOperator::make(ip, 4, args[0].getId(), fromValue(ip, args[1]), "*", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "*", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::IDIV:
             case Pex::OpCode::FDIV:
             {
-                node = Node::BinaryOperator::make(ip, 4, args[0].getId(), fromValue(ip, args[1]), "/", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "/", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::IMOD:
             {
-                node = Node::BinaryOperator::make(ip, 4, args[0].getId(), fromValue(ip, args[1]), "%", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "%", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::NOT:
             {
-                node = Node::UnaryOperator::make(ip, 3, args[0].getId(), "!", fromValue(ip, args[1]));
+                node = std::make_shared<Node::UnaryOperator>(ip, 3, args[0].getId(), "!", fromValue(ip, args[1]));
             }
                 break;
             case Pex::OpCode::INEG:
             case Pex::OpCode::FNEG:
             {
-                node = Node::UnaryOperator::make(ip, 3, args[0].getId(), "-", fromValue(ip, args[1]));
+                node = std::make_shared<Node::UnaryOperator>(ip, 3, args[0].getId(), "-", fromValue(ip, args[1]));
             }
                 break;
             case Pex::OpCode::ASSIGN:
             {
-                node = Node::Copy::make(ip, args[0].getId(), fromValue(ip, args[1]));
+                node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
 
             }
                 break;
@@ -420,42 +420,42 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             {
                 if(args[1].getType() == Pex::ValueType::None)
                 {
-                    node = Node::Copy::make(ip, args[0].getId(), fromValue(ip, args[1]));
+                    node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                 }
                 else if (args[1].getType() != Pex::ValueType::Identifier || (typeOfVar(args[0].getId()) != typeOfVar(args[1].getId()) && args[1].getId() != m_NoneVar) )
                 {                    
-                    node = Node::Cast::make(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
+                    node = std::make_shared<Node::Cast>(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
                 }
                 else // two variables of the same type, equivalent to an assign
                 {
-                    node = Node::Copy::make(ip, args[0].getId(), fromValue(ip, args[1]));
+                    node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                 }
             }
                 break;
             case Pex::OpCode::CMP_EQ:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), "==", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "==", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::CMP_LT:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::CMP_LTE:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<=", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<=", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::CMP_GT:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">", fromValue(ip, args[2]));
 
             }
                 break;
             case Pex::OpCode::CMP_GTE:
             {
-                node = Node::BinaryOperator::make(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">=", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">=", fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::JMP:
@@ -465,7 +465,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 break;
             case Pex::OpCode::CALLMETHOD:
             {
-                auto callNode = Node::CallMethod::make(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
                 auto argNode = callNode->getParameters();
                 for (auto varg : varargs)
                 {
@@ -476,7 +476,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 break;
             case Pex::OpCode::CALLPARENT:
             {
-                auto callNode = Node::CallMethod::make(ip, args[1].getId(), Node::IdentifierString::make(ip, "parent"), args[0].getId());
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), std::make_shared<Node::IdentifierString>(ip, "parent"), args[0].getId());
                 auto argNode = callNode->getParameters();
                 for (auto varg : varargs)
                 {
@@ -487,7 +487,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 break;
             case Pex::OpCode::CALLSTATIC:
             {
-                auto callNode = Node::CallMethod::make(ip, args[2].getId(), fromValue(ip, args[0]), args[1].getId());
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[0]), args[1].getId());
                 auto argNode = callNode->getParameters();
                 for (auto varg : varargs)
                 {
@@ -501,51 +501,51 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             {
                 if(m_ReturnNone)
                 {
-                    node = Node::Return::make(ip, nullptr);
+                    node = std::make_shared<Node::Return>(ip, nullptr);
                 }
                 else
                 {
-                    node = Node::Return::make(ip, fromValue(ip, args[0]));
+                    node = std::make_shared<Node::Return>(ip, fromValue(ip, args[0]));
                 }
             }
                 break;
 
             case Pex::OpCode::PROPGET:
             {
-                node = Node::PropertyAccess::make(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
+                node = std::make_shared<Node::PropertyAccess>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
             }
                 break;
             case Pex::OpCode::PROPSET:
             {
-                node = Node::PropertyAccess::make(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[0].getId());
-                node = Node::Assign::make(ip, node, fromValue(ip, args[2]));
+                node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[0].getId());
+                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
             }
                 break;
 
             case Pex::OpCode::ARRAY_CREATE:
             {
-                node = Node::ArrayCreate::make(ip, args[0].getId(), fromValue(ip, args[0]), fromValue(ip, args[1]));
+                node = std::make_shared<Node::ArrayCreate>(ip, args[0].getId(), fromValue(ip, args[0]), fromValue(ip, args[1]));
             }
                 break;
             case Pex::OpCode::ARRAY_LENGTH:
             {
-                node = Node::ArrayLength::make(ip, args[0].getId(), fromValue(ip, args[1]));
+                node = std::make_shared<Node::ArrayLength>(ip, args[0].getId(), fromValue(ip, args[1]));
             }
                 break;
             case Pex::OpCode::ARRAY_GETELEMENT:
             {
-                node = Node::ArrayAccess::make(ip, args[0].getId(), fromValue(ip, args[1]), fromValue(ip, args[2]));
+                node = std::make_shared<Node::ArrayAccess>(ip, args[0].getId(), fromValue(ip, args[1]), fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::ARRAY_SETELEMENT:
             {
-                node = Node::ArrayAccess::make(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), fromValue(ip, args[1]));
-                node = Node::Assign::make(ip, node, fromValue(ip, args[2]));
+                node = std::make_shared<Node::ArrayAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), fromValue(ip, args[1]));
+                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
             }
                 break;
             case Pex::OpCode::ARRAY_FINDELEMENT:
             {
-                auto callNode =  Node::CallMethod::make(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("find")));
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("find")));
                 auto argNode = callNode->getParameters();
                 *argNode << fromValue(ip, args[2]);
                 *argNode << fromValue(ip, args[3]);
@@ -554,7 +554,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 break;
             case Pex::OpCode::ARRAY_RFINDELEMENT:
             {
-                auto callNode = Node::CallMethod::make(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("rfind")));
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("rfind")));
                 auto argNode = callNode->getParameters();
                 *argNode << fromValue(ip, args[2]);
                 *argNode << fromValue(ip, args[3]);
@@ -564,13 +564,13 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 break;
             case Pex::OpCode::STRUCT_GET:
             {
-                node = Node::PropertyAccess::make(ip, args[0].getId(), fromValue(ip, args[1]), args[2].getId());
+                node = std::make_shared<Node::PropertyAccess>(ip, args[0].getId(), fromValue(ip, args[1]), args[2].getId());
             }
                 break;
             case Pex::OpCode::STRUCT_SET:
             {
-                node = Node::PropertyAccess::make(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[2].getId());
-                node = Node::Assign::make(ip, node, fromValue(ip, args[0]));
+                node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[2].getId());
+                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[0]));
             }
                 break;
             case Pex::OpCode::ARRAY_FINDSTRUCT:
@@ -750,7 +750,7 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                             auto right = onTrue->getScope()->front();
                             onFalse->getScope()->removeChild(right);
 
-                            auto andOperator = Node::BinaryOperator::make(-1, 7, source->getCondition(), left, "&&", right);
+                            auto andOperator = std::make_shared<Node::BinaryOperator>(-1, 7, source->getCondition(), left, "&&", right);
                             *(source->getScope()) << andOperator;
 
                             // Remove the true block now that the expression is rebuild
@@ -796,7 +796,7 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         auto right = onFalse->getScope()->front();
                         onFalse->getScope()->removeChild(right);
 
-                        auto orOperator = Node::BinaryOperator::make(-1, 8, source->getCondition(), left, "||", right);
+                        auto orOperator = std::make_shared<Node::BinaryOperator>(-1, 8, source->getCondition(), left, "||", right);
                         *(source->getScope()) << orOperator;
 
                         //Remove the false block now that the expression is rebuild
@@ -847,7 +847,7 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
     auto end = m_CodeBlocs.find(endBlock);
     auto it = begin;
 
-    Node::BasePtr result = Node::Scope::make();
+    Node::BasePtr result = std::make_shared<Node::Scope>();
     while (it != end)
     {
         auto current = it->first;
@@ -875,14 +875,14 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                 auto whileEndBlock = source->onFalse();
 
 
-                Node::BasePtr whileCondition = Node::Constant::make(-1, Pex::Value(source->getCondition(), true));
+                Node::BasePtr whileCondition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
                 result->mergeChildren(source->getScope()->shared_from_this());
 
                 // Rebuild the statements in the while loop.
                 auto whileBody = rebuildControlFlow(whileStartBlock, whileEndBlock);
 
-                *result << Node::While::make(-1, whileCondition, whileBody);
+                *result << std::make_shared<Node::While>(-1, whileCondition, whileBody);
 
                 advance = 0;
                 it = m_CodeBlocs.find(whileEndBlock);
@@ -897,14 +897,14 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                     auto ifStartBlock = source->onTrue();
                     auto ifEndBlock = source->onFalse();
 
-                    Node::BasePtr ifCondition = Node::Constant::make(-1, Pex::Value(source->getCondition(), true));
+                    Node::BasePtr ifCondition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
                     result->mergeChildren(source->getScope()->shared_from_this());
 
                     // Rebuild the statements of the if body
                     auto ifBody = rebuildControlFlow(ifStartBlock, ifEndBlock);
 
-                    *result << Node::IfElse::make(-1, ifCondition, ifBody, nullptr);
+                    *result << std::make_shared<Node::IfElse>(-1, ifCondition, ifBody, nullptr);
 
                     advance = 0;
                     it = m_CodeBlocs.find(ifEndBlock);
@@ -915,7 +915,7 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                     auto elseStartBlock = source->onFalse();
                     auto endElseBlock = lastBlock->getNext();
 
-                    Node::BasePtr ifCondition = Node::Constant::make(-1, Pex::Value(source->getCondition(), true));
+                    Node::BasePtr ifCondition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
                     result->mergeChildren(source->getScope()->shared_from_this());
 
@@ -924,7 +924,7 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                     // Rebuilds the statements in the else body.
                     auto elseBody = rebuildControlFlow(elseStartBlock, endElseBlock);
 
-                    *result << Node::IfElse::make(-1, ifCondition, ifBody, elseBody);
+                    *result << std::make_shared<Node::IfElse>(-1, ifCondition, ifBody, elseBody);
 
                     advance = 0;
                     it = m_CodeBlocs.find(endElseBlock);
@@ -1039,7 +1039,7 @@ void Decompiler::PscDecompiler::declareVariables(Node::BasePtr program)
             auto scope = findScopeForVariable(local.getName(), program);
             assert(scope);
 
-            auto declare = Node::Declare::make(-1, Node::Constant::make(-1, Pex::Value(local.getName(), true)), local.getTypeName());
+            auto declare = std::make_shared<Node::Declare>(-1, std::make_shared<Node::Constant>(-1, Pex::Value(local.getName(), true)), local.getTypeName());
 
             // Find all assignment to the variable
             auto assignments = Node::WithNode<Node::Assign>()
@@ -1130,7 +1130,7 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
                 return node->getConstant().getType() == Pex::ValueType::Identifier;
             })
             .transform([&] (Node::Constant* node) {
-                return Node::IdentifierString::make(node->getBegin(), getVarName(node->getConstant().getId()));
+                return std::make_shared<Node::IdentifierString>(node->getBegin(), getVarName(node->getConstant().getId()));
             })
             .on(program);
 
@@ -1147,7 +1147,7 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
         })
         .transform([&] (Node::UnaryOperator* node) {
             auto op = node->getValue()->as<Node::BinaryOperator>();
-            auto result = Node::BinaryOperator::make(op->getBegin(), op->getPrecedence(), op->getResult(), op->getLeft(), "!=", op->getRight());
+            auto result = std::make_shared<Node::BinaryOperator>(op->getBegin(), op->getPrecedence(), op->getResult(), op->getLeft(), "!=", op->getRight());
             result->includeInstruction(node->getEnd());
             return result;
         })
@@ -1163,7 +1163,7 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
             auto childIfNode = node->getElse()->operator[](0);            
 
             node->setElse(childIfNode->as<Node::IfElse>()->getElse());
-            childIfNode->as<Node::IfElse>()->setElse(Node::Scope::make());
+            childIfNode->as<Node::IfElse>()->setElse(std::make_shared<Node::Scope>());
 
             *node->getElseIf() << childIfNode;
             node->getElseIf()->mergeChildren(childIfNode->as<Node::IfElse>()->getElseIf());
@@ -1196,7 +1196,7 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
         })
         .transform([&] (Node::Assign* node) {
             auto binaryOp = node->getValue()->as<Node::BinaryOperator>();
-            return Node::AssignOperator::make(node->getBegin(), node->getDestination(), binaryOp->getOperator() + "=", binaryOp->getRight());
+            return std::make_shared<Node::AssignOperator>(node->getBegin(), node->getDestination(), binaryOp->getOperator() + "=", binaryOp->getRight());
 
         })
         .on(program);
@@ -1260,7 +1260,7 @@ Pex::StringTable::Index Decompiler::PscDecompiler::toIdentifier(const Pex::Value
  */
 Node::BasePtr Decompiler::PscDecompiler::fromValue(size_t ip, const Pex::Value &value) const
 {
-    return Node::Constant::make(ip, value);
+    return std::make_shared<Node::Constant>(ip, value);
 }
 
 /**
@@ -1276,7 +1276,7 @@ Node::BasePtr Decompiler::PscDecompiler::checkAssign(Node::BasePtr expression) c
     auto& result = expression->getResult();
     if (result.isValid() && !isTempVar(result))
     {
-        return Node::Assign::make(expression->getBegin(), Node::Constant::make(expression->getBegin(), Pex::Value(result, true)), expression);
+        return std::make_shared<Node::Assign>(expression->getBegin(), std::make_shared<Node::Constant>(expression->getBegin(), Pex::Value(result, true)), expression);
     }
     return expression;
 }

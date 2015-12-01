@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -22,11 +21,6 @@ public:
     {
     }
     virtual ~Declare() = default;
-
-    static std::shared_ptr<Declare> make(size_t ip, BasePtr identifier, const Pex::StringTable::Index& type)
-    {
-        return std::make_shared<Declare>(ip, identifier, type);
-    }
 
     virtual void visit(Visitor* visitor)
     {

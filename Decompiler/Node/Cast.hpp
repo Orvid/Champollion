@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -22,11 +21,6 @@ public:
     {
     }
     virtual ~Cast() = default;
-
-    static std::shared_ptr<Cast> make(size_t ip, const Pex::StringTable::Index& result, BasePtr value, const Pex::StringTable::Index& type)
-    {
-        return std::make_shared<Cast>(ip, result, value, type);
-    }
 
     virtual void visit(Visitor* visitor)
     {

@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -22,11 +21,6 @@ public:
     {
     }
     virtual ~ArrayCreate() = default;
-
-    static std::shared_ptr<ArrayCreate> make(size_t ip, const Pex::StringTable::Index& result, BasePtr type, BasePtr size)
-    {
-        return std::make_shared<ArrayCreate>(ip, result, type, size);
-    }
 
     virtual void visit(Visitor* visitor)
     {

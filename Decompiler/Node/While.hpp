@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 
 #include "Base.hpp"
 #include "FieldNodeMixin.hpp"
@@ -23,11 +22,6 @@ public:
     {
     }
     virtual ~While() = default;
-
-    static std::shared_ptr<While> make(size_t ip, BasePtr condition, BasePtr body)
-    {
-        return std::make_shared<While>(ip, condition, body);
-    }
 
     virtual void visit(Visitor* visitor)
     {

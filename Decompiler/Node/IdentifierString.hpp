@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 #include "Base.hpp"
@@ -19,11 +18,6 @@ public:
     {
     }
     virtual ~IdentifierString() = default;
-
-    static std::shared_ptr<IdentifierString> make(size_t ip, const std::string& identifier)
-    {
-        return std::make_shared<IdentifierString>(ip, identifier);
-    }
 
     virtual void visit(Visitor* visitor)
     {

@@ -15,32 +15,31 @@ public:
     {
         m_Visitor.common([&](Base*, DynamicVisitor*) {});
     }
-
     virtual ~NodeComparer() = default;
 
     bool getResult() const { return m_Result; }
 
-    virtual void visit(Node::Scope* node);
-    virtual void visit(Node::BinaryOperator* node);
-    virtual void visit(Node::UnaryOperator* node);
-    virtual void visit(Node::Assign* node);
-    virtual void visit(Node::AssignOperator* node);
-    virtual void visit(Node::Copy* node);
-    virtual void visit(Node::Cast* node);
-    virtual void visit(Node::CallMethod* node);
-    virtual void visit(Node::Params* node);
-    virtual void visit(Node::Return* node);
-    virtual void visit(Node::PropertyAccess* node);
-    virtual void visit(Node::ArrayCreate* node);
-    virtual void visit(Node::ArrayLength* node);
-    virtual void visit(Node::ArrayAccess* node);
-    virtual void visit(Node::Constant* node);
-    virtual void visit(Node::IdentifierString* node);
-    virtual void visit(Node::While* node);
-    virtual void visit(Node::IfElse* node);
-    virtual void visit(Node::Declare* node);
+    void visit(Node::Scope* node) override;
+    void visit(Node::BinaryOperator* node) override;
+    void visit(Node::UnaryOperator* node) override;
+    void visit(Node::Assign* node) override;
+    void visit(Node::AssignOperator* node) override;
+    void visit(Node::Copy* node) override;
+    void visit(Node::Cast* node) override;
+    void visit(Node::CallMethod* node) override;
+    void visit(Node::Params* node) override;
+    void visit(Node::Return* node) override;
+    void visit(Node::PropertyAccess* node) override;
+    void visit(Node::ArrayCreate* node) override;
+    void visit(Node::ArrayLength* node) override;
+    void visit(Node::ArrayAccess* node) override;
+    void visit(Node::Constant* node) override;
+    void visit(Node::IdentifierString* node) override;
+    void visit(Node::While* node) override;
+    void visit(Node::IfElse* node) override;
+    void visit(Node::Declare* node) override;
 
-protected:
+private:
     BasePtr m_Reference;
     DynamicVisitor m_Visitor;
     bool m_Result;

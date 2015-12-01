@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 #include "Base.hpp"
@@ -23,11 +22,6 @@ public:
     {
     }
     virtual ~UnaryOperator() = default;
-
-    static std::shared_ptr<UnaryOperator> make(size_t ip, std::uint8_t precedence, const Pex::StringTable::Index& result, const std::string& op, BasePtr value)
-    {
-        return std::make_shared<UnaryOperator>(ip, precedence, result, op, value);
-    }
 
     virtual void visit(Visitor* visitor)
     {

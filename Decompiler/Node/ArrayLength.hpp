@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 #include "Base.hpp"
@@ -22,11 +21,6 @@ public:
     {
     }
     virtual ~ArrayLength() = default;
-
-    static std::shared_ptr<ArrayLength> make(size_t ip, const Pex::StringTable::Index& result, BasePtr object)
-    {
-        return std::make_shared<ArrayLength>(ip, result, object);
-    }
 
     virtual void visit(Visitor* visitor)
     {
