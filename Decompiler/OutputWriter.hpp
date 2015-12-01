@@ -15,8 +15,8 @@ namespace Decompiler {
 class OutputWriter
 {
 public:
-    OutputWriter();
-    virtual ~OutputWriter();
+    OutputWriter() = default;
+    virtual ~OutputWriter() = default;
 
     virtual void writeLine(const std::string& line) = 0;
 };
