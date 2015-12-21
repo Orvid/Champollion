@@ -1,10 +1,14 @@
 #include "PscCoder.hpp"
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #include <cassert>
 #include <ctime>
 #include <iostream>
 #include <iomanip>
-
+#include <locale>
+#include <map>
+#include <string>
 
 #include "PscDecompiler.hpp"
 
@@ -60,7 +64,8 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 {
     auto& header = pex.getHeader();
     auto& debug  = pex.getDebugInfo();
-    write(";/ Decompiled by Champollion V1.0.1");
+    write(";/ Decompiled by Champollion V1.0.4");
+    write(indent(0) << "PEX format v" << (int)header.getMajorVersion() << "." << (int)header.getMinorVersion() << " GameID: " << header.getGameID());
     write(indent(0) << "Source   : " << header.getSourceFileName());
     if (debug.getModificationTime() != 0)
     {
@@ -80,7 +85,7 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Binary &pex)
 {
     auto stream = indent(0);
-    stream <<"scriptName " << object.getName().asString();
+    stream <<"ScriptName " << object.getName().asString();
     if (! object.getParentClassName().asString().empty())
     {
         stream << " extends " << object.getParentClassName().asString();
@@ -91,15 +96,95 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
 
     writeDocString(0, object);
 
-    write("");
-    write(";-- Properties --------------------------------------");
-    writeProperties(object, pex);
+    if (object.getStructInfos().size()) {
+        write("");
+        write(";-- Structs -----------------------------------------");
+        writeStructs(object, pex);
+    }
 
-    write("");
-    write(";-- Variables ---------------------------------------");
-    writeVariables(object, pex);
+    if (object.getProperties().size()) {
+        write("");
+        write(";-- Properties --------------------------------------");
+        writeProperties(object, pex);
+    }
+
+    if (object.getVariables().size()) {
+        write("");
+        write(";-- Variables ---------------------------------------");
+        writeVariables(object, pex);
+    }
 
     writeStates(object, pex);
+}
+
+/**
+* @brief Write the struct definitions stored in the object.
+* @param object Object containing the struct definitions.
+* @param pex Binary to decompile.
+*/
+void Decompiler::PscCoder::writeStructs(const Pex::Object& object, const Pex::Binary& pex) {
+    for (auto& sInfo : object.getStructInfos()) {
+        write(indent(0) << "Struct " << sInfo.getName());
+
+        bool foundInfo = false;
+        if (pex.getDebugInfo().getStructOrders().size()) {
+            // If we have debug info, we have information on the order
+            // they were in the original source file, so use that order.
+            for (auto& sOrder : pex.getDebugInfo().getStructOrders()) {
+                if (sOrder.getObjectName() == object.getName() && sOrder.getOrderName() == sInfo.getName()) {
+                    if (sOrder.getNames().size() == sInfo.getMembers().size()) {
+                        foundInfo = true;
+                        for (auto& orderName : sOrder.getNames()) {
+                            for (auto& member : sInfo.getMembers()) {
+                                if (member.getName() == orderName) {
+                                    writeStructMember(member, pex);
+                                    goto ContinueOrder;
+                                }
+                            }
+                            // If we get here, then we failed to find the struct
+                            // member in the debug info :(
+                            throw std::runtime_error("Unable to locate the struct member by the name of '" + orderName.asString() + "'");
+                        ContinueOrder:
+                            continue;
+                        }
+                    } else {
+                        // This shouldn't happen, but it's possible that the
+                        // debug info doesn't include all members of the struct,
+                        // so write them in whatever order they are in the file.
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!foundInfo) {
+            for (auto& mem : sInfo.getMembers())
+                writeStructMember(mem, pex);
+        }
+
+        write(indent(0) << "EndStruct");
+        write("");
+    }
+}
+
+/**
+* @brief Write the struct member passed in.
+* @param member The member to output.
+* @param pex Binary to decompile.
+*/
+void Decompiler::PscCoder::writeStructMember(const Pex::StructInfo::Member& member, const Pex::Binary& pex)
+{
+    auto stream = indent(1);
+    if (member.getConstFlag())
+        stream << "const ";
+    stream << mapType(member.getTypeName().asString()) << " " << member.getName();
+
+    if (member.getValue().getType() != Pex::ValueType::None) {
+        stream << " = " << member.getValue().toString();
+    }
+    writeUserFlag(stream, member, pex);
+    write(stream);
+    writeDocString(1, member);
 }
 
 /**
@@ -109,50 +194,99 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
  */
 void Decompiler::PscCoder::writeProperties(const Pex::Object &object, const Pex::Binary &pex)
 {
-    for(auto& property : object.getProperties())
-    {
-        auto stream = indent(0);
-        stream << property.getTypeName() << " property " << property.getName();
-        if (property.hasAutoVar())
-        {
-            auto var = object.getVariables().findByName(property.getAutoVarName());
-            if(var == nullptr)
-            {
-                throw std::runtime_error("Auto variable for property not found");
+    bool foundInfo = false;
+    if (pex.getDebugInfo().getPropertyGroups().size()) {
+        size_t totalProperties = 0;
+        // If we have debug info, we have information on the order
+        // they were in the original source file, so use that order.
+        for (auto& propGroup : pex.getDebugInfo().getPropertyGroups()) {
+            if (propGroup.getObjectName() == object.getName()) {
+                totalProperties += propGroup.getNames().size();
             }
-            auto initialValue = var->getDefaultValue();
-            if (initialValue.getType() != Pex::ValueType::None)
-            {
-                stream << " = " << initialValue.toString();
-            }
-            if (! property.isWritable())
-            {
-                stream << " autoreadonly";
-            }
-            else
-            {
-                stream << " auto";
-            }
-
-            // The flags defined on the variable must be set on the property
-            writeUserFlag(stream, *var, pex);
         }
-        writeUserFlag(stream, property, pex);
-        write(stream);
-        writeDocString(0, property);
 
-        if (!property.hasAutoVar())
-        {
-            if(property.isReadable())
-            {
-                writeFunction(1, property.getReadFunction(),object , pex, "get");
+        if (totalProperties == object.getProperties().size()) {
+            foundInfo = true;
+
+            for (auto& propGroup : pex.getDebugInfo().getPropertyGroups()) {
+                if (propGroup.getObjectName() == object.getName()) {
+                    int propertyIndent = 0;
+                    if (!propGroup.getGroupName().asString().empty()) {
+                        auto stream = indent(0);
+                        stream << "PropertyGroup " << propGroup.getGroupName();
+                        writeUserFlag(stream, propGroup, pex);
+                        write(stream);
+                        writeDocString(0, propGroup);
+                        propertyIndent = 1;
+                    }
+
+                    for (auto& propName : propGroup.getNames()) {
+                        for (auto& prop : object.getProperties()) {
+                            if (prop.getName() == propName) {
+                                writeProperty(propertyIndent, prop, object, pex);
+                                goto ContinueOrder;
+                            }
+                        }
+                        // If we get here, then we failed to find the struct
+                        // member in the debug info :(
+                        throw std::runtime_error("Unable to locate the property by the name of '" + propName.asString() + "' referenced in the debug info");
+                    ContinueOrder:
+                        continue;
+                    }
+
+                    if (!propGroup.getGroupName().asString().empty()) {
+                        write(indent(0) << "EndPropertyGroup");
+                        write("");
+                    }
+                }
             }
-            if(property.isWritable())
-            {
-                writeFunction(1, property.getWriteFunction(),object , pex, "set");
-            }
-            write(indent(0) << "endproperty");
         }
+    }
+
+    if (!foundInfo) {
+        for (auto& prop : object.getProperties())
+            writeProperty(0, prop, object, pex);
+    }
+}
+
+/**
+* @brief Write the property definition.
+* @param i The indent level.
+* @param prop The property to write.
+* @param object Object containing the properties definitions.
+* @param pex Binary to decompile.
+*/
+void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const Pex::Object &object, const Pex::Binary& pex)
+{
+    auto stream = indent(i);
+    stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName();
+    if (prop.hasAutoVar()) {
+        auto var = object.getVariables().findByName(prop.getAutoVarName());
+        if (var == nullptr)
+            throw std::runtime_error("Auto variable for property not found");
+
+        auto initialValue = var->getDefaultValue();
+        if (initialValue.getType() != Pex::ValueType::None)
+            stream << " = " << initialValue.toString();
+
+        if (!prop.isWritable())
+            stream << " autoreadonly";
+        else
+            stream << " auto";
+
+        // The flags defined on the variable must be set on the property
+        writeUserFlag(stream, *var, pex);
+    }
+    writeUserFlag(stream, prop, pex);
+    write(stream);
+    writeDocString(i, prop);
+
+    if (!prop.hasAutoVar()) {
+        if (prop.isReadable())
+            writeFunction(i + 1, prop.getReadFunction(), object, pex, "Get");
+        if (prop.isWritable())
+            writeFunction(i + 1, prop.getWriteFunction(), object, pex, "Set");
+        write(indent(i) << "EndProperty");
     }
 }
 
@@ -168,11 +302,14 @@ void Decompiler::PscCoder::writeVariables(const Pex::Object &object, const Pex::
         auto name = var.getName().asString();
         bool compilerGenerated = (name.size() > 2 && name[0] == ':' && name[1] == ':');
         auto stream = indent(0);
+
         if (compilerGenerated)
-        {
             stream << "; ";
-        }
-        stream << var.getTypeName() << " " << name;
+
+        if (var.getConstFlag())
+            stream << "const ";
+
+        stream << mapType(var.getTypeName().asString()) << " " << name;
         auto initialValue = var.getDefaultValue();
         if (initialValue.getType() != Pex::ValueType::None)
         {
@@ -200,9 +337,11 @@ void Decompiler::PscCoder::writeStates(const Pex::Object &object, const Pex::Bin
         auto name = state.getName().asString();
         if (name.empty())
         {
-            write("");
-            write(";-- Functions ---------------------------------------");
-            writeFunctions(0, state, object, pex);
+            if (state.getFunctions().size()) {
+                write("");
+                write(";-- Functions ---------------------------------------");
+                writeFunctions(0, state, object, pex);
+            }
         }
         else
         {
@@ -215,9 +354,9 @@ void Decompiler::PscCoder::writeStates(const Pex::Object &object, const Pex::Bin
             {
                 stream << "auto ";
             }
-            write(stream << "state " << state.getName().asString());
+            write(stream << "State " << state.getName().asString());
             writeFunctions(1, state, object, pex);
-            write(indent(0) << "endState");
+            write(indent(0) << "EndState");
         }
     }
 }
@@ -261,9 +400,9 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         auto stream = indent(i);
         if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
         {
-            stream << function.getReturnTypeName().asString() << " ";
+            stream << mapType(function.getReturnTypeName().asString()) << " ";
         }
-        stream << "function " << functionName << "(";
+        stream << "Function " << functionName << "(";
 
         auto first = true;
         for (auto& param : function.getParams())
@@ -276,7 +415,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             {
                 stream << ", ";
             }
-            stream << param.getTypeName() << " " << param.getName();
+            stream << mapType(param.getTypeName().asString()) << " " << param.getName();
         }
         stream << ")";
 
@@ -299,7 +438,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             {
                 write(indent(i+1) << line);
             }
-            write(indent(i) << "endFunction");
+            write(indent(i) << "EndFunction");
         }
     }
     else
@@ -337,4 +476,111 @@ void Decompiler::PscCoder::writeDocString(int i, const Pex::DocumentedItem &item
     {
         write(indent(i) << "{" << item.getDocString().asString() << "}");
     }
+}
+
+static const std::map<std::string, std::string> prettyTypeNameMap {
+    // Builtin Types
+    { "bool", "bool" },
+    { "float", "float" },
+    { "int", "int" },
+    { "string", "string" },
+    { "Var", "var" },
+
+    // Special
+    { "self", "Self" },
+
+    // General Types
+    { "action", "Action" },
+    { "activator", "Activator" },
+    { "activemagiceffect", "ActiveMagicEffect" },
+    { "actor", "Actor" },
+    { "actorbase", "ActorBase" },
+    { "actorvalue", "ActorValue" },
+    { "alias", "Alias" },
+    { "ammo", "Ammo" },
+    { "apparatus", "Apparatus" },
+    { "armor", "Armor" },
+    { "associationtype", "AssociationType" },
+    { "book", "Book" },
+    { "cell", "Cell" },
+    { "class", "Class" },
+    { "constructibleobject", "ConstructibleObject" },
+    { "container", "Container" },
+    { "debug", "Debug" },
+    { "door", "Door" },
+    { "effectshader", "EffectShader" },
+    { "enchantment", "Enchantment" },
+    { "encounterzone", "EncounterZone" },
+    { "explosion", "Explosion" },
+    { "faction", "Faction" },
+    { "flora", "Flora" },
+    { "form", "Form" },
+    { "formlist", "FormList" },
+    { "furniture", "Furniture" },
+    { "game", "Game" },
+    { "globalvariable", "GlobalVariable" },
+    { "hazard", "Hazard" },
+    { "idle", "Idle" },
+    { "imagespacemodifier", "ImageSpaceModifier" },
+    { "impactdataset", "ImpactDataSet" },
+    { "ingredient", "Ingredient" },
+    { "key", "Key" },
+    { "keyword", "Keyword" },
+    { "leveledactor", "LeveledActor" },
+    { "leveleditem", "LeveledItem" },
+    { "leveledspell", "LeveledSpell" },
+    { "light", "Light" },
+    { "location", "Location" },
+    { "locationalias", "LocationAlias" },
+    { "locationreftype", "LocationRefType" },
+    { "magiceffect", "MagicEffect" },
+    { "math", "Math" },
+    { "message", "Message" },
+    { "miscobject", "MiscObject" },
+    { "musictype", "MusicType" },
+    { "objectreference", "ObjectReference" },
+    { "outfit", "Outfit" },
+    { "package", "Package" },
+    { "perk", "Perk" },
+    { "potion", "Potion" },
+    { "projectile", "Projectile" },
+    { "quest", "Quest" },
+    { "race", "Race" },
+    { "referencealias", "ReferenceAlias" },
+    { "refcollectionalias", "RefCollectionAlias" },
+    { "scene", "Scene" },
+    { "scroll", "Scroll" },
+    { "scriptobject", "ScriptObject" },
+    { "shout", "Shout" },
+    { "soulgem", "SoulGem" },
+    { "sound", "Sound" },
+    { "soundcategory", "SoundCategory" },
+    { "spell", "Spell" },
+    { "static", "Static" },
+    { "talkingactivator", "TalkingActivator" },
+    { "topic", "Topic" },
+    { "topicinfo", "TopicInfo" },
+    { "utility", "Utility" },
+    { "visualeffect", "VisualEffect" },
+    { "voicetype", "VoiceType" },
+    { "weapon", "Weapon" },
+    { "weather", "Weather" },
+    { "wordofpower", "WordOfPower" },
+    { "worldspace", "WorldSpace" },
+};
+
+/**
+* @brief Map the type name used by the compiler to the form most used by people.
+* @param type The type to map.
+*/
+std::string Decompiler::PscCoder::mapType(std::string type)
+{
+    if (type.length() > 2 && type[type.length() - 2] == '[' && type[type.length() - 1] == ']')
+        return mapType(type.substr(0, type.length() - 2)) + "[]";
+    auto lowerType = type;
+    boost::algorithm::to_lower(lowerType);
+    auto a = prettyTypeNameMap.find(lowerType);
+    if (a != prettyTypeNameMap.end())
+        return a->second;
+    return type;
 }

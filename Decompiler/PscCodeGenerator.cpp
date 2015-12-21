@@ -4,6 +4,7 @@
 
 #include "Node/Nodes.hpp"
 #include "Node/WithNode.hpp"
+#include "PscCoder.hpp"
 
 static bool isTempVar(const Pex::StringTable::Index& var)
 {
@@ -136,7 +137,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Cast* node)
     {
         m_Result << ")";
     }
-    m_Result << " as " << node->getType();
+    m_Result << " as " << PscCoder::mapType(node->getType().asString());
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::CallMethod* node)
@@ -147,7 +148,11 @@ void Decompiler::PscCodeGenerator::visit(Node::CallMethod* node)
     {
         m_Result << "(";
     }
-    node->getObject()->visit(this);
+    if (node->getObject()->is<Node::IdentifierString>()) {
+        m_Result << PscCoder::mapType(node->getObject()->as<Node::IdentifierString>()->getIdentifier());
+    } else {
+        node->getObject()->visit(this);
+    }
     if (paren)
     {
         m_Result << ")";
@@ -183,12 +188,10 @@ void Decompiler::PscCodeGenerator::visit(Node::Return* node)
     }
 }
 
-void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node)
-{
+void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node) {
     bool paren = node->getPrecedence() < node->getObject()->getPrecedence();
 
-    if (paren)
-    {
+    if (paren) {
         m_Result << "(";
     }
     node->getObject()->visit(this);
@@ -201,12 +204,12 @@ void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::StructCreate* node)
 {
-    m_Result << "new " << node->getType().asString() << "()";
+    m_Result << "new " << PscCoder::mapType(node->getType().asString()) << "()";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayCreate* node)
 {
-    std::string type = node->getType().asString();
+    std::string type = PscCoder::mapType(node->getType().asString());
     m_Result << "new " << type.substr(0, type.length() - 2) << "[";
     node->getIndex()->visit(this);
     m_Result << "]";
@@ -255,12 +258,15 @@ void Decompiler::PscCodeGenerator::visit(Node::Constant* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::IdentifierString *node)
 {
-    m_Result << node->getIdentifier();
+    if (node->getIdentifier() == "self")
+        m_Result << "Self";
+    else
+        m_Result << node->getIdentifier();
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::While* node)
 {
-    m_Result << "while (";
+    m_Result << "While (";
     node->getCondition()->visit(this);
     m_Result << ")";
     m_Level++;
@@ -272,12 +278,12 @@ void Decompiler::PscCodeGenerator::visit(Node::While* node)
     {
         m_Decompiler->decodeToAsm(m_Level, node->getBody()->back()->getEnd() + 1, node->getBody()->back()->getEnd() + 1);
     }
-    m_Result << "endwhile";
+    m_Result << "EndWhile";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
 {
-    m_Result << "if (";
+    m_Result << "If (";
     node->getCondition()->visit(this);
     m_Result << ")";
     m_Level++;
@@ -291,7 +297,7 @@ void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
     {
         m_Decompiler->decodeToAsm(m_Level, childNode->getBegin()-1, childNode->getEnd());
         auto elseIf = childNode->as<Node::IfElse>();
-        m_Result << "elseif (";
+        m_Result << "ElseIf (";
         elseIf->getCondition()->visit(this);
         m_Result << ")";
         m_Level++;
@@ -304,19 +310,19 @@ void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
     m_Decompiler->decodeToAsm(m_Level, lastBody->getEnd() + 1, lastBody->getEnd() + 1);
     if (node->getElse()->size() != 0)
     {
-        m_Result << "else";
+        m_Result << "Else";
         m_Level++;
         newLine();
         node->getElse()->visit(this);
         m_Level--;
         newLine();
     }
-    m_Result << "endif";
+    m_Result << "EndIf";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::Declare *node)
 {
-    m_Result << node->getType() << " ";
+    m_Result << PscCoder::mapType(node->getType().asString()) << " ";
     node->getObject()->visit(this);
 }
 

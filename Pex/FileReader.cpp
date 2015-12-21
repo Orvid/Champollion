@@ -120,7 +120,7 @@ void Pex::FileReader::read(Pex::DebugInfo &debugInfo)
         {
             propertyGroup.setObjectName(getStringIndex());
             propertyGroup.setGroupName(getStringIndex());
-            propertyGroup.setGroupDocumentation(getStringIndex());
+            propertyGroup.setDocString(getStringIndex());
             propertyGroup.setUserFlags(getUint32());
             auto nameCount = getUint16();
             auto& names = propertyGroup.getNames();

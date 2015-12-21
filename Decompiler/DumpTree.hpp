@@ -1,5 +1,11 @@
 #pragma once
 
+#include <cassert>
+#include <functional>
+#include <sstream>
+
+#include "Node/Nodes.hpp"
+
 namespace Decompiler
 {
 /**

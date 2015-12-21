@@ -17,11 +17,16 @@ public:
     virtual void code(const Pex::Binary& pex);
 
     PscCoder& outputAsmComment(bool commentAsm);
+
+    static std::string mapType(std::string type);
 protected:
 
     void writeHeader(const Pex::Binary& pex);
     void writeObject(const Pex::Object& object, const Pex::Binary& pex);
+    void writeStructs(const Pex::Object& object, const Pex::Binary& pex);
+    void writeStructMember(const Pex::StructInfo::Member& member, const Pex::Binary& pex);
     void writeProperties(const Pex::Object& object, const Pex::Binary& pex);
+    void writeProperty(int i, const Pex::Property& prop, const Pex::Object &object, const Pex::Binary& pex);
     void writeVariables(const Pex::Object& object, const Pex::Binary& pex);
     void writeStates(const Pex::Object& object, const Pex::Binary& pex);
     void writeFunctions(int i, const Pex::State& state, const Pex::Object &object, const Pex::Binary& pex);

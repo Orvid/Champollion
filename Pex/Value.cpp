@@ -241,68 +241,74 @@ std::string Pex::Value::toString() const
 
     switch(getType())
     {
-    case Pex::ValueType::None:
-    {
-        result << "none";
-    }
-        break;
-    case Pex::ValueType::Identifier:
-    {
-        result << getId().asString();
-    }
-        break;
-    case Pex::ValueType::String:
-    {
-        result << '"';
-        for (auto c : getString().asString())
+        case Pex::ValueType::None:
         {
-            switch(c)
+            result << "None";
+            break;
+        }
+        case Pex::ValueType::Identifier:
+        {
+            result << getId().asString();
+            break;
+        }
+        case Pex::ValueType::String:
+        {
+            result << '"';
+            for (auto c : getString().asString())
             {
-            case '\n':
-                result << "\\n";
-                break;
-            case '\t':
-                result << "\\t";
-                break;
-            case '\\':
-                result << "\\\\";
-                break;
-            case '\"':
-                result << "\\\"";
-                break;
-            default:
-                result << c;
-                break;
+                switch(c)
+                {
+                case '\n':
+                    result << "\\n";
+                    break;
+                case '\t':
+                    result << "\\t";
+                    break;
+                case '\\':
+                    result << "\\\\";
+                    break;
+                case '\"':
+                    result << "\\\"";
+                    break;
+                default:
+                    result << c;
+                    break;
+                }
             }
+            result << '"';
+            break;
         }
-        result << '"';
-    }
-        break;
-    case Pex::ValueType::Integer:
-    {
-        result << getInteger();
-    }
-        break;
-    case Pex::ValueType::Float:
-    {
-        result << std::showpoint << std::defaultfloat << getFloat();
-
-        // Prevent a point to be the last character.
-        if (result.str().back() == '.')
+        case Pex::ValueType::Integer:
         {
-            result << "0";
+            result << getInteger();
+            break;
         }
-    }
-        break;
-    case Pex::ValueType::Bool:
-    {
-        result << (getBool()?"true":"false");
-    }
-        break;
-    default:
-    {
-        result << "*error invalid value type*";
-    }
+        case Pex::ValueType::Float:
+        {
+            result << std::showpoint << std::defaultfloat << getFloat();
+
+            // Prevent a point to be the last character.
+            if (result.str().back() == '.') {
+                result << "0";
+            }
+
+            auto str = result.str();
+            size_t i = str.length() - 1;
+            for (; i >= 0; i--) {
+                if (str[i] != '0') {
+                    if (str[i] == '.')
+                        i--;
+                    break;
+                }
+            }
+            return str.substr(0, i + 1);
+        }
+        case Pex::ValueType::Bool:
+            result << (getBool() ? "True" : "False");
+            break;
+        default:
+            result << "*error invalid value type*";
+            break;
     }
 
     return result.str();

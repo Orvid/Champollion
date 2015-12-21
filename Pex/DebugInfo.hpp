@@ -77,6 +77,7 @@ public:
     };
 
     class PropertyGroup :
+            public DocumentedItem,
             public UserFlagged
     {
     public:
@@ -92,16 +93,12 @@ public:
         StringTable::Index getGroupName() const { return m_GroupName; }
         void setGroupName(StringTable::Index value) { m_GroupName = value; }
 
-        StringTable::Index getGroupDocumentation() const { return m_GroupDocumentation; }
-        void setGroupDocumentation(StringTable::Index value) { m_GroupDocumentation = value; }
-
         const Names& getNames() const { return m_Names; }
         Names& getNames() { return m_Names; }
 
      private:
         StringTable::Index m_ObjectName;
         StringTable::Index m_GroupName;
-        StringTable::Index m_GroupDocumentation;
 
         Names m_Names;
     };

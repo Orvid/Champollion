@@ -477,7 +477,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             }
             case Pex::OpCode::CALLPARENT:
             {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), std::make_shared<Node::IdentifierString>(ip, "parent"), args[0].getId());
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), std::make_shared<Node::IdentifierString>(ip, "Parent"), args[0].getId());
                 auto argNode = callNode->getParameters();
                 for (auto varg : varargs)
                 {
