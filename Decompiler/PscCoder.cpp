@@ -85,6 +85,8 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Binary &pex)
 {
     auto stream = indent(0);
+    if (object.getConstFlag())
+        stream << "const ";
     stream <<"ScriptName " << object.getName().asString();
     if (! object.getParentClassName().asString().empty())
     {
@@ -259,6 +261,14 @@ void Decompiler::PscCoder::writeProperties(const Pex::Object &object, const Pex:
 void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const Pex::Object &object, const Pex::Binary& pex)
 {
     auto stream = indent(i);
+    auto isConst = !prop.hasAutoVar() &&
+                    prop.isReadable() &&
+                   !prop.isWritable() &&
+                    prop.getReadFunction().getInstructions().size() == 1 &&
+                    prop.getReadFunction().getInstructions()[0].getOpCode() == Pex::OpCode::RETURN &&
+                    prop.getReadFunction().getInstructions()[0].getArgs().size() == 1;
+    if (isConst)
+      stream << "const ";
     stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName();
     if (prop.hasAutoVar()) {
         auto var = object.getVariables().findByName(prop.getAutoVarName());
@@ -276,12 +286,14 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
 
         // The flags defined on the variable must be set on the property
         writeUserFlag(stream, *var, pex);
+    } else if (isConst) {
+      stream << " = " << prop.getReadFunction().getInstructions()[0].getArgs()[0].toString();
     }
     writeUserFlag(stream, prop, pex);
     write(stream);
     writeDocString(i, prop);
 
-    if (!prop.hasAutoVar()) {
+    if (!prop.hasAutoVar() && !isConst) {
         if (prop.isReadable())
             writeFunction(i + 1, prop.getReadFunction(), object, pex, "Get");
         if (prop.isWritable())
