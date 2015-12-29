@@ -70,6 +70,11 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
     if (debug.getModificationTime() != 0)
     {
         write(indent(0) << "Modified : " << std::put_time(std::localtime(&debug.getModificationTime()), "%Y-%m-%d %H:%M:%S"));
+        for (auto& f : debug.getFunctionInfos()) {
+          write(indent(0) << f.getObjectName().asString() << ":" << f.getStateName().asString() << ":" << f.getFunctionName().asString() << " type: " << (int)f.getFunctionType());
+          for (auto& l : f.getLineNumbers())
+            write(indent(1) << "Line: " << l);
+        }
     }
     write(indent(0) << "Compiled : " << std::put_time(std::localtime(&header.getCompilationTime()), "%Y-%m-%d %H:%M:%S"));
     write(indent(0) << "User     : " << header.getUserName());
@@ -261,14 +266,12 @@ void Decompiler::PscCoder::writeProperties(const Pex::Object &object, const Pex:
 void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const Pex::Object &object, const Pex::Binary& pex)
 {
     auto stream = indent(i);
-    auto isConst = !prop.hasAutoVar() &&
-                    prop.isReadable() &&
-                   !prop.isWritable() &&
-                    prop.getReadFunction().getInstructions().size() == 1 &&
-                    prop.getReadFunction().getInstructions()[0].getOpCode() == Pex::OpCode::RETURN &&
-                    prop.getReadFunction().getInstructions()[0].getArgs().size() == 1;
-    if (isConst)
-      stream << "const ";
+    auto isAutoReadOnly = !prop.hasAutoVar() &&
+                           prop.isReadable() &&
+                          !prop.isWritable() &&
+                           prop.getReadFunction().getInstructions().size() == 1 &&
+                           prop.getReadFunction().getInstructions()[0].getOpCode() == Pex::OpCode::RETURN &&
+                           prop.getReadFunction().getInstructions()[0].getArgs().size() == 1;
     stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName();
     if (prop.hasAutoVar()) {
         auto var = object.getVariables().findByName(prop.getAutoVarName());
@@ -278,22 +281,19 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
         auto initialValue = var->getDefaultValue();
         if (initialValue.getType() != Pex::ValueType::None)
             stream << " = " << initialValue.toString();
-
-        if (!prop.isWritable())
-            stream << " autoreadonly";
-        else
-            stream << " auto";
+        stream << " Auto";
 
         // The flags defined on the variable must be set on the property
         writeUserFlag(stream, *var, pex);
-    } else if (isConst) {
+    } else if (isAutoReadOnly) {
       stream << " = " << prop.getReadFunction().getInstructions()[0].getArgs()[0].toString();
+      stream << " AutoReadOnly";
     }
     writeUserFlag(stream, prop, pex);
     write(stream);
     writeDocString(i, prop);
 
-    if (!prop.hasAutoVar() && !isConst) {
+    if (!prop.hasAutoVar() && !isAutoReadOnly) {
         if (prop.isReadable())
             writeFunction(i + 1, prop.getReadFunction(), object, pex, "Get");
         if (prop.isWritable())
@@ -364,7 +364,7 @@ void Decompiler::PscCoder::writeStates(const Pex::Object &object, const Pex::Bin
             // The auto state name canbe a different index than the state name, event if it is the same value.
             if (_stricmp(state.getName().asString().c_str(), object.getAutoStateName().asString().c_str()) == 0)
             {
-                stream << "auto ";
+                stream << "Auto ";
             }
             write(stream << "State " << state.getName().asString());
             writeFunctions(1, state, object, pex);
@@ -486,7 +486,7 @@ void Decompiler::PscCoder::writeDocString(int i, const Pex::DocumentedItem &item
 {
     if (! item.getDocString().asString().empty())
     {
-        write(indent(i) << "{" << item.getDocString().asString() << "}");
+        write(indent(i) << "{ " << item.getDocString().asString() << " }");
     }
 }
 
