@@ -70,11 +70,11 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
     if (debug.getModificationTime() != 0)
     {
         write(indent(0) << "Modified : " << std::put_time(std::localtime(&debug.getModificationTime()), "%Y-%m-%d %H:%M:%S"));
-        for (auto& f : debug.getFunctionInfos()) {
-          write(indent(0) << f.getObjectName().asString() << ":" << f.getStateName().asString() << ":" << f.getFunctionName().asString() << " type: " << (int)f.getFunctionType());
-          for (auto& l : f.getLineNumbers())
-            write(indent(1) << "Line: " << l);
-        }
+        //for (auto& f : debug.getFunctionInfos()) {
+        //  write(indent(0) << f.getObjectName().asString() << ":" << f.getStateName().asString() << ":" << f.getFunctionName().asString() << " type: " << (int)f.getFunctionType());
+        //  for (auto& l : f.getLineNumbers())
+        //    write(indent(1) << "Line: " << l);
+        //}
     }
     write(indent(0) << "Compiled : " << std::put_time(std::localtime(&header.getCompilationTime()), "%Y-%m-%d %H:%M:%S"));
     write(indent(0) << "User     : " << header.getUserName());
@@ -406,7 +406,6 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         functionName = function.getName().asString();
     }
 
-
     if (functionName != "GetState" && functionName != "GotoState")
     {
         auto stream = indent(i);
@@ -496,7 +495,7 @@ static const std::map<std::string, std::string> prettyTypeNameMap {
     { "float", "float" },
     { "int", "int" },
     { "string", "string" },
-    { "Var", "var" },
+    { "var", "var" },
 
     // Special
     { "self", "Self" },

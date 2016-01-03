@@ -83,7 +83,11 @@ void Decompiler::PscCodeGenerator::visit(Node::BinaryOperator* node)
     {
         m_Result << "(";
     }
-    node->getRight()->visit(this);
+    if (node->getOperator() == "is" && node->getRight()->is<Node::IdentifierString>()) {
+      m_Result << PscCoder::mapType(node->getRight()->as<Node::IdentifierString>()->getIdentifier());
+    } else {
+      node->getRight()->visit(this);
+    }
     if (parenOnRight)
     {
         m_Result << ")";

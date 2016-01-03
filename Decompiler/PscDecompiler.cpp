@@ -564,7 +564,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             }
             case Pex::OpCode::IS:
             {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "is", fromValue(ip, args[2]));
+                node = std::make_shared<Node::BinaryOperator>(ip, 0, args[0].getId(), fromValue(ip, args[1]), "is", fromValue(ip, args[2]));
                 break;
             }
             case Pex::OpCode::STRUCT_CREATE:
