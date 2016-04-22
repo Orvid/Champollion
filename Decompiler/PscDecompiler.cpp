@@ -76,7 +76,9 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
         m_TempTable.push_back("false");
 
         m_TempTable.push_back("find");
+        m_TempTable.push_back("findstruct");
         m_TempTable.push_back("rfind");
+        m_TempTable.push_back("rfindstruct");
         m_TempTable.push_back("add");
         m_TempTable.push_back("insert");
         m_TempTable.push_back("removelast");
@@ -585,7 +587,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             }
             case Pex::OpCode::ARRAY_FINDSTRUCT:
             {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("find"));
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("findstruct"));
                 auto argNode = callNode->getParameters();
                 *argNode << fromValue(ip, args[2]);
                 *argNode << fromValue(ip, args[3]);
@@ -596,7 +598,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             }
             case Pex::OpCode::ARRAY_RFINDSTRUCT:
             {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("rfind"));
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("rfindstruct"));
                 auto argNode = callNode->getParameters();
                 *argNode << fromValue(ip, args[2]);
                 *argNode << fromValue(ip, args[3]);

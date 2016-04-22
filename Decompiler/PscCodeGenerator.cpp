@@ -208,7 +208,7 @@ void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node) {
 
 void Decompiler::PscCodeGenerator::visit(Node::StructCreate* node)
 {
-    m_Result << "new " << PscCoder::mapType(node->getType().asString()) << "()";
+    m_Result << "new " << PscCoder::mapType(node->getType().asString());
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayCreate* node)
