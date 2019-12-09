@@ -84,6 +84,7 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
         m_TempTable.push_back("removelast");
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
+        m_TempTable.push_back("getallmatchingstructs");
 
         //findReplacedVars();
         findVarTypes();
@@ -283,7 +284,7 @@ void Decompiler::PscDecompiler::createFlowBlocks()
         case Pex::OpCode::JMPT:
         {
             assert(ins.getArgs().size() == 2);
-            assert(ins.getArgs()[0].getType() == Pex::ValueType::Identifier || ins.getArgs()[0].getType() == Pex::ValueType::Bool);
+            assert(ins.getArgs()[0].getType() == Pex::ValueType::Identifier || ins.getArgs()[0].getType() == Pex::ValueType::Bool || ins.getArgs()[0].getType() == Pex::ValueType::Integer);
             assert(ins.getArgs()[1].getType() == Pex::ValueType::Integer);
 
             // Conditional jump
@@ -310,7 +311,7 @@ void Decompiler::PscDecompiler::createFlowBlocks()
             {
                 condition = ins.getArgs()[0].getId();
             }
-            else
+            else if (ins.getArgs()[0].getType() == Pex::ValueType::Bool)
             {
                 if(ins.getArgs()[0].getBool())
                 {
@@ -320,6 +321,9 @@ void Decompiler::PscDecompiler::createFlowBlocks()
                 {
                     condition = m_TempTable.findIdentifier("false");
                 }
+            }
+            else {
+                condition = m_TempTable.get(ins.getArgs()[0].getInteger());
             }
 
             if (ins.getOpCode() == Pex::OpCode::JMPF)
@@ -645,6 +649,18 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             case Pex::OpCode::ARRAY_CLEAR:
             {
                 node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("clear"));
+                break;
+            }
+            case Pex::OpCode::ARRAY_GETALLMATCHINGSTRUCTS:
+            {
+                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("getallmatchingstructs"));
+                auto argNode = callNode->getParameters();
+                *argNode << fromValue(ip, args[2]);
+                *argNode << fromValue(ip, args[3]);
+                *argNode << fromValue(ip, args[4]);
+                *argNode << fromValue(ip, args[5]);
+
+                node = callNode;
                 break;
             }
 

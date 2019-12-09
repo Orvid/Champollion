@@ -9,7 +9,7 @@ set(PACKAGE_BUGREPORT "https://github.com/Orvid/champollion/issues")
 
 project(${PACKAGE_NAME} CXX)
 
-find_package(Boost 1.52.0 COMPONENTS system program_options filesystem REQUIRED)
+find_package(Boost 1.71.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 

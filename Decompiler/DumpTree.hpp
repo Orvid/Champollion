@@ -161,7 +161,7 @@ public:
     {
         enter("ArrayCreate", node);
         m_Callback(indent() << "Type:" << node->getType());
-        m_Callback(indent() << "Size:" << node->getSize());
+        //m_Callback(indent() << "Size:" << node->getSize());
         leave();
     }
 
@@ -191,7 +191,7 @@ public:
 
         switch(value.getType())
         {
-        case Pex::ValueType::Null:
+        case Pex::ValueType::None:
         {
            m_Callback(indent() << "None:none");
         }
