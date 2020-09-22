@@ -1,18 +1,13 @@
 #include "PscDecompiler.hpp"
 
-#include <map>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <sstream>
 #include <iomanip>
-#include <iterator>
-#include <functional>
 #include <iterator>
 
 
 #include "Node/Nodes.hpp"
-#include "Node/Visitor.hpp"
 #include "Node/WithNode.hpp"
 #include "Node/NodeComparer.hpp"
 
@@ -61,10 +56,6 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
     m_Object(object),
     m_CommentAsm(commentAsm)
 {
-#ifdef TRACE_DECOMPILATION
-    m_Log.open(std::string("rebuild-") + object.getName().asString()
-               + "-" + (function.getName().isValid()?function.getName().asString():std::string("unnamed")) + ".txt");
-#endif
     if (m_Function.getInstructions().size() == 0)
     {
         push_back("; Empty function");
@@ -142,7 +133,7 @@ void Decompiler::PscDecompiler::decodeToAsm(std::uint8_t level, size_t begin, si
             std::ostringstream stream;
             for (auto i = 0; i < level; ++i)
             {
-                stream << '\t';
+                stream << ' ' << ' ';
             }
             stream << "; " << std::setw(3) << std::setfill('0') << ip << " : " << ins.getOpCodeName() << " ";
             switch(ins.getOpCode())
@@ -1303,13 +1294,6 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
  */
 void Decompiler::PscDecompiler::generateCode(Node::BasePtr program)
 {
-#ifdef TRACE_DECOMPILATION
-    DumpTree tree([&] (std::ostream& stream)
-    {
-        push_back(static_cast<std::ostringstream&>(stream).str());
-    });
-    program->visit(&tree);
-#endif
     if (m_CommentAsm)
     {
         for (auto& local : m_Function.getLocals())
@@ -1395,11 +1379,6 @@ void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
             }
             m_Log << '\n';
         }
-        DumpTree tree([&] (std::ostream& line)
-        {
-            m_Log << static_cast<std::ostringstream&>(line).str() << '\n';
-        });
-        b->getScope()->visit(&tree);
 
         m_Log << "------- cond:" << b->getCondition() << " true:" << b->onTrue() << " false:" << b->onFalse() << std::endl;
         ++it;

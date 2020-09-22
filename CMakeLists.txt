@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
 
 # package information
-set(PACKAGE_NAME      "champollion")
+set(PACKAGE_NAME      "Champollion")
 set(PACKAGE_VERSION   "0.0.1")
 set(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
@@ -9,7 +9,7 @@ set(PACKAGE_BUGREPORT "https://github.com/Orvid/champollion/issues")
 
 project(${PACKAGE_NAME} CXX)
 
-find_package(Boost 1.71.0 REQUIRED)
+find_package(Boost 1.74.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
