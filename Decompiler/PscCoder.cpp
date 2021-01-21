@@ -37,7 +37,6 @@ Decompiler::PscCoder::~PscCoder()
  */
 void Decompiler::PscCoder::code(const Pex::Binary &pex)
 {
-    writeHeader(pex);
     for(auto& object : pex.getObjects())
     {
         writeObject(object, pex);
@@ -57,32 +56,6 @@ Decompiler::PscCoder &Decompiler::PscCoder::outputAsmComment(bool commentAsm)
 }
 
 /**
- * @brief Write the content of the PEX header as a block comment.
- * @param pex Binary to decompile.
- */
-void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
-{
-    auto& header = pex.getHeader();
-    auto& debug  = pex.getDebugInfo();
-    write(";/ Decompiled by Champollion V1.0.6");
-    write(indent(0) << "PEX format v" << (int)header.getMajorVersion() << "." << (int)header.getMinorVersion() << " GameID: " << header.getGameID());
-    write(indent(0) << "Source   : " << header.getSourceFileName());
-    if (debug.getModificationTime() != 0)
-    {
-        write(indent(0) << "Modified : " << std::put_time(std::localtime(&debug.getModificationTime()), "%Y-%m-%d %H:%M:%S"));
-        //for (auto& f : debug.getFunctionInfos()) {
-        //  write(indent(0) << f.getObjectName().asString() << ":" << f.getStateName().asString() << ":" << f.getFunctionName().asString() << " type: " << (int)f.getFunctionType());
-        //  for (auto& l : f.getLineNumbers())
-        //    write(indent(1) << "Line: " << l);
-        //}
-    }
-    write(indent(0) << "Compiled : " << std::put_time(std::localtime(&header.getCompilationTime()), "%Y-%m-%d %H:%M:%S"));
-    write(indent(0) << "User     : " << header.getUserName());
-    write(indent(0) << "Computer : " << header.getComputerName());
-    write("/;");
-}
-
-/**
  * @brief Write an object contained in the binary.
  * @param object Object to decompile
  * @param pex Binary to decompile.
@@ -93,7 +66,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
     stream <<"ScriptName " << object.getName().asString();
     if (! object.getParentClassName().asString().empty())
     {
-        stream << " extends " << object.getParentClassName().asString();
+        stream << " Extends " << object.getParentClassName().asString();
     }
     if (object.getConstFlag())
       stream << " Const";
@@ -443,11 +416,11 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
 
         if (function.isGlobal())
         {
-            stream << " global";
+            stream << " Global";
         }
         if (function.isNative())
         {
-            stream << " native";
+            stream << " Native";
         }
         writeUserFlag(stream, function, pex);
         write(stream);
@@ -505,11 +478,11 @@ void Decompiler::PscCoder::writeDocString(int i, const Pex::DocumentedItem &item
 
 static const std::map<std::string, std::string> prettyTypeNameMap {
     // Builtin Types
-    { "bool", "bool" },
-    { "float", "float" },
-    { "int", "int" },
-    { "string", "string" },
-    { "var", "var" },
+    { "bool", "Bool" },
+    { "float", "Float" },
+    { "int", "Int" },
+    { "string", "String" },
+    { "var", "Var" },
 
     // Special
     { "self", "Self" },

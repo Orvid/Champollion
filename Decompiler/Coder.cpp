@@ -53,7 +53,7 @@ std::ostringstream Decompiler::Coder::indent(int i)
     std::ostringstream result;
     for(; i != 0; --i)
     {
-        result << '\t';
+        result << ' ' << ' ';
     }
     return result;
 }
