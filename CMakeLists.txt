@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 # package information
 set(PACKAGE_NAME      "Champollion")
-set(PACKAGE_VERSION   "0.0.1")
+set(PACKAGE_VERSION   "1.0.8")
 set(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 set(PACKAGE_BUGREPORT "https://github.com/Orvid/champollion/issues")
