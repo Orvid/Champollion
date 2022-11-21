@@ -86,7 +86,7 @@ Pex::StringTable::Index Pex::StringTable::findIdentifier(const std::string &id) 
     }
     else
     {
-        return Index(this, it-begin());
+        return Index(this, uint16_t(it - begin()));
     }
 }
 

@@ -72,7 +72,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
       stream << " Const";
 
     writeUserFlag(stream, object, pex);
-    write(stream);
+    write(stream.str());
 
     writeDocString(0, object);
 
@@ -104,7 +104,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
 */
 void Decompiler::PscCoder::writeStructs(const Pex::Object& object, const Pex::Binary& pex) {
     for (auto& sInfo : object.getStructInfos()) {
-        write(indent(0) << "Struct " << sInfo.getName());
+        write(indent(0) << "Struct " << sInfo.getName().asString());
 
         bool foundInfo = false;
         if (pex.getDebugInfo().getStructOrders().size()) {
@@ -155,7 +155,7 @@ void Decompiler::PscCoder::writeStructs(const Pex::Object& object, const Pex::Bi
 void Decompiler::PscCoder::writeStructMember(const Pex::StructInfo::Member& member, const Pex::Binary& pex)
 {
     auto stream = indent(1);
-    stream << mapType(member.getTypeName().asString()) << " " << member.getName();
+    stream << mapType(member.getTypeName().asString()) << " " << member.getName().asString();
 
     if (member.getValue().getType() != Pex::ValueType::None) {
         stream << " = " << member.getValue().toString();
@@ -163,7 +163,7 @@ void Decompiler::PscCoder::writeStructMember(const Pex::StructInfo::Member& memb
     writeUserFlag(stream, member, pex);
     if (member.getConstFlag())
       stream << " Const";
-    write(stream);
+    write(stream.str());
     writeDocString(1, member);
 }
 
@@ -195,7 +195,7 @@ void Decompiler::PscCoder::writeProperties(const Pex::Object &object, const Pex:
                         auto stream = indent(0);
                         stream << "Group " << propGroup.getGroupName();
                         writeUserFlag(stream, propGroup, pex);
-                        write(stream);
+                        write(stream.str());
                         writeDocString(0, propGroup);
                         propertyIndent = 1;
                     }
@@ -245,7 +245,7 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
                            prop.getReadFunction().getInstructions().size() == 1 &&
                            prop.getReadFunction().getInstructions()[0].getOpCode() == Pex::OpCode::RETURN &&
                            prop.getReadFunction().getInstructions()[0].getArgs().size() == 1;
-    stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName();
+    stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName().asString();
     if (prop.hasAutoVar()) {
         auto var = object.getVariables().findByName(prop.getAutoVarName());
         if (var == nullptr)
@@ -265,7 +265,7 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
       stream << " AutoReadOnly";
     }
     writeUserFlag(stream, prop, pex);
-    write(stream);
+    write(stream.str());
     writeDocString(i, prop);
 
     if (!prop.hasAutoVar() && !isAutoReadOnly) {
@@ -305,7 +305,7 @@ void Decompiler::PscCoder::writeVariables(const Pex::Object &object, const Pex::
 
         if (m_CommentAsm || !compilerGenerated)
         {
-            write(stream);
+            write(stream.str());
         }
     }
 }
@@ -340,7 +340,7 @@ void Decompiler::PscCoder::writeStates(const Pex::Object &object, const Pex::Bin
             {
                 stream << "Auto ";
             }
-            write(stream << "State " << state.getName().asString());
+            write(stream.str() + "State " + state.getName().asString());
             writeFunctions(1, state, object, pex);
             write(indent(0) << "EndState");
         }
@@ -423,7 +423,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             stream << " Native";
         }
         writeUserFlag(stream, function, pex);
-        write(stream);
+        write(stream.str());
 
         writeDocString(i, function);
 
@@ -458,7 +458,7 @@ void Decompiler::PscCoder::writeUserFlag(std::ostream& stream, const Pex::UserFl
     {
         if (flags & flag.getFlagMask())
         {
-            stream << " " << flag.getName();
+            stream << " " << flag.getName().asString();
         }
     }
 }

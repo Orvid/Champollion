@@ -77,7 +77,7 @@ protected:
 
 };
 }
-
+// TODO: Get this working with ostream&&, right now certain Index values are just being converted to string to work around this.
 inline std::ostream& operator << (std::ostream& stream, const Pex::StringTable::Index& index)
 {
     if(index.isValid())

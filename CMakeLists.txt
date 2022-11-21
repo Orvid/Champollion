@@ -16,18 +16,14 @@ project(${PACKAGE_NAME} CXX)
 
 if (VCPKG_TARGET_TRIPLET MATCHES "static")
   if(MSVC)
-    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_MINSIZEREL ${CMAKE_CXX_FLAGS_MINSIZEREL})
-    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
+   # No longer necessary to replace flags
   else(MSVC)
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_STATIC_RUNTIME ON)
   endif(MSVC)
 endif()
 
-find_package(Boost 1.73.0 REQUIRED COMPONENTS system program_options filesystem)
+find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}

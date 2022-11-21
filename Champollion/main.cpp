@@ -147,7 +147,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
 }
 
 typedef std::vector<std::string> ProcessResults;
-ProcessResults processFile(fs::path file, Params& params)
+ProcessResults processFile(fs::path file, Params params)
 {
     ProcessResults result;
     Pex::Binary pex;
@@ -250,14 +250,14 @@ int main(int argc, char* argv[])
                         if (_stricmp(entry->path().extension().string().c_str(), ".pex") == 0)
                         {
 
-                            results.push_back(std::async(std::launch::async, processFile, fs::path(entry->path()), args));
+                            results.push_back(std::move(std::async(std::launch::async, processFile, fs::path(entry->path()), args)));
                         }
                         entry++;
                     }
                 }
                 else
                 {
-                    results.push_back(std::async(std::launch::async, processFile, path, args));
+                    results.push_back(std::move(std::async(std::launch::async, processFile, path, args)));
                 }
             }
 

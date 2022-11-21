@@ -23,7 +23,7 @@ public:
 
 protected:
     void write(const std::string& line);
-    void write(std::ostream& stream);
+    void write(std::ostream&& stream);
 
 
     std::ostringstream indent(int i);
