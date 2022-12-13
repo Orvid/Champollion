@@ -20,7 +20,8 @@
  */
 Decompiler::PscCoder::PscCoder(Decompiler::OutputWriter *writer)  :
     Coder(writer),
-    m_CommentAsm(false)
+    m_CommentAsm(false),
+    m_WriteHeader(false)
 {
 }
 
@@ -37,6 +38,10 @@ Decompiler::PscCoder::~PscCoder()
  */
 void Decompiler::PscCoder::code(const Pex::Binary &pex)
 {
+    if (m_WriteHeader) 
+    {
+        writeHeader(pex);
+    }
     for(auto& object : pex.getObjects())
     {
         writeObject(object, pex);
@@ -56,6 +61,17 @@ Decompiler::PscCoder &Decompiler::PscCoder::outputAsmComment(bool commentAsm)
 }
 
 /**
+ * @brief Set the option to add a header to the decompiled script.
+ * @param writeHeader True to write the header.
+ * @return A reference to this.
+ */
+Decompiler::PscCoder &Decompiler::PscCoder::outputWriteHeader(bool writeHeader)
+{
+    m_WriteHeader = writeHeader;
+    return *this;
+}
+
+/**
  * @brief Write the content of the PEX header as a block comment.
  * @param pex Binary to decompile.
  */
@@ -63,7 +79,7 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 {
     auto& header = pex.getHeader();
     auto& debug  = pex.getDebugInfo();
-    write(";/ Decompiled by Champollion V1.0.6");
+    write(";/ Decompiled by Champollion V1.0.8"); // TODO: Make this get the version number dynamically
     write(indent(0) << "PEX format v" << (int)header.getMajorVersion() << "." << (int)header.getMinorVersion() << " GameID: " << header.getGameID());
     write(indent(0) << "Source   : " << header.getSourceFileName());
     if (debug.getModificationTime() != 0)

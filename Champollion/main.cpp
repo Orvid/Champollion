@@ -24,6 +24,7 @@ struct Params
 {
     bool outputAssembly;
     bool outputComment;
+    bool writeHeader;
     bool parallel;
 
     fs::path assemblyDir;
@@ -36,17 +37,19 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
 {
     params.outputAssembly = false;
     params.outputComment = false;
+    params.writeHeader = false;
     params.parallel = false;
     params.assemblyDir = fs::path(".");
     params.papyrusDir = fs::path(".");
 
 
-    options::options_description desc("Champollion PEX decompiler V1.0.6");
+    options::options_description desc("Champollion PEX decompiler V1.0.8");
     desc.add_options()
             ("help,h", "Display the help message")
             ("asm,a", options::value<std::string>()->implicit_value(""), "Output assembly file")
             ("psc,p", options::value<std::string>(), "Name of the output dir for psc decompilation")
             ("comment,c", "Output assembly in comments of the decompiled psc file")
+            ("header,e", "Write header to decompiled psc file")
             ("threaded,t", "Run decompilation in parallel mode")
     ;
     options::options_description files;
@@ -79,6 +82,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     }
 
     params.outputComment = (args.count("comment") != 0);
+    params.writeHeader = (args.count("header") != 0);
     params.parallel = (args.count("threaded") != 0);
 
     try
@@ -185,7 +189,7 @@ ProcessResults processFile(fs::path file, Params params)
         std::ofstream pscStream(pscFile.string());
         Decompiler::PscCoder pscCoder(new Decompiler::StreamWriter(pscStream));
 
-        pscCoder.outputAsmComment(params.outputComment).code(pex);
+        pscCoder.outputAsmComment(params.outputComment).outputWriteHeader(params.writeHeader).code(pex);
         result.push_back(boost::str(boost::format("%1% decompiled to %2%") % file.string() % pscFile.string()));
     }
     catch(std::exception& ex)

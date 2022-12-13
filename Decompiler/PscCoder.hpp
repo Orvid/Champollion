@@ -17,7 +17,7 @@ public:
     virtual void code(const Pex::Binary& pex);
 
     PscCoder& outputAsmComment(bool commentAsm);
-
+    PscCoder& outputWriteHeader(bool writeHeader);
     static std::string mapType(std::string type);
 protected:
 
@@ -37,5 +37,6 @@ protected:
 
 protected:
     bool m_CommentAsm;
+    bool m_WriteHeader;
 };
 }
