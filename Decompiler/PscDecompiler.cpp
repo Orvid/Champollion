@@ -56,6 +56,10 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
     m_Object(object),
     m_CommentAsm(commentAsm)
 {
+#if defined(TRACE_DECOMPILATION) && defined(REBUILD_LOG)
+    m_Log.open(std::string("rebuild-") + object.getName().asString()
+               + "-" + (function.getName().isValid()?function.getName().asString():std::string("unnamed")) + ".txt");
+#endif
     if (m_Function.getInstructions().size() == 0)
     {
         push_back("; Empty function");
@@ -1294,6 +1298,14 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
  */
 void Decompiler::PscDecompiler::generateCode(Node::BasePtr program)
 {
+#if defined(TRACE_DECOMPILATION) && defined(DUMP_TREE)
+    DumpTree tree([&] (std::ostream& stream)
+    {
+        push_back(static_cast<std::ostringstream&>(stream).str());
+    });
+    program->visit(&tree);
+#endif
+
     if (m_CommentAsm)
     {
         for (auto& local : m_Function.getLocals())
@@ -1379,7 +1391,13 @@ void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
             }
             m_Log << '\n';
         }
-
+#ifdef DUMP_TREE
+        DumpTree tree([&] (std::ostream& line)
+        {
+            m_Log << static_cast<std::ostringstream&>(line).str() << '\n';
+        });
+        b->getScope()->visit(&tree);
+#endif
         m_Log << "------- cond:" << b->getCondition() << " true:" << b->onTrue() << " false:" << b->onFalse() << std::endl;
         ++it;
     }
