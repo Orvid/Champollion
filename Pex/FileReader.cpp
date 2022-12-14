@@ -102,14 +102,12 @@ void Pex::FileReader::readHeader(Pex::Header &header)
     // read magic as little endian to determine what endianness to set
     auto magic = getUint32(true);
 
-    // Little Endian = Fallout 4, Skyrim SE scripts stored in memory
-    // They appear to share the same PEX format, which differs significantly from
-    // the Skyrim PEX format.
-    // TODO: Verify this by dumping PEX in memory to disk.
+    // Little Endian = Fallout 4
+    // Has new PEX format with const, struct info, more debug info
     if (magic != LE_MAGIC_NUMBER)
     {
-        // Big Endian = Skyrim scripts stored on disk
-        // Has old Skyrim PEX format 
+        // Big Endian = Skyrim scripts
+        // Has old Skyrim PEX format
         if (magic != BE_MAGIC_NUMBER) {
             throw std::runtime_error("Invalid file magic");
         }
@@ -171,7 +169,7 @@ void Pex::FileReader::read(Pex::DebugInfo &debugInfo)
                 lineNumbers.push_back(getUint16());
             }
         }
-        // Skyrim scripts stored on disk do not have the following info
+        // Skyrim scripts do not have the following info
         if (m_endianness == BIG_ENDIAN){
             return;
         }
@@ -242,13 +240,13 @@ void Pex::FileReader::read(Pex::Objects &objects)
 
         object.setParentClassName(getStringIndex());
         object.setDocString(getStringIndex());
-        // Skyrim scripts stored on disk do not have this info 
+        // Skyrim scripts do not have this info 
         if (m_endianness == LITTLE_ENDIAN) {
             object.setConstFlag(getUint8());
         }
         object.setUserFlags(getUint32());
         object.setAutoStateName(getStringIndex());
-        // Skyrim scripts stored on disk do not have this info 
+        // Skyrim scripts do not have this info 
         if (m_endianness == LITTLE_ENDIAN) {
             read(object.getStructInfos());
         }
@@ -300,7 +298,7 @@ void Pex::FileReader::read(Pex::Variables &variables)
         variable.setUserFlags(getUint32());
 
         variable.setDefaultValue(getValue());
-        // Skyrim scripts stored on disk do not have this info 
+        // Skyrim scripts do not have this info 
         if (m_endianness == LITTLE_ENDIAN) {
             variable.setConstFlag(getUint8());
         }
