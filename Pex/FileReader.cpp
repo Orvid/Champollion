@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <type_traits>
 
 #include <cassert>
 
@@ -44,6 +45,53 @@ void Pex::FileReader::read(Pex::Binary &binary)
     read(binary.getObjects());    
 }
 
+constexpr uint16_t _Byteswap_ushort(const uint16_t _Val) noexcept {
+    if (std::_Is_constant_evaluated()) {
+        return static_cast<unsigned short>((_Val << 8) | (_Val >> 8));
+    } else {
+        return _byteswap_ushort(_Val);
+    }
+}
+
+constexpr uint32_t _Byteswap_ulong(const uint32_t _Val) noexcept {
+    if (std::_Is_constant_evaluated()) {
+        return (_Val << 24) | ((_Val << 8) & 0x00FF'0000) | ((_Val >> 8) & 0x0000'FF00) | (_Val >> 24);
+    } else {
+        return _byteswap_ulong(_Val);
+    }
+}
+
+constexpr uint64_t _Byteswap_uint64(const uint64_t _Val) noexcept {
+    if (std::_Is_constant_evaluated()) {
+        return (_Val << 56) | ((_Val << 40) & 0x00FF'0000'0000'0000) | ((_Val << 24) & 0x0000'FF00'0000'0000)
+             | ((_Val << 8) & 0x0000'00FF'0000'0000) | ((_Val >> 8) & 0x0000'0000'FF00'0000)
+             | ((_Val >> 24) & 0x0000'0000'00FF'0000) | ((_Val >> 40) & 0x0000'0000'0000'FF00) | (_Val >> 56);
+    } else {
+        return _byteswap_uint64(_Val);
+    }
+}
+// template <typename Integer, typename = std::enable_if_t<std::is_integral<Integer>::value>>
+// constexpr uint64_t _get_sizeof_integer(Integer) noexcept {
+//     return constexpr (sizeof(Integer));
+// }
+template <class... T>
+constexpr bool always_false = false;
+
+template <typename Integer, typename = std::enable_if_t<std::is_integral<Integer>::value>>
+constexpr Integer byteswap(const Integer _Val) noexcept {
+    if constexpr (sizeof(Integer) == 1) {
+        return _Val;
+    } else if constexpr (sizeof(Integer) == 2) {
+        return static_cast<Integer>(_Byteswap_ushort(static_cast<uint16_t>(_Val)));
+    } else if constexpr (sizeof(Integer) == 4) {
+        return static_cast<Integer>(_Byteswap_ulong(static_cast<uint32_t>(_Val)));
+    } else if constexpr (sizeof(Integer) == 8) {
+        return static_cast<Integer>(_Byteswap_uint64(static_cast<uint64_t>(_Val)));
+    } else {
+        static_assert(always_false<Integer>, "Unexpected integer size");
+    }
+}
+
 /**
  * @brief Reads the Header from the file
  * @param[in] header Header to fill in
@@ -51,12 +99,23 @@ void Pex::FileReader::read(Pex::Binary &binary)
  */
 void Pex::FileReader::readHeader(Pex::Header &header)
 {
-    const std::uint32_t MAGIC_NUMBER = 0xFA57C0DE;
-    auto magic = getUint32();
+    // read magic as little endian to determine what endianness to set
+    auto magic = getUint32(true);
 
-    if (magic != MAGIC_NUMBER)
+    // Little Endian = Fallout 4, Skyrim SE scripts stored in memory
+    // They appear to share the same PEX format, which differs significantly from
+    // the Skyrim PEX format.
+    // TODO: Verify this by dumping PEX in memory to disk.
+    if (magic != LE_MAGIC_NUMBER)
     {
-        throw std::runtime_error("Invalid file magic");
+        // Big Endian = Skyrim scripts stored on disk
+        // Has old Skyrim PEX format 
+        if (magic != BE_MAGIC_NUMBER) {
+            throw std::runtime_error("Invalid file magic");
+        }
+        m_endianness = BIG_ENDIAN;
+    } else {
+        m_endianness = LITTLE_ENDIAN;
     }
 
     header.setMajorVersion(getUint8());
@@ -112,7 +171,10 @@ void Pex::FileReader::read(Pex::DebugInfo &debugInfo)
                 lineNumbers.push_back(getUint16());
             }
         }
-
+        // Skyrim scripts stored on disk do not have the following info
+        if (m_endianness == BIG_ENDIAN){
+            return;
+        }
         auto groupCount = getUint16();
         auto& propertyGroups = debugInfo.getPropertyGroups();
         propertyGroups.resize(groupCount);
@@ -180,11 +242,16 @@ void Pex::FileReader::read(Pex::Objects &objects)
 
         object.setParentClassName(getStringIndex());
         object.setDocString(getStringIndex());
-        object.setConstFlag(getUint8());
+        // Skyrim scripts stored on disk do not have this info 
+        if (m_endianness == LITTLE_ENDIAN) {
+            object.setConstFlag(getUint8());
+        }
         object.setUserFlags(getUint32());
         object.setAutoStateName(getStringIndex());
-
-        read(object.getStructInfos());
+        // Skyrim scripts stored on disk do not have this info 
+        if (m_endianness == LITTLE_ENDIAN) {
+            read(object.getStructInfos());
+        }
         read(object.getVariables());
         read(object.getProperties());
         read(object.getStates());
@@ -233,7 +300,10 @@ void Pex::FileReader::read(Pex::Variables &variables)
         variable.setUserFlags(getUint32());
 
         variable.setDefaultValue(getValue());
-        variable.setConstFlag(getUint8());
+        // Skyrim scripts stored on disk do not have this info 
+        if (m_endianness == LITTLE_ENDIAN) {
+            variable.setConstFlag(getUint8());
+        }
     }
 }
 
@@ -399,6 +469,9 @@ std::uint16_t Pex::FileReader::getUint16()
     {
         throw std::runtime_error("Error reading file");
     }
+    if (m_endianness == BIG_ENDIAN){
+        return byteswap(value);
+    }
     return value;
 }
 
@@ -407,13 +480,16 @@ std::uint16_t Pex::FileReader::getUint16()
  * The int is store in the file coded in little endian.
  * @return a long read from the file.
  */
-std::uint32_t Pex::FileReader::getUint32()
+std::uint32_t Pex::FileReader::getUint32(bool le_override)
 {
     std::uint32_t value = 0;
     m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
     if(m_File.gcount() != sizeof(value))
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (!le_override && m_endianness == BIG_ENDIAN){
+        return byteswap(value);
     }
     return value;
 }
@@ -448,6 +524,9 @@ std::int16_t Pex::FileReader::getInt16()
     {
         throw std::runtime_error("Error reading file");
     }
+    if (m_endianness == BIG_ENDIAN){
+        return byteswap(value);
+    }
     return value;
 }
 
@@ -458,13 +537,16 @@ std::int16_t Pex::FileReader::getInt16()
  */
 float Pex::FileReader::getFloat()
 {
-    float value;
+    uint32_t value; // for byteswapping, float is stored in x86 registers 40-bits wide
     m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
     if(!m_File)
     {
         throw std::runtime_error("Error reading file");
     }
-    return value;
+    if (m_endianness == BIG_ENDIAN){
+        value = byteswap(value);
+    }
+    return static_cast<float>(value);
 }
 
 /**
@@ -480,6 +562,9 @@ std::time_t Pex::FileReader::getTime()
     if(!m_File)
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (m_endianness == BIG_ENDIAN){
+        return byteswap(value);
     }
     return value;
 }

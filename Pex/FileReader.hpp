@@ -21,6 +21,12 @@ public:
     ~FileReader();
 
     void read(Binary& binary);
+    enum Endianness{
+        BIG_ENDIAN,
+        LITTLE_ENDIAN
+    };
+    static constexpr std::uint32_t LE_MAGIC_NUMBER = 0xFA57C0DE;
+    static constexpr std::uint32_t BE_MAGIC_NUMBER = 0xDEC057FA;
 
 protected:
 
@@ -41,7 +47,7 @@ protected:
 
     std::uint8_t getUint8();
     std::uint16_t getUint16();
-    std::uint32_t getUint32();
+    std::uint32_t getUint32(bool le_override = false);
     StringTable::Index getStringIndex();
 
     std::int16_t getInt16();
@@ -53,6 +59,7 @@ protected:
     const StringTable* m_StringTable;
 
 private:
+    Endianness m_endianness;
     std::ifstream m_File;
 };
 }
