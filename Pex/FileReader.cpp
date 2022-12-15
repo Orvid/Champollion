@@ -14,12 +14,30 @@
  * @throws runtime_error if the file can't be openened
  */
 Pex::FileReader::FileReader(const std::string &fileName) :
-    m_File(fileName, std::ifstream::binary),
+    m_fileStream(fileName, std::ifstream::binary),
     m_StringTable(nullptr)
 {    
-    if (m_File.bad())
+    m_iStream = &m_fileStream;
+    if (m_iStream->fail())
     {
         throw std::runtime_error("Unable to open file");
+    }
+}
+
+/**
+ * @brief Construct from istream
+ * @param[in] stream pointer to istream.
+ *
+ * @throws runtime_error if the istream is bad
+ */
+Pex::FileReader::FileReader(std::istream *stream):
+    m_iStream(stream),
+    m_StringTable(nullptr),
+    m_fileStream()
+{
+    if (m_iStream->fail())
+    {
+        throw std::runtime_error("istream is bad");
     }
 }
 
@@ -400,8 +418,8 @@ void Pex::FileReader::read(Pex::Instructions &instructions)
 std::uint8_t Pex::FileReader::getUint8()
 {
     std::uint8_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
@@ -416,8 +434,8 @@ std::uint8_t Pex::FileReader::getUint8()
 std::uint16_t Pex::FileReader::getUint16()
 {
     std::uint16_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
@@ -435,8 +453,8 @@ std::uint16_t Pex::FileReader::getUint16()
 std::uint32_t Pex::FileReader::getUint32(bool le_override)
 {
     std::uint32_t value = 0;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(m_File.gcount() != sizeof(value))
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->gcount() != sizeof(value))
     {
         throw std::runtime_error("Error reading file");
     }
@@ -471,8 +489,8 @@ Pex::StringTable::Index Pex::FileReader::getStringIndex()
 std::int16_t Pex::FileReader::getInt16()
 {
     std::int16_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
@@ -490,8 +508,8 @@ std::int16_t Pex::FileReader::getInt16()
 float Pex::FileReader::getFloat()
 {
     uint32_t value; // for byteswapping, float is stored in x86 registers 40-bits wide
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
@@ -510,8 +528,8 @@ std::time_t Pex::FileReader::getTime()
 {
     static_assert(sizeof(std::time_t) == 8, "time_t is not 64 bits");
     std::time_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
@@ -530,8 +548,8 @@ std::string Pex::FileReader::getString()
     auto len = getUint16();
     auto data = new char[len];
     memset(data, 0, len);
-    m_File.read(data, len);
-    if (m_File.gcount() != len)
+    m_iStream->read(data, len);
+    if (m_iStream->gcount() != len)
     {
         throw std::runtime_error("Unable to read string");
     }

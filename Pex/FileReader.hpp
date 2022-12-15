@@ -17,6 +17,7 @@ namespace Pex {
 class FileReader
 {
 public:
+    FileReader(std::istream *stream);
     FileReader(const std::string& fileName);
     ~FileReader();
 
@@ -60,6 +61,7 @@ protected:
 
 private:
     Endianness m_endianness;
-    std::ifstream m_File;
+    std::istream* m_iStream;
+    std::ifstream m_fileStream;
 };
 }
