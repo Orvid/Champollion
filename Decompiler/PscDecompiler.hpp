@@ -11,7 +11,7 @@
 
 #include "Node/Base.hpp"
 
-//#define TRACE_DECOMPILATION
+#define TRACE_DECOMPILATION
 
 namespace Decompiler {
 

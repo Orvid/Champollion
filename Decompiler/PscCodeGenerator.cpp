@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include "Node/Nodes.hpp"
-#include "Node/WithNode.hpp"
 #include "PscCoder.hpp"
 
 static bool isTempVar(const Pex::StringTable::Index& var)
@@ -36,7 +35,7 @@ void Decompiler::PscCodeGenerator::newLine()
     m_Result = std::ostringstream();
     for (auto i = 0; i < m_Level; ++i)
     {
-        m_Result << '\t';
+        m_Result << ' ' << ' ';
     }
 }
 
@@ -185,7 +184,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Params *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::Return* node)
 {
-    m_Result << "return ";
+    m_Result << "Return ";
     if (node->getValue())
     {
         node->getValue()->visit(this);
@@ -232,7 +231,7 @@ void Decompiler::PscCodeGenerator::visit(Node::ArrayLength* node)
     {
         m_Result << ")";
     }
-    m_Result << ".length";
+    m_Result << ".Length";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayAccess *node)
@@ -270,9 +269,8 @@ void Decompiler::PscCodeGenerator::visit(Node::IdentifierString *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::While* node)
 {
-    m_Result << "While (";
+    m_Result << "While ";
     node->getCondition()->visit(this);
-    m_Result << ")";
     m_Level++;
     newLine();
     node->getBody()->visit(this);
@@ -287,9 +285,8 @@ void Decompiler::PscCodeGenerator::visit(Node::While* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
 {
-    m_Result << "If (";
+    m_Result << "If ";
     node->getCondition()->visit(this);
-    m_Result << ")";
     m_Level++;
     newLine();
     node->getBody()->visit(this);
@@ -301,9 +298,8 @@ void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
     {
         m_Decompiler->decodeToAsm(m_Level, childNode->getBegin()-1, childNode->getEnd());
         auto elseIf = childNode->as<Node::IfElse>();
-        m_Result << "ElseIf (";
+        m_Result << "ElseIf ";
         elseIf->getCondition()->visit(this);
-        m_Result << ")";
         m_Level++;
         newLine();
         elseIf->getBody()->visit(this);

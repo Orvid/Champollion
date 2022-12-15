@@ -1,18 +1,13 @@
 #include "PscDecompiler.hpp"
 
-#include <map>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <sstream>
 #include <iomanip>
-#include <iterator>
-#include <functional>
 #include <iterator>
 
 
 #include "Node/Nodes.hpp"
-#include "Node/Visitor.hpp"
 #include "Node/WithNode.hpp"
 #include "Node/NodeComparer.hpp"
 
@@ -61,10 +56,6 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
     m_Object(object),
     m_CommentAsm(commentAsm)
 {
-#ifdef TRACE_DECOMPILATION
-    m_Log.open(std::string("rebuild-") + object.getName().asString()
-               + "-" + (function.getName().isValid()?function.getName().asString():std::string("unnamed")) + ".txt");
-#endif
     if (m_Function.getInstructions().size() == 0)
     {
         push_back("; Empty function");
@@ -84,6 +75,7 @@ Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pe
         m_TempTable.push_back("removelast");
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
+        m_TempTable.push_back("getallmatchingstructs");
 
         //findReplacedVars();
         findVarTypes();
@@ -141,7 +133,7 @@ void Decompiler::PscDecompiler::decodeToAsm(std::uint8_t level, size_t begin, si
             std::ostringstream stream;
             for (auto i = 0; i < level; ++i)
             {
-                stream << '\t';
+                stream << ' ' << ' ';
             }
             stream << "; " << std::setw(3) << std::setfill('0') << ip << " : " << ins.getOpCodeName() << " ";
             switch(ins.getOpCode())
@@ -283,7 +275,7 @@ void Decompiler::PscDecompiler::createFlowBlocks()
         case Pex::OpCode::JMPT:
         {
             assert(ins.getArgs().size() == 2);
-            assert(ins.getArgs()[0].getType() == Pex::ValueType::Identifier || ins.getArgs()[0].getType() == Pex::ValueType::Bool);
+            assert(ins.getArgs()[0].getType() == Pex::ValueType::Identifier || ins.getArgs()[0].getType() == Pex::ValueType::Bool || ins.getArgs()[0].getType() == Pex::ValueType::Integer);
             assert(ins.getArgs()[1].getType() == Pex::ValueType::Integer);
 
             // Conditional jump
@@ -310,7 +302,7 @@ void Decompiler::PscDecompiler::createFlowBlocks()
             {
                 condition = ins.getArgs()[0].getId();
             }
-            else
+            else if (ins.getArgs()[0].getType() == Pex::ValueType::Bool)
             {
                 if(ins.getArgs()[0].getBool())
                 {
@@ -320,6 +312,9 @@ void Decompiler::PscDecompiler::createFlowBlocks()
                 {
                     condition = m_TempTable.findIdentifier("false");
                 }
+            }
+            else {
+                condition = m_TempTable.get(ins.getArgs()[0].getInteger());
             }
 
             if (ins.getOpCode() == Pex::OpCode::JMPF)
@@ -371,282 +366,294 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             Node::BasePtr node;
             switch(ins.getOpCode())
             {
-            case Pex::OpCode::NOP:
-                //do nothing
-                break;
-            case Pex::OpCode::IADD:
-            case Pex::OpCode::FADD:
-            case Pex::OpCode::STRCAT:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "+", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::ISUB:
-            case Pex::OpCode::FSUB:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "-", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::IMUL:
-            case Pex::OpCode::FMUL:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "*", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::IDIV:
-            case Pex::OpCode::FDIV:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "/", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::IMOD:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "%", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::NOT:
-            {
-                node = std::make_shared<Node::UnaryOperator>(ip, 3, args[0].getId(), "!", fromValue(ip, args[1]));
-                break;
-            }
-            case Pex::OpCode::INEG:
-            case Pex::OpCode::FNEG:
-            {
-                node = std::make_shared<Node::UnaryOperator>(ip, 3, args[0].getId(), "-", fromValue(ip, args[1]));
-                break;
-            }
-            case Pex::OpCode::ASSIGN:
-            {
-                node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
-                break;
-            }
-            case Pex::OpCode::CAST:
-            {
-                if(args[1].getType() == Pex::ValueType::None)
+                case Pex::OpCode::NOP:
+                    //do nothing
+                    break;
+                case Pex::OpCode::IADD:
+                case Pex::OpCode::FADD:
+                case Pex::OpCode::STRCAT:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "+", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::ISUB:
+                case Pex::OpCode::FSUB:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "-", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::IMUL:
+                case Pex::OpCode::FMUL:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "*", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::IDIV:
+                case Pex::OpCode::FDIV:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "/", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::IMOD:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 4, args[0].getId(), fromValue(ip, args[1]), "%", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::NOT:
+                {
+                    node = std::make_shared<Node::UnaryOperator>(ip, 3, args[0].getId(), "!", fromValue(ip, args[1]));
+                    break;
+                }
+                case Pex::OpCode::INEG:
+                case Pex::OpCode::FNEG:
+                {
+                    node = std::make_shared<Node::UnaryOperator>(ip, 3, args[0].getId(), "-", fromValue(ip, args[1]));
+                    break;
+                }
+                case Pex::OpCode::ASSIGN:
                 {
                     node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
+                    break;
                 }
-                else if (args[1].getType() != Pex::ValueType::Identifier || (typeOfVar(args[0].getId()) != typeOfVar(args[1].getId()) && args[1].getId() != m_NoneVar) )
-                {                    
-                    node = std::make_shared<Node::Cast>(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
-                }
-                else // two variables of the same type, equivalent to an assign
+                case Pex::OpCode::CAST:
                 {
-                    node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
+                    if(args[1].getType() == Pex::ValueType::None)
+                    {
+                        node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
+                    }
+                    else if (args[1].getType() != Pex::ValueType::Identifier || (typeOfVar(args[0].getId()) != typeOfVar(args[1].getId()) && args[1].getId() != m_NoneVar) )
+                    {                    
+                        node = std::make_shared<Node::Cast>(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
+                    }
+                    else // two variables of the same type, equivalent to an assign
+                    {
+                        node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
+                    }
+                    break;
                 }
-                break;
-            }
-            case Pex::OpCode::CMP_EQ:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "==", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::CMP_LT:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::CMP_LTE:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<=", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::CMP_GT:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::CMP_GTE:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">=", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::JMP:
-            case Pex::OpCode::JMPT:
-            case Pex::OpCode::JMPF:
-                //do nothing
-                break;
-            case Pex::OpCode::CALLMETHOD:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
-                auto argNode = callNode->getParameters();
-                for (auto varg : varargs)
+                case Pex::OpCode::CMP_EQ:
                 {
-                    *argNode << fromValue(ip, varg);
-                }                
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::CALLPARENT:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), std::make_shared<Node::IdentifierString>(ip, "Parent"), args[0].getId());
-                auto argNode = callNode->getParameters();
-                for (auto varg : varargs)
-                {
-                    *argNode << fromValue(ip, varg);
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "==", fromValue(ip, args[2]));
+                    break;
                 }
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::CALLSTATIC:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[0]), args[1].getId());
-                auto argNode = callNode->getParameters();
-                for (auto varg : varargs)
+                case Pex::OpCode::CMP_LT:
                 {
-                    *argNode << fromValue(ip, varg);
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<", fromValue(ip, args[2]));
+                    break;
                 }
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::RETURN:
-            {
-                if(m_ReturnNone)
+                case Pex::OpCode::CMP_LTE:
                 {
-                    node = std::make_shared<Node::Return>(ip, nullptr);
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), "<=", fromValue(ip, args[2]));
+                    break;
                 }
-                else
+                case Pex::OpCode::CMP_GT:
                 {
-                    node = std::make_shared<Node::Return>(ip, fromValue(ip, args[0]));
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">", fromValue(ip, args[2]));
+                    break;
                 }
-                break;
-            }
+                case Pex::OpCode::CMP_GTE:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 5, args[0].getId(), fromValue(ip, args[1]), ">=", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::JMP:
+                case Pex::OpCode::JMPT:
+                case Pex::OpCode::JMPF:
+                    //do nothing
+                    break;
+                case Pex::OpCode::CALLMETHOD:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
+                    auto argNode = callNode->getParameters();
+                    for (auto varg : varargs)
+                    {
+                        *argNode << fromValue(ip, varg);
+                    }                
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::CALLPARENT:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), std::make_shared<Node::IdentifierString>(ip, "Parent"), args[0].getId());
+                    auto argNode = callNode->getParameters();
+                    for (auto varg : varargs)
+                    {
+                        *argNode << fromValue(ip, varg);
+                    }
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::CALLSTATIC:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[0]), args[1].getId());
+                    auto argNode = callNode->getParameters();
+                    for (auto varg : varargs)
+                    {
+                        *argNode << fromValue(ip, varg);
+                    }
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::RETURN:
+                {
+                    if(m_ReturnNone)
+                    {
+                        node = std::make_shared<Node::Return>(ip, nullptr);
+                    }
+                    else
+                    {
+                        node = std::make_shared<Node::Return>(ip, fromValue(ip, args[0]));
+                    }
+                    break;
+                }
 
-            case Pex::OpCode::PROPGET:
-            {
-                node = std::make_shared<Node::PropertyAccess>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
-                break;
-            }
-            case Pex::OpCode::PROPSET:
-            {
-                node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[0].getId());
-                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
-                break;
-            }
+                case Pex::OpCode::PROPGET:
+                {
+                    node = std::make_shared<Node::PropertyAccess>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
+                    break;
+                }
+                case Pex::OpCode::PROPSET:
+                {
+                    node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[1]), args[0].getId());
+                    node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
+                    break;
+                }
 
-            case Pex::OpCode::ARRAY_CREATE:
-            {
-                node = std::make_shared<Node::ArrayCreate>(ip, args[0].getId(), typeOfVar(args[0].getId()), fromValue(ip, args[1]));
-                break;
-            }
-            case Pex::OpCode::ARRAY_LENGTH:
-            {
-                node = std::make_shared<Node::ArrayLength>(ip, args[0].getId(), fromValue(ip, args[1]));
-                break;
-            }
-            case Pex::OpCode::ARRAY_GETELEMENT:
-            {
-                node = std::make_shared<Node::ArrayAccess>(ip, args[0].getId(), fromValue(ip, args[1]), fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::ARRAY_SETELEMENT:
-            {
-                node = std::make_shared<Node::ArrayAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), fromValue(ip, args[1]));
-                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::ARRAY_FINDELEMENT:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("find")));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[2]);
-                *argNode << fromValue(ip, args[3]);
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::ARRAY_RFINDELEMENT:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("rfind")));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[2]);
-                *argNode << fromValue(ip, args[3]);
+                case Pex::OpCode::ARRAY_CREATE:
+                {
+                    node = std::make_shared<Node::ArrayCreate>(ip, args[0].getId(), typeOfVar(args[0].getId()), fromValue(ip, args[1]));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_LENGTH:
+                {
+                    node = std::make_shared<Node::ArrayLength>(ip, args[0].getId(), fromValue(ip, args[1]));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_GETELEMENT:
+                {
+                    node = std::make_shared<Node::ArrayAccess>(ip, args[0].getId(), fromValue(ip, args[1]), fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_SETELEMENT:
+                {
+                    node = std::make_shared<Node::ArrayAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), fromValue(ip, args[1]));
+                    node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_FINDELEMENT:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("find")));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[2]);
+                    *argNode << fromValue(ip, args[3]);
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::ARRAY_RFINDELEMENT:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier(("rfind")));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[2]);
+                    *argNode << fromValue(ip, args[3]);
 
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::IS:
-            {
-                node = std::make_shared<Node::BinaryOperator>(ip, 0, args[0].getId(), fromValue(ip, args[1]), "is", fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::STRUCT_CREATE:
-            {
-                node = std::make_shared<Node::StructCreate>(ip, args[0].getId(), typeOfVar(args[0].getId()));
-                break;
-            }
-            case Pex::OpCode::STRUCT_GET:
-            {
-                node = std::make_shared<Node::PropertyAccess>(ip, args[0].getId(), fromValue(ip, args[1]), args[2].getId());
-                break;
-            }
-            case Pex::OpCode::STRUCT_SET:
-            {
-                node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), args[1].getId());
-                node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
-                break;
-            }
-            case Pex::OpCode::ARRAY_FINDSTRUCT:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("findstruct"));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[2]);
-                *argNode << fromValue(ip, args[3]);
-                *argNode << fromValue(ip, args[4]);
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::IS:
+                {
+                    node = std::make_shared<Node::BinaryOperator>(ip, 0, args[0].getId(), fromValue(ip, args[1]), "is", fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::STRUCT_CREATE:
+                {
+                    node = std::make_shared<Node::StructCreate>(ip, args[0].getId(), typeOfVar(args[0].getId()));
+                    break;
+                }
+                case Pex::OpCode::STRUCT_GET:
+                {
+                    node = std::make_shared<Node::PropertyAccess>(ip, args[0].getId(), fromValue(ip, args[1]), args[2].getId());
+                    break;
+                }
+                case Pex::OpCode::STRUCT_SET:
+                {
+                    node = std::make_shared<Node::PropertyAccess>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), args[1].getId());
+                    node = std::make_shared<Node::Assign>(ip, node, fromValue(ip, args[2]));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_FINDSTRUCT:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("findstruct"));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[2]);
+                    *argNode << fromValue(ip, args[3]);
+                    *argNode << fromValue(ip, args[4]);
 
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::ARRAY_RFINDSTRUCT:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("rfindstruct"));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[2]);
-                *argNode << fromValue(ip, args[3]);
-                *argNode << fromValue(ip, args[4]);
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::ARRAY_RFINDSTRUCT:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("rfindstruct"));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[2]);
+                    *argNode << fromValue(ip, args[3]);
+                    *argNode << fromValue(ip, args[4]);
 
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::ARRAY_ADD:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("add"));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[1]);
-                *argNode << fromValue(ip, args[2]);
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::ARRAY_ADD:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("add"));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[1]);
+                    *argNode << fromValue(ip, args[2]);
 
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::ARRAY_INSERT:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("insert"));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[1]);
-                *argNode << fromValue(ip, args[2]);
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::ARRAY_INSERT:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("insert"));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[1]);
+                    *argNode << fromValue(ip, args[2]);
 
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::ARRAY_REMOVELAST:
-            {
-                node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("removelast"));
-                break;
-            }
-            case Pex::OpCode::ARRAY_REMOVE:
-            {
-                auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("remove"));
-                auto argNode = callNode->getParameters();
-                *argNode << fromValue(ip, args[1]);
-                *argNode << fromValue(ip, args[2]);
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::ARRAY_REMOVELAST:
+                {
+                    node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("removelast"));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_REMOVE:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("remove"));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[1]);
+                    *argNode << fromValue(ip, args[2]);
 
-                node = callNode;
-                break;
-            }
-            case Pex::OpCode::ARRAY_CLEAR:
-            {
-                node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("clear"));
-                break;
-            }
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::ARRAY_CLEAR:
+                {
+                    node = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), fromValue(ip, args[0]), m_TempTable.findIdentifier("clear"));
+                    break;
+                }
+                case Pex::OpCode::ARRAY_GETALLMATCHINGSTRUCTS:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("getallmatchingstructs"));
+                    auto argNode = callNode->getParameters();
+                    *argNode << fromValue(ip, args[2]);
+                    *argNode << fromValue(ip, args[3]);
+                    *argNode << fromValue(ip, args[4]);
+                    *argNode << fromValue(ip, args[5]);
+
+                    node = callNode;
+                    break;
+                }
 
             }
             if (node)
@@ -1287,13 +1294,6 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
  */
 void Decompiler::PscDecompiler::generateCode(Node::BasePtr program)
 {
-#ifdef TRACE_DECOMPILATION
-    DumpTree tree([&] (std::ostream& stream)
-    {
-        push_back(static_cast<std::ostringstream&>(stream).str());
-    });
-    program->visit(&tree);
-#endif
     if (m_CommentAsm)
     {
         for (auto& local : m_Function.getLocals())
@@ -1379,11 +1379,6 @@ void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
             }
             m_Log << '\n';
         }
-        DumpTree tree([&] (std::ostream& line)
-        {
-            m_Log << static_cast<std::ostringstream&>(line).str() << '\n';
-        });
-        b->getScope()->visit(&tree);
 
         m_Log << "------- cond:" << b->getCondition() << " true:" << b->onTrue() << " false:" << b->onFalse() << std::endl;
         ++it;
