@@ -564,37 +564,37 @@ std::string Pex::FileReader::getString()
  */
 Pex::Value Pex::FileReader::getValue()
 {
-    auto valueType = getUint8();
+    Pex::ValueType valueType = Pex::ValueType(getUint8());
     switch(valueType)
     {
-    case 0:
+    case Pex::ValueType::None:
         return Value();
         break;
-    case 1:
+    case Pex::ValueType::Identifier:
     {
         auto value = getStringIndex();
         return Value(value, true);
     }
         break;
-    case 2:
+    case Pex::ValueType::String:
     {
         auto value = getStringIndex();
         return Value(value);
     }
         break;
-    case 3:
+    case Pex::ValueType::Integer:
     {
         auto value = static_cast<std::int32_t>(getUint32());
         return Value(value);
     }
         break;
-    case 4:
+    case Pex::ValueType::Float:
     {
         auto value = getFloat();
         return Value(value);
     }
         break;
-    case 5:
+    case Pex::ValueType::Bool:
     {
         auto value = (getUint8() != 0);
         return Value(value);
@@ -602,7 +602,7 @@ Pex::Value Pex::FileReader::getValue()
         break;
     default:
         std::stringstream error;
-        error << "Invalid value type " << valueType;
+        error << "Invalid value type " << (uint8_t)valueType;
         throw std::runtime_error(error.str());
 
     }
