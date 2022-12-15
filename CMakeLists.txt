@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_policy(SET CMP0048 NEW)
 
 # package information
 set(PACKAGE_NAME      "Champollion")
@@ -12,7 +13,15 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 
-project(${PACKAGE_NAME} CXX)
+project(${PACKAGE_NAME} VERSION 1.46.0 LANGUAGES CXX)
+include(GNUInstallDirs)
+function (option_if_not_defined name description default)
+  if(NOT DEFINED ${name})
+      option(${name} ${description} ${default})
+  endif()
+endfunction()
+
+option_if_not_defined(CHAMPOLLION_STATIC_LIBRARY "Build Champollion as a standalone executable" OFF)
 
 if (VCPKG_TARGET_TRIPLET MATCHES "static")
   if(MSVC)
@@ -24,13 +33,6 @@ if (VCPKG_TARGET_TRIPLET MATCHES "static")
 endif()
 
 find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
-
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Boost_INCLUDE_DIRS}
-)
-
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 # Automatically create source_group directives for the sources passed in.
 function(auto_source_group rootName rootDir)
@@ -65,6 +67,75 @@ function(auto_source_group rootName rootDir)
   endforeach()
 endfunction()
 
-add_subdirectory(Decompiler)
-add_subdirectory(Pex)
-add_subdirectory(Champollion)
+
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+set(CHAMPOLLION_TARGET_NAME               ${PROJECT_NAME})
+set(CHAMPOLLION_CONFIG_INSTALL_DIR        "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE INTERNAL "")
+set(CHAMPOLLION_INCLUDE_INSTALL_DIR       "${CMAKE_INSTALL_INCLUDEDIR}/Champollion")
+set(CHAMPOLLION_TARGETS_EXPORT_NAME       "${PROJECT_NAME}-targets")
+set(CHAMPOLLION_CMAKE_CONFIG_TEMPLATE     "cmake/Config.cmake.in")
+set(CHAMPOLLION_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_BINARY_DIR}")
+set(CHAMPOLLION_CMAKE_VERSION_CONFIG_FILE "${CHAMPOLLION_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(CHAMPOLLION_CMAKE_PROJECT_CONFIG_FILE "${CHAMPOLLION_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
+set(CHAMPOLLION_CMAKE_PROJECT_TARGETS_FILE "${CHAMPOLLION_CMAKE_CONFIG_DIR}/${PROJECT_NAME}-targets.cmake")
+
+if(CHAMPOLLION_STATIC_LIBRARY)
+
+  file(GLOB DECOMPILER_HEADER_FILES "Decompiler/*.hpp")
+  file(GLOB PEX_HEADER_FILES "Pex/*.hpp")
+  file(GLOB NODE_HEADER_FILES "Decompiler/Node/*.hpp")
+  file(GLOB SOURCE_FILES "Pex/*.cpp" "Decompiler/*.cpp" "Decompiler/Node/*.cpp")
+
+  add_library("${PROJECT_NAME}" STATIC ${SOURCE_FILES})
+  set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE CXX)
+  target_link_libraries("${PROJECT_NAME}" ${Boost_LIBRARIES})
+
+  target_include_directories(
+    "${PROJECT_NAME}"
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Boost_INCLUDE_DIRS}
+  )
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+      ${CHAMPOLLION_CMAKE_VERSION_CONFIG_FILE} COMPATIBILITY SameMajorVersion
+  )
+  configure_package_config_file(
+    ${CHAMPOLLION_CMAKE_CONFIG_TEMPLATE}
+    "${CHAMPOLLION_CMAKE_PROJECT_CONFIG_FILE}" 
+    INSTALL_DESTINATION ${CHAMPOLLION_CONFIG_INSTALL_DIR}
+  )
+
+  install(
+    TARGETS "${CHAMPOLLION_TARGET_NAME}"
+    EXPORT "${CHAMPOLLION_TARGETS_EXPORT_NAME}"
+  )
+
+  install(
+    EXPORT "${CHAMPOLLION_TARGETS_EXPORT_NAME}"
+    NAMESPACE "${CHAMPOLLION_TARGET_NAME}::"
+    DESTINATION "${CHAMPOLLION_CONFIG_INSTALL_DIR}"
+  )
+  install(
+    FILES ${DECOMPILER_HEADER_FILES}
+    DESTINATION "${CHAMPOLLION_INCLUDE_INSTALL_DIR}/Decompiler"
+  )
+  install(
+    FILES ${PEX_HEADER_FILES}
+    DESTINATION "${CHAMPOLLION_INCLUDE_INSTALL_DIR}/Pex"
+  )
+  install(
+    FILES ${NODE_HEADER_FILES}
+    DESTINATION "${CHAMPOLLION_INCLUDE_INSTALL_DIR}/Decompiler/Node"
+  )
+  install(FILES ${CHAMPOLLION_CMAKE_VERSION_CONFIG_FILE} ${CHAMPOLLION_CMAKE_PROJECT_CONFIG_FILE}
+  DESTINATION ${CHAMPOLLION_CONFIG_INSTALL_DIR})
+else()
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Boost_INCLUDE_DIRS}
+  )
+  add_subdirectory(Decompiler)
+  add_subdirectory(Pex)
+  add_subdirectory(Champollion)
+endif()
