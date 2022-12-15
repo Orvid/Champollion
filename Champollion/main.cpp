@@ -3,10 +3,10 @@
 #include <boost/program_options.hpp>
 namespace options = boost::program_options;
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
-#include <boost/format.hpp>
+#include <format>
 
 #include <chrono>
 #include <future>
@@ -162,7 +162,7 @@ ProcessResults processFile(fs::path file, Params params)
     }
     catch(std::exception& ex)
     {
-       result.push_back(boost::str(boost::format("ERROR: %1% : %2%") % file.string() % ex.what()));
+       result.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
        return result;
     }
     if (params.outputAssembly)
@@ -174,11 +174,11 @@ ProcessResults processFile(fs::path file, Params params)
             Decompiler::AsmCoder asmCoder(new Decompiler::StreamWriter(asmStream));
 
             asmCoder.code(pex);
-            result.push_back(boost::str(boost::format("%1% dissassembled to %2%") % file.string() % asmFile.string()));
+            result.push_back(std::format("{} dissassembled to {}", file.string(), asmFile.string()));
         }
         catch(std::exception& ex)
         {
-            result.push_back(boost::str(boost::format("ERROR: %1% : %2%") % file.string() % ex.what()));
+            result.push_back(std::format("ERROR: {} : {}",file.string(),ex.what()));
             fs::remove(asmFile);
         }
     }
@@ -190,11 +190,11 @@ ProcessResults processFile(fs::path file, Params params)
         Decompiler::PscCoder pscCoder(new Decompiler::StreamWriter(pscStream));
 
         pscCoder.outputAsmComment(params.outputComment).outputWriteHeader(params.writeHeader).code(pex);
-        result.push_back(boost::str(boost::format("%1% decompiled to %2%") % file.string() % pscFile.string()));
+        result.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));
     }
     catch(std::exception& ex)
     {
-        result.push_back(boost::str(boost::format("ERROR: %1% : %2%") % file.string() % ex.what()));
+        result.push_back(std::format("ERROR: {} : {}", file.string() , ex.what()));
         fs::remove(pscFile);
     }
     return result;

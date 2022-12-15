@@ -1,7 +1,5 @@
 #include "PscCoder.hpp"
 
-#include <boost/algorithm/string/case_conv.hpp>
-
 #include <cassert>
 #include <ctime>
 #include <iostream>
@@ -609,6 +607,11 @@ static const std::map<std::string, std::string> prettyTypeNameMap {
     { "worldspace", "WorldSpace" },
 };
 
+void str_to_lower(std::string &p_str){
+    for (int i = 0; i < p_str.size(); i++){
+        p_str[i] = tolower(p_str[i]);
+    }
+}
 /**
 * @brief Map the type name used by the compiler to the form most used by people.
 * @param type The type to map.
@@ -618,7 +621,7 @@ std::string Decompiler::PscCoder::mapType(std::string type)
     if (type.length() > 2 && type[type.length() - 2] == '[' && type[type.length() - 1] == ']')
         return mapType(type.substr(0, type.length() - 2)) + "[]";
     auto lowerType = type;
-    boost::algorithm::to_lower(lowerType);
+    str_to_lower(lowerType);
     auto a = prettyTypeNameMap.find(lowerType);
     if (a != prettyTypeNameMap.end())
         return a->second;

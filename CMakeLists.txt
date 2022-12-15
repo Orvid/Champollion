@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(SET CMP0048 NEW)
+set(CMAKE_CXX_STANDARD 20)
 
 # package information
 set(PACKAGE_NAME      "Champollion")
@@ -23,16 +24,6 @@ endfunction()
 
 option_if_not_defined(CHAMPOLLION_STATIC_LIBRARY "Build Champollion as a standalone executable" OFF)
 
-if (VCPKG_TARGET_TRIPLET MATCHES "static")
-  if(MSVC)
-   # No longer necessary to replace flags
-  else(MSVC)
-    set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_USE_STATIC_RUNTIME ON)
-  endif(MSVC)
-endif()
-
-find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
 # Automatically create source_group directives for the sources passed in.
 function(auto_source_group rootName rootDir)
@@ -94,7 +85,6 @@ if(CHAMPOLLION_STATIC_LIBRARY)
     "${PROJECT_NAME}"
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${Boost_INCLUDE_DIRS}
   )
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
@@ -131,6 +121,15 @@ if(CHAMPOLLION_STATIC_LIBRARY)
   install(FILES ${CHAMPOLLION_CMAKE_VERSION_CONFIG_FILE} ${CHAMPOLLION_CMAKE_PROJECT_CONFIG_FILE}
   DESTINATION ${CHAMPOLLION_CONFIG_INSTALL_DIR})
 else()
+  if (VCPKG_TARGET_TRIPLET MATCHES "static")
+    if(MSVC)
+     # No longer necessary to replace flags
+    else(MSVC)
+      set(Boost_USE_STATIC_LIBS ON)
+      set(Boost_USE_STATIC_RUNTIME ON)
+    endif(MSVC)
+  endif()
+  find_package(Boost REQUIRED COMPONENTS program_options)
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Boost_INCLUDE_DIRS}

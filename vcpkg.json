@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/master/docs/vcpkg.schema.json",
   "name": "champollion",
   "version-semver": "1.0.9",
   "port-version": 0,
@@ -7,32 +7,18 @@
   "homepage": "https://github.com/infomaniac50/Champollion",
   "license": "LGPL-3.0-only",
   "supports": "windows & x64",
-  "dependencies": [
-    "boost-system",
-    "boost-filesystem",
-    "boost-program-options",
-    "boost-format",
-    "boost-algorithm"
-  ],
+  "features": {
+    "standalone": {
+      "description": "Build as a standalone program",
+      "dependencies": [
+        "boost-program-options"
+      ]
+    }
+  },
+  "default-features": ["standalone"],
   "overrides": [
     {
-      "name": "boost-system",
-      "version": "1.80.0"
-    },
-    {
-      "name": "boost-filesystem",
-      "version": "1.80.0"
-    },
-    {
       "name": "boost-program-options",
-      "version": "1.80.0"
-    },
-    {
-      "name": "boost-format",
-      "version": "1.80.0"
-    },
-    {
-      "name": "boost-algorithm",
       "version": "1.80.0"
     }
   ],
