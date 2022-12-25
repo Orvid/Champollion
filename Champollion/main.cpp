@@ -18,7 +18,7 @@ namespace fs = std::filesystem;
 #include "Decompiler/PscCoder.hpp"
 
 #include "Decompiler/StreamWriter.hpp"
-
+#include "glob.hpp"
 
 struct Params
 {
@@ -28,6 +28,7 @@ struct Params
     bool parallel;
     bool traceDecompilation;
     bool dumpTree;
+    bool recreateDirStructure;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
@@ -43,6 +44,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     params.parallel = false;
     params.traceDecompilation = false;
     params.dumpTree = true;
+    params.recreateDirStructure = true;
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
@@ -51,6 +53,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
             ("help,h", "Display the help message")
             ("asm,a", options::value<std::string>()->implicit_value(""), "Output assembly file(s) to this directory")
             ("psc,p", options::value<std::string>(), "Name of the output dir for psc decompilation")
+            ("recreate-subdirs,s", "Recreates directory structure for script in root of output directory (Fallout 4 only, default false)")
             ("comment,c", "Output assembly in comments of the decompiled psc file")
             ("header,e", "Write header to decompiled psc file")
             ("threaded,t", "Run decompilation in parallel mode")
@@ -91,6 +94,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     params.parallel = (args.count("threaded") != 0);
     params.traceDecompilation = (args.count("trace") != 0);
     params.dumpTree = params.traceDecompilation && args.count("no-dump-tree") == 0;
+    params.recreateDirStructure = (args.count("recreate-subdirs") != 0);
 
     try
     {
@@ -136,7 +140,9 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
 
     if(args.count("input"))
     {
-        for (auto in : args["input"].as<std::vector<std::string>>())
+        auto input_args = args["input"].as<std::vector<std::string>>();
+        auto globbed_files = glob::rglob(input_args);
+        for (auto in : globbed_files)
         {
             fs::path file(in);
             if (fs::exists(file))
@@ -189,10 +195,20 @@ ProcessResults processFile(fs::path file, Params params)
             fs::remove(asmFile);
         }
     }
-
-    fs::path pscFile = params.papyrusDir / file.filename().replace_extension(".psc");
+    fs::path dir_structure = "";
+    if (params.recreateDirStructure && pex.getGameType() == Pex::Binary::FALLOUT4 && pex.getObjects().size() > 0){
+        std::string script_path = pex.getObjects()[0].getName().asString();
+        std::replace(script_path.begin(), script_path.end(), ':', '/');
+        dir_structure = fs::path(script_path).remove_filename();
+    }
+    fs::path basedir = !dir_structure.empty() ? (params.papyrusDir / dir_structure) : params.papyrusDir;
+    if (!dir_structure.empty()){
+        fs::create_directories(basedir);
+    }
+    fs::path fileName = file.filename().replace_extension(".psc");
+    fs::path pscFile = basedir / fileName;
     try
-    {
+    {   
         std::ofstream pscStream(pscFile);
         if (pscStream.fail()){
             throw std::runtime_error(std::format("Failed to open {} for writing", pscFile.string()));

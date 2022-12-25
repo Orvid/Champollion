@@ -14,7 +14,7 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 
-project(${PACKAGE_NAME} VERSION 1.46.0 LANGUAGES CXX)
+project(${PACKAGE_NAME} VERSION 1.0.8 LANGUAGES CXX)
 include(GNUInstallDirs)
 function (option_if_not_defined name description default)
   if(NOT DEFINED ${name})
@@ -79,7 +79,6 @@ if(CHAMPOLLION_STATIC_LIBRARY)
 
   add_library("${PROJECT_NAME}" STATIC ${SOURCE_FILES})
   set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries("${PROJECT_NAME}" ${Boost_LIBRARIES})
 
   target_include_directories(
     "${PROJECT_NAME}"
