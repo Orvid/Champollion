@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(SET CMP0048 NEW)
-set(CMAKE_CXX_STANDARD 20)
 
 # package information
 set(PACKAGE_NAME      "Champollion")
@@ -16,13 +15,15 @@ endif()
 
 project(${PACKAGE_NAME} VERSION 1.0.8 LANGUAGES CXX)
 include(GNUInstallDirs)
-function (option_if_not_defined name description default)
-  if(NOT DEFINED ${name})
-      option(${name} ${description} ${default})
-  endif()
-endfunction()
 
-option_if_not_defined(CHAMPOLLION_STATIC_LIBRARY "Build Champollion as a standalone executable" OFF)
+
+option(CHAMPOLLION_STATIC_LIBRARY "Build Champollion as a static library" OFF)
+
+if (NOT CHAMPOLLION_STATIC_LIBRARY)
+  set(CMAKE_CXX_STANDARD 20)
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 
 
 # Automatically create source_group directives for the sources passed in.
@@ -75,15 +76,17 @@ if(CHAMPOLLION_STATIC_LIBRARY)
   file(GLOB DECOMPILER_HEADER_FILES "Decompiler/*.hpp")
   file(GLOB PEX_HEADER_FILES "Pex/*.hpp")
   file(GLOB NODE_HEADER_FILES "Decompiler/Node/*.hpp")
+  list(APPEND ALL_HEADERS ${DECOMPILER_HEADER_FILES} ${PEX_HEADER_FILES} ${NODE_HEADER_FILES})
+
   file(GLOB SOURCE_FILES "Pex/*.cpp" "Decompiler/*.cpp" "Decompiler/Node/*.cpp")
 
-  add_library("${PROJECT_NAME}" STATIC ${SOURCE_FILES})
-  set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE CXX)
+  add_library("${PROJECT_NAME}" STATIC ${ALL_HEADERS} ${SOURCE_FILES})
 
   target_include_directories(
     "${PROJECT_NAME}"
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CHAMPOLLION_INCLUDE_INSTALL_DIR}>
   )
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
@@ -121,12 +124,10 @@ if(CHAMPOLLION_STATIC_LIBRARY)
   DESTINATION ${CHAMPOLLION_CONFIG_INSTALL_DIR})
 else()
   if (VCPKG_TARGET_TRIPLET MATCHES "static")
-    if(MSVC)
-     # No longer necessary to replace flags
-    else(MSVC)
+    if(NOT MSVC)
       set(Boost_USE_STATIC_LIBS ON)
       set(Boost_USE_STATIC_RUNTIME ON)
-    endif(MSVC)
+    endif()
   endif()
   find_package(Boost REQUIRED COMPONENTS program_options)
   include_directories(
@@ -136,4 +137,7 @@ else()
   add_subdirectory(Decompiler)
   add_subdirectory(Pex)
   add_subdirectory(Champollion)
+  install(
+    TARGETS Champollion
+  )
 endif()

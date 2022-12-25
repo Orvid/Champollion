@@ -1,5 +1,5 @@
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
 
-include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@.cmake")
-check_required_components("@PROJECT_NAME@")
+include("${CMAKE_CURRENT_LIST_DIR}/@CHAMPOLLION_TARGETS_EXPORT_NAME@.cmake")
+check_required_components("@CHAMPOLLION_TARGETS_EXPORT_NAME@")
