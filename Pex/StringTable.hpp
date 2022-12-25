@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cstdint>
+#include <sstream>
 
 namespace Pex {
 
@@ -78,7 +79,32 @@ protected:
 };
 }
 
+[[nodiscard]] inline std::string operator + (std::string str, const Pex::StringTable::Index& index)
+{
+    if(index.isValid())
+    {
+        return str + index.asString();
+    }
+    else
+    {
+        return str + "";
+    }
+}
+
 inline std::ostream& operator << (std::ostream& stream, const Pex::StringTable::Index& index)
+{
+    if(index.isValid())
+    {
+        stream << index.asString();
+    }
+    else
+    {
+        stream << "*invalid*";
+    }
+    return stream;
+}
+
+inline std::ostringstream operator << (std::ostringstream stream, const Pex::StringTable::Index& index)
 {
     if(index.isValid())
     {

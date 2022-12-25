@@ -16,7 +16,7 @@ namespace Decompiler
 class DumpTree : public Node::VisitorBase
 {
 private:
-    std::function<void (std::ostream& stream)> m_Callback;
+    std::function<void (std::ostringstream stream)> m_Callback;
     std::uint32_t m_Indent;
 public:
     DumpTree(decltype(m_Callback) callback) :
@@ -34,7 +34,7 @@ public:
     {
         std::ostringstream result;
         result << ";";
-        for (auto i = 0; i < m_Indent; ++i)
+        for (uint32_t i = 0; i < m_Indent; ++i)
         {
             result << " ";
         }
@@ -43,7 +43,7 @@ public:
 
     void enter(const char* text, Node::Base* node)
     {
-        m_Callback(indent() << text << "<" << node << "> (" << node->getBegin() << "," << node->getEnd() << ")");
+        m_Callback((indent() << text << "<" << node << "> (" << node->getBegin() << "," << node->getEnd() << ")"));
         ++m_Indent;
     }
     void leave()
@@ -143,7 +143,11 @@ public:
     {
         enter("Return", node);
         m_Callback(indent() << "Value:");
-        node->getValue()->visit(this);
+        if (node->getValue()) {
+            node->getValue()->visit(this);
+        } else {
+            m_Callback(indent() << "<NONE>");
+        }
         leave();
     }
 
@@ -161,7 +165,7 @@ public:
     {
         enter("ArrayCreate", node);
         m_Callback(indent() << "Type:" << node->getType());
-        //m_Callback(indent() << "Size:" << node->getSize());
+        //m_Callback(indent() << "Size:" << node->getSize()); // TODO: Add size back to ArrayCreate?
         leave();
     }
 

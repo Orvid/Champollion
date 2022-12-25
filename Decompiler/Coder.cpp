@@ -29,6 +29,8 @@ void Decompiler::Coder::write(const std::string &line)
 {
     m_Writer->writeLine(line);
 }
+template<class T> static constexpr bool IsAnOstream = std::is_base_of<std::decay_t<T>, std::ostream>::value;
+template<class T> static constexpr bool IsAnOStringstream = std::is_base_of<std::decay_t<T>, std::ostringstream>::value;
 
 /**
  * @brief Write the content of a ostringstream.
@@ -37,7 +39,7 @@ void Decompiler::Coder::write(const std::string &line)
  *  write(indent(i) << "line data");
  * @param stream The stream as an ostream.
  */
-void Decompiler::Coder::write(std::ostream &stream)
+void Decompiler::Coder::write(std::ostream&& stream)
 {
     auto& sstream = static_cast<std::ostringstream&>(stream);
     m_Writer->writeLine(sstream.str());

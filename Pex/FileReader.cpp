@@ -1,4 +1,6 @@
 #include "FileReader.hpp"
+#include "ByteSwap.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -12,12 +14,30 @@
  * @throws runtime_error if the file can't be openened
  */
 Pex::FileReader::FileReader(const std::string &fileName) :
-    m_File(fileName, std::ifstream::binary),
+    m_fileStream(fileName, std::ifstream::binary),
     m_StringTable(nullptr)
 {    
-    if (m_File.bad())
+    m_iStream = &m_fileStream;
+    if (m_iStream->fail())
     {
         throw std::runtime_error("Unable to open file");
+    }
+}
+
+/**
+ * @brief Construct from istream
+ * @param[in] stream pointer to istream.
+ *
+ * @throws runtime_error if the istream is bad
+ */
+Pex::FileReader::FileReader(std::istream *stream):
+    m_iStream(stream),
+    m_StringTable(nullptr),
+    m_fileStream()
+{
+    if (m_iStream->fail())
+    {
+        throw std::runtime_error("istream is bad");
     }
 }
 
@@ -37,6 +57,7 @@ Pex::FileReader::~FileReader()
 void Pex::FileReader::read(Pex::Binary &binary)
 {
     readHeader(binary.getHeader());
+    binary.setGameType(m_endianness == BIG_ENDIAN ? Pex::Binary::GameType::SKYRIM : Pex::Binary::GameType::FALLOUT4);
     read(binary.getStringTable());
     m_StringTable = & binary.getStringTable();
     read(binary.getDebugInfo());
@@ -51,12 +72,21 @@ void Pex::FileReader::read(Pex::Binary &binary)
  */
 void Pex::FileReader::readHeader(Pex::Header &header)
 {
-    const std::uint32_t MAGIC_NUMBER = 0xFA57C0DE;
-    auto magic = getUint32();
+    // read magic as little endian to determine what endianness to set
+    auto magic = getUint32(true);
 
-    if (magic != MAGIC_NUMBER)
+    // Little Endian = Fallout 4
+    // Has new PEX format with const, struct info, more debug info
+    if (magic != LE_MAGIC_NUMBER)
     {
-        throw std::runtime_error("Invalid file magic");
+        // Big Endian = Skyrim scripts
+        // Has old Skyrim PEX format
+        if (magic != BE_MAGIC_NUMBER) {
+            throw std::runtime_error("Invalid file magic");
+        }
+        m_endianness = BIG_ENDIAN;
+    } else {
+        m_endianness = LITTLE_ENDIAN;
     }
 
     header.setMajorVersion(getUint8());
@@ -112,7 +142,10 @@ void Pex::FileReader::read(Pex::DebugInfo &debugInfo)
                 lineNumbers.push_back(getUint16());
             }
         }
-
+        // Skyrim scripts do not have the following info
+        if (m_endianness == BIG_ENDIAN){
+            return;
+        }
         auto groupCount = getUint16();
         auto& propertyGroups = debugInfo.getPropertyGroups();
         propertyGroups.resize(groupCount);
@@ -180,11 +213,16 @@ void Pex::FileReader::read(Pex::Objects &objects)
 
         object.setParentClassName(getStringIndex());
         object.setDocString(getStringIndex());
-        object.setConstFlag(getUint8());
+        // Skyrim scripts do not have this info 
+        if (m_endianness == LITTLE_ENDIAN) {
+            object.setConstFlag(getUint8());
+        }
         object.setUserFlags(getUint32());
         object.setAutoStateName(getStringIndex());
-
-        read(object.getStructInfos());
+        // Skyrim scripts do not have this info 
+        if (m_endianness == LITTLE_ENDIAN) {
+            read(object.getStructInfos());
+        }
         read(object.getVariables());
         read(object.getProperties());
         read(object.getStates());
@@ -233,7 +271,10 @@ void Pex::FileReader::read(Pex::Variables &variables)
         variable.setUserFlags(getUint32());
 
         variable.setDefaultValue(getValue());
-        variable.setConstFlag(getUint8());
+        // Skyrim scripts do not have this info 
+        if (m_endianness == LITTLE_ENDIAN) {
+            variable.setConstFlag(getUint8());
+        }
     }
 }
 
@@ -378,8 +419,8 @@ void Pex::FileReader::read(Pex::Instructions &instructions)
 std::uint8_t Pex::FileReader::getUint8()
 {
     std::uint8_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
@@ -388,32 +429,38 @@ std::uint8_t Pex::FileReader::getUint8()
 
 /**
  * @brief Reads a 16 bit unsigned int from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a short read from the file.
  */
 std::uint16_t Pex::FileReader::getUint16()
 {
     std::uint16_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (m_endianness == BIG_ENDIAN){
+        return byteswap(value);
     }
     return value;
 }
 
 /**
  * @brief Reads a 32 bit unsigned int from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a long read from the file.
  */
-std::uint32_t Pex::FileReader::getUint32()
+std::uint32_t Pex::FileReader::getUint32(bool le_override)
 {
     std::uint32_t value = 0;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(m_File.gcount() != sizeof(value))
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->gcount() != sizeof(value))
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (!le_override && m_endianness == BIG_ENDIAN){
+        return byteswap(value);
     }
     return value;
 }
@@ -437,49 +484,58 @@ Pex::StringTable::Index Pex::FileReader::getStringIndex()
 
 /**
  * @brief Reads a 16 bit signed int from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a short read from the file.
  */
 std::int16_t Pex::FileReader::getInt16()
 {
     std::int16_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (m_endianness == BIG_ENDIAN){
+        return byteswap(value);
     }
     return value;
 }
 
 /**
  * @brief Reads a 32 bit float from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a float read from the file.
  */
 float Pex::FileReader::getFloat()
 {
     float value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (m_endianness == BIG_ENDIAN){
+       value = byteswap_float(value);
     }
     return value;
 }
 
 /**
  * @brief Reads a 64 bit time_t from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a time_t read from the file.
  */
 std::time_t Pex::FileReader::getTime()
 {
     static_assert(sizeof(std::time_t) == 8, "time_t is not 64 bits");
     std::time_t value;
-    m_File.read(reinterpret_cast<char*>(&value), sizeof(value));
-    if(!m_File)
+    m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
+    if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
+    }
+    if (m_endianness == BIG_ENDIAN){
+        return byteswap(value);
     }
     return value;
 }
@@ -493,8 +549,8 @@ std::string Pex::FileReader::getString()
     auto len = getUint16();
     auto data = new char[len];
     memset(data, 0, len);
-    m_File.read(data, len);
-    if (m_File.gcount() != len)
+    m_iStream->read(data, len);
+    if (m_iStream->gcount() != len)
     {
         throw std::runtime_error("Unable to read string");
     }
@@ -509,37 +565,37 @@ std::string Pex::FileReader::getString()
  */
 Pex::Value Pex::FileReader::getValue()
 {
-    auto valueType = getUint8();
+    Pex::ValueType valueType = Pex::ValueType(getUint8());
     switch(valueType)
     {
-    case 0:
+    case Pex::ValueType::None:
         return Value();
         break;
-    case 1:
+    case Pex::ValueType::Identifier:
     {
         auto value = getStringIndex();
         return Value(value, true);
     }
         break;
-    case 2:
+    case Pex::ValueType::String:
     {
         auto value = getStringIndex();
         return Value(value);
     }
         break;
-    case 3:
+    case Pex::ValueType::Integer:
     {
         auto value = static_cast<std::int32_t>(getUint32());
         return Value(value);
     }
         break;
-    case 4:
+    case Pex::ValueType::Float:
     {
         auto value = getFloat();
         return Value(value);
     }
         break;
-    case 5:
+    case Pex::ValueType::Bool:
     {
         auto value = (getUint8() != 0);
         return Value(value);
@@ -547,7 +603,7 @@ Pex::Value Pex::FileReader::getValue()
         break;
     default:
         std::stringstream error;
-        error << "Invalid value type " << valueType;
+        error << "Invalid value type " << (uint8_t)valueType;
         throw std::runtime_error(error.str());
 
     }

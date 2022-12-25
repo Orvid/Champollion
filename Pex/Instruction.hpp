@@ -58,8 +58,8 @@ enum class OpCode {
     ARRAY_REMOVELAST,
     ARRAY_REMOVE,
     ARRAY_CLEAR,
-	//New in Fallout 76
-	ARRAY_GETALLMATCHINGSTRUCTS,
+    //New in Fallout 76
+    ARRAY_GETALLMATCHINGSTRUCTS,
     MAX_OPCODE
 };
 

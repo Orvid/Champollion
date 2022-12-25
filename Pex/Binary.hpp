@@ -16,9 +16,15 @@ namespace Pex {
  * The Binary class reflect the content of a PEX file.
  *
  */
+class FileReader;
 class Binary
 {
 public:
+    enum GameType {
+        UNKNOWN = -1,
+        SKYRIM,
+        FALLOUT4
+    };
     Binary();
     virtual ~Binary();
 
@@ -37,11 +43,16 @@ public:
     const Objects& getObjects() const;
     Objects& getObjects();
 
+    GameType getGameType() const;
+    
 protected:
+    friend FileReader;
+    void setGameType(GameType game_type);
     Header m_Header;
     StringTable m_StringTable;
     DebugInfo m_DebugInfo;
     UserFlags m_UserFlags;
     Objects m_Objects;
+    GameType m_GameType;
 };
 }

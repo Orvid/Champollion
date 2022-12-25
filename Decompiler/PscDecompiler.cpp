@@ -5,7 +5,8 @@
 #include <iostream>
 #include <iomanip>
 #include <iterator>
-
+#include <atomic>
+#include <mutex>
 
 #include "Node/Nodes.hpp"
 #include "Node/WithNode.hpp"
@@ -43,6 +44,8 @@ std::string getVarName(const Pex::StringTable::Index& var)
     return name;
 }
 
+static std::atomic_size_t unnamed_num{0};
+
 /**
  * @brief Constructor.
  * The constructor associate the function and object to the decompiler.
@@ -50,12 +53,48 @@ std::string getVarName(const Pex::StringTable::Index& var)
  * @param function Function to decompile.
  * @param object Object containing the function.
  * @param commentAsm True to output assembly instruction comments.
+ * @param traceDecompilation True to output decompilation tracing to the rebuild log.
+ * @param dumpTree True to output the entire tree for each block (true by default if traceDecompilation is true).
  */
-Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pex::Object &object, bool commentAsm = false) :
+Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
+                                            const Pex::Object &object,
+                                            bool commentAsm = false,
+                                            bool traceDecompilation = false,
+                                            bool dumpTree = true,
+                                            std::string outputDir = "" ) :
     m_Function(function),
     m_Object(object),
-    m_CommentAsm(commentAsm)
+    m_CommentAsm(commentAsm),
+    m_TraceDecompilation(traceDecompilation),
+    m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
+    m_OutputDir(outputDir)
 {
+    if (m_TraceDecompilation)
+    {
+        auto fileprefix = std::string("rebuild-") + object.getName()
+                + "-";     
+        std::string filename;
+        if (function.getName().isValid()){
+            filename = fileprefix + function.getName() + ".txt";
+        } else {
+            fileprefix += "unnamed";
+            // in case of parallel execution
+            static std::mutex unnamed_num_mutex;
+            std::lock_guard m(unnamed_num_mutex);
+            filename = fileprefix + std::to_string(++unnamed_num) + ".txt";
+        }
+        std::replace(filename.begin(), filename.end(), '#', '_');
+        std::replace(filename.begin(), filename.end(), ':', '_');
+        std::string filepath = !m_OutputDir.empty() ? m_OutputDir + "/" + filename : filename;
+        m_Log.open(filepath);
+        if (m_Log.fail())
+        {
+            m_TraceDecompilation = false;
+            static std::mutex cerr_mutex;
+            std::lock_guard m(cerr_mutex);
+            std::cerr << "Failed to open " << filepath << ", tracing disabled." << std::endl;
+        }
+    }
     if (m_Function.getInstructions().size() == 0)
     {
         push_back("; Empty function");
@@ -761,10 +800,11 @@ void Decompiler::PscDecompiler::rebuildExpression(Node::BasePtr scope)
  */
 void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_t endBlock)
 {
-#ifdef TRACE_DECOMPILATION
-    m_Log << "--- BEGIN REBUILD : " << startBlock << " " << endBlock << std::endl;
-    dumpBlock(startBlock, endBlock);
-#endif
+    if (m_TraceDecompilation)
+    {
+        m_Log << "--- BEGIN REBUILD : " << startBlock << " " << endBlock << std::endl;
+        dumpBlock(startBlock, endBlock);
+    }
     auto begin = m_CodeBlocs.find(startBlock);
     auto end = m_CodeBlocs.find(endBlock);
     auto it = begin;
@@ -772,31 +812,34 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
     {
         auto& source = it->second;
         int advance = 1;
-#ifdef TRACE_DECOMPILATION
-        m_Log << "?" << source->getBegin() << " source->isConditional()=" << source->isConditional() <<" "
-            << "source->getScope()->size()=" << source->getScope()->size() <<" "
-            << '\n';
-#endif
+        if (m_TraceDecompilation)
+        {
+            m_Log << "?" << source->getBegin() << " source->isConditional()=" << source->isConditional() <<" "
+                << "source->getScope()->size()=" << source->getScope()->size() <<" "
+                << '\n';
+        }
         // Process only conditional block with at least one statement.
         if (source->isConditional() && source->getScope()->size() != 0)
         {
-#ifdef TRACE_DECOMPILATION
-            m_Log << "??"             << "source->getCondition()=" << source->getCondition() << " "
-                << "source->getScope()->back()->getResult()=" << source->getScope()->back()->getResult() << " "
-                << '\n';
-#endif
+            if (m_TraceDecompilation)
+            {
+                m_Log << "??"             << "source->getCondition()=" << source->getCondition() << " "
+                    << "source->getScope()->back()->getResult()=" << source->getScope()->back()->getResult() << " "
+                    << '\n';
+            }
             // Ensure that the last statement computes the value of the condition variable.
             if (source->getCondition() == source->getScope()->back()->getResult())
             {
-#ifdef TRACE_DECOMPILATION
-            // AND ?
-                m_Log << "AND? "
-                      << "source->onTrue() == source->getEnd() + 1:" << (source->onTrue() == source->getEnd() + 1) << " "
-                      << '\n';
-                m_Log << "OR? "
-                      << "source->onFalse() == source->getEnd() + 1:" << (source->onFalse() == source->getEnd() + 1) << " "
-                      << '\n';
-#endif
+                if (m_TraceDecompilation)
+                {
+                    // AND ?
+                    m_Log << "AND? "
+                        << "source->onTrue() == source->getEnd() + 1:" << (source->onTrue() == source->getEnd() + 1) << " "
+                        << '\n';
+                    m_Log << "OR? "
+                        << "source->onFalse() == source->getEnd() + 1:" << (source->onFalse() == source->getEnd() + 1) << " "
+                        << '\n';
+                }
                 // If the true block is the block directly following this one, it is a potential and
                 bool maybeAnd = (source->onTrue() == source->getEnd() + 1);
                 // If the false block is the block directly following this one, it is a potential or
@@ -811,12 +854,13 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                     auto & onFalse = m_CodeBlocs[source->onFalse()];
                     if (onTrue->getScope()->size() == 1)
                     {
-#ifdef TRACE_DECOMPILATION
-                        m_Log << "AND@" << source->getBegin() << " "
-                              << "onTrue->getScope()->size() == 1:" << (onTrue->getScope()->size() == 1) << " "
-                              << "onTrue->getScope()->back()->getResult() == source->getCondition():" << (onTrue->getScope()->back()->getResult() == source->getCondition()) << " "
-                              << "\n";
-#endif
+                        if (m_TraceDecompilation)
+                        {
+                            m_Log << "AND@" << source->getBegin() << " "
+                                << "onTrue->getScope()->size() == 1:" << (onTrue->getScope()->size() == 1) << " "
+                                << "onTrue->getScope()->back()->getResult() == source->getCondition():" << (onTrue->getScope()->back()->getResult() == source->getCondition()) << " "
+                                << "\n";
+                        }
                         // The true block computes the same value as the current block, and it is the condition variable
                         // This is a "and" operator
                         if(onTrue->getScope()->size() == 1 && onTrue->getScope()->back()->getResult() == source->getCondition())
@@ -842,10 +886,11 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                             m_CodeBlocs.erase(onFalse->getBegin());
 
                             advance = 0;
-#ifdef TRACE_DECOMPILATION
-                            m_Log << "AND? " << "detected" << std::endl;
-                            dumpBlock(source->getBegin(), source->getEnd()+1);
-#endif
+                            if (m_TraceDecompilation)
+                            {
+                                m_Log << "AND? " << "detected" << std::endl;
+                                dumpBlock(source->getBegin(), source->getEnd()+1);
+                            }
                         }
                     }
                     it = m_CodeBlocs.find(source->getBegin());
@@ -857,12 +902,13 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                     rebuildBooleanOperators(source->onFalse(), source->onTrue());
                     auto & onTrue  = m_CodeBlocs[source->onTrue()];
                     auto & onFalse = m_CodeBlocs[source->onFalse()];
-#ifdef TRACE_DECOMPILATION
-                    m_Log << "OR@"  << source->getBegin() << " "
-                          << "onFalse->getScope()->size() == 1:" << (onFalse->getScope()->size() == 1) << " "
-                          << "onFalse->getScope()->back()->getResult() == source->getCondition():" << (onFalse->getScope()->back()->getResult() == source->getCondition()) << " "
-                          << "\n";
-#endif
+                        if (m_TraceDecompilation)
+                        {
+                            m_Log << "OR@"  << source->getBegin() << " "
+                                << "onFalse->getScope()->size() == 1:" << (onFalse->getScope()->size() == 1) << " "
+                                << "onFalse->getScope()->back()->getResult() == source->getCondition():" << (onFalse->getScope()->back()->getResult() == source->getCondition()) << " "
+                                << "\n";
+                        }
                     // The false block computes the same value as the current block, and it is the condition variable
                     // This is a "or operator
                     if(onFalse->getScope()->size() == 1 && onFalse->getScope()->back()->getResult() == source->getCondition())
@@ -887,10 +933,11 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         source->setCondition(onTrue->getCondition(), onTrue->onTrue(), onTrue->onFalse());
                         m_CodeBlocs.erase(onTrue->getBegin());
                         advance = 0;
-#ifdef TRACE_DECOMPILATION
-                        m_Log << "OR? " << "detected" << std::endl;
-                        dumpBlock(source->getBegin(), source->getEnd()+1);
-#endif
+                        if (m_TraceDecompilation)
+                        {
+                            m_Log << "OR? " << "detected" << std::endl;
+                            dumpBlock(source->getBegin(), source->getEnd()+1);
+                        }
                     }
                     it = m_CodeBlocs.find(source->getBegin());
                     advance = 0;
@@ -899,10 +946,11 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
         }
         std::advance(it, advance);
     }
-#ifdef TRACE_DECOMPILATION
-    m_Log << "--- END REBUILD : " << startBlock << " " << endBlock << std::endl;
-    dumpBlock(startBlock, endBlock);
-#endif
+    if (m_TraceDecompilation)
+    {
+        m_Log << "--- END REBUILD : " << startBlock << " " << endBlock << std::endl;
+        dumpBlock(startBlock, endBlock);
+    }
 }
 
 /**
@@ -1283,9 +1331,7 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
 
 }
 
-#ifdef TRACE_DECOMPILATION
 #include "DumpTree.hpp"
-#endif
 
 /**
  * @brief Generate the code from the program tree.
@@ -1294,6 +1340,18 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
  */
 void Decompiler::PscDecompiler::generateCode(Node::BasePtr program)
 {
+    if (m_TraceDecompilation && m_DumpTree)
+    {
+        
+        //DumpTree tree([&] (std::string&& line)
+        DumpTree tree([&] (std::ostringstream stream)
+        {
+            push_back(stream.str());
+            //push_back(line);
+        });
+        program->visit(&tree);
+    }
+
     if (m_CommentAsm)
     {
         for (auto& local : m_Function.getLocals())
@@ -1352,7 +1410,6 @@ Node::BasePtr Decompiler::PscDecompiler::checkAssign(Node::BasePtr expression) c
     return expression;
 }
 
-#ifdef TRACE_DECOMPILATION
 void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
 {
     auto begin = m_CodeBlocs.find(startBlock);
@@ -1379,9 +1436,18 @@ void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
             }
             m_Log << '\n';
         }
-
+        if (m_DumpTree)
+        {
+            //DumpTree tree([&] (std::string&& line)
+            
+            DumpTree tree([&] (std::ostringstream line)
+            {
+                m_Log << line.str() << '\n';
+                // m_Log << line << '\n';
+            });
+            b->getScope()->visit(&tree);
+        }
         m_Log << "------- cond:" << b->getCondition() << " true:" << b->onTrue() << " false:" << b->onFalse() << std::endl;
         ++it;
     }
 }
-#endif

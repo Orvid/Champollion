@@ -30,7 +30,7 @@ protected:
     void writeFunction(int i, const Pex::Function& function, const Pex::Binary& pex, const Pex::DebugInfo::FunctionInfo* info, const std::string& name="");
     void writeCode(int i, const Pex::Instructions& instructions, const Pex::DebugInfo::FunctionInfo *info);
 
-    void writeUserFlags(std::ostream& stream, const Pex::UserFlagged& flagged, const Pex::Binary& pex);
+    void writeUserFlags(std::ostream&& stream, const Pex::UserFlagged& flagged, const Pex::Binary& pex);
 
 };
 }

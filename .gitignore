@@ -21,4 +21,8 @@ CMakeUserPresets.json
 
 # End of https://www.toptal.com/developers/gitignore/api/cmake
 
+.vs/
+.vscode/
+vcpkg_installed/
+vcpkg_installed/**
 build

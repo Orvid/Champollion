@@ -1,7 +1,5 @@
 #include "PscCoder.hpp"
 
-#include <boost/algorithm/string/case_conv.hpp>
-
 #include <cassert>
 #include <ctime>
 #include <iostream>
@@ -17,10 +15,42 @@
  * Builds an object associated with an output writer.
  *
  * @param writer Pointer to the output writer. The ownership is transferred.
+ * @param commentAsm True to output assembly instruction comments (default: false).
+ * @param writeHeader True to write the header (default: false).
+ * @param traceDecompilation True to output decompilation tracing to the rebuild log (default: false).
+ * @param dumpTree True to output the entire tree for each block (true by default if traceDecompilation is true).
+ * @param traceDir If tracing is enabled, write rebuild logs to this dir (default is cwd)
+ */
+
+Decompiler::PscCoder::PscCoder( OutputWriter* writer,
+                                bool commentAsm = false,
+                                bool writeHeader = false,
+                                bool traceDecompilation = false,
+                                bool dumpTree = true,   
+                                std::string traceDir = ""):
+    Coder(writer),
+    m_CommentAsm(commentAsm),
+    m_WriteHeader(writeHeader),
+    m_TraceDecompilation(traceDecompilation),
+    m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
+    m_OutputDir(traceDir)
+{
+    
+}
+
+/**
+ * @brief Constructor
+ * Builds an object associated with an output writer.
+ *
+ * @param writer Pointer to the output writer. The ownership is transferred.
  */
 Decompiler::PscCoder::PscCoder(Decompiler::OutputWriter *writer)  :
     Coder(writer),
-    m_CommentAsm(false)
+    m_CommentAsm(false),
+    m_WriteHeader(false),
+    m_TraceDecompilation(false),
+    m_DumpTree(true),
+    m_OutputDir("")
 {
 }
 
@@ -37,6 +67,10 @@ Decompiler::PscCoder::~PscCoder()
  */
 void Decompiler::PscCoder::code(const Pex::Binary &pex)
 {
+    if (m_WriteHeader) 
+    {
+        writeHeader(pex);
+    }
     for(auto& object : pex.getObjects())
     {
         writeObject(object, pex);
@@ -56,6 +90,65 @@ Decompiler::PscCoder &Decompiler::PscCoder::outputAsmComment(bool commentAsm)
 }
 
 /**
+ * @brief Set the option to write decompilation trace information to the rebuild log
+ * @param traceDecompilation True to trace decompilation.
+ * @return A reference to this.
+ */
+Decompiler::PscCoder &Decompiler::PscCoder::outputDecompilationTrace(bool traceDecompilation)
+{
+    m_TraceDecompilation = traceDecompilation;
+    return *this;
+}
+
+/**
+ * @brief Set the option to output the tree for each node during decompilation tracing
+ * @param dumpTree True to dump node trees during decompilation tracing.
+ * @return A reference to this.
+ */
+Decompiler::PscCoder &Decompiler::PscCoder::outputDumpTree(bool dumpTree)
+{
+    m_DumpTree = dumpTree;
+    return *this;
+}
+
+/**
+ * @brief Set the option to add a header to the decompiled script.
+ * @param writeHeader True to write the header.
+ * @return A reference to this.
+ */
+Decompiler::PscCoder &Decompiler::PscCoder::outputWriteHeader(bool writeHeader)
+{
+    m_WriteHeader = writeHeader;
+    return *this;
+}
+
+/**
+ * @brief Write the content of the PEX header as a block comment.
+ * @param pex Binary to decompile.
+ */
+void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
+{
+    auto& header = pex.getHeader();
+    auto& debug  = pex.getDebugInfo();
+    write(";/ Decompiled by Champollion V1.1.0"); // TODO: Make this get the version number dynamically
+    write(indent(0) << "PEX format v" << (int)header.getMajorVersion() << "." << (int)header.getMinorVersion() << " GameID: " << header.getGameID());
+    write(indent(0) << "Source   : " << header.getSourceFileName());
+    if (debug.getModificationTime() != 0)
+    {
+        write(indent(0) << "Modified : " << std::put_time(std::localtime(&debug.getModificationTime()), "%Y-%m-%d %H:%M:%S"));
+        //for (auto& f : debug.getFunctionInfos()) {
+        //  write(indent(0) << f.getObjectName().asString() << ":" << f.getStateName().asString() << ":" << f.getFunctionName().asString() << " type: " << (int)f.getFunctionType());
+        //  for (auto& l : f.getLineNumbers())
+        //    write(indent(1) << "Line: " << l);
+        //}
+    }
+    write(indent(0) << "Compiled : " << std::put_time(std::localtime(&header.getCompilationTime()), "%Y-%m-%d %H:%M:%S"));
+    write(indent(0) << "User     : " << header.getUserName());
+    write(indent(0) << "Computer : " << header.getComputerName());
+    write("/;");
+}
+
+/**
  * @brief Write an object contained in the binary.
  * @param object Object to decompile
  * @param pex Binary to decompile.
@@ -72,7 +165,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
       stream << " Const";
 
     writeUserFlag(stream, object, pex);
-    write(stream);
+    write(stream.str());
 
     writeDocString(0, object);
 
@@ -104,7 +197,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
 */
 void Decompiler::PscCoder::writeStructs(const Pex::Object& object, const Pex::Binary& pex) {
     for (auto& sInfo : object.getStructInfos()) {
-        write(indent(0) << "Struct " << sInfo.getName());
+        write(indent(0) << "Struct " << sInfo.getName().asString());
 
         bool foundInfo = false;
         if (pex.getDebugInfo().getStructOrders().size()) {
@@ -155,7 +248,7 @@ void Decompiler::PscCoder::writeStructs(const Pex::Object& object, const Pex::Bi
 void Decompiler::PscCoder::writeStructMember(const Pex::StructInfo::Member& member, const Pex::Binary& pex)
 {
     auto stream = indent(1);
-    stream << mapType(member.getTypeName().asString()) << " " << member.getName();
+    stream << mapType(member.getTypeName().asString()) << " " << member.getName().asString();
 
     if (member.getValue().getType() != Pex::ValueType::None) {
         stream << " = " << member.getValue().toString();
@@ -163,7 +256,7 @@ void Decompiler::PscCoder::writeStructMember(const Pex::StructInfo::Member& memb
     writeUserFlag(stream, member, pex);
     if (member.getConstFlag())
       stream << " Const";
-    write(stream);
+    write(stream.str());
     writeDocString(1, member);
 }
 
@@ -195,7 +288,7 @@ void Decompiler::PscCoder::writeProperties(const Pex::Object &object, const Pex:
                         auto stream = indent(0);
                         stream << "Group " << propGroup.getGroupName();
                         writeUserFlag(stream, propGroup, pex);
-                        write(stream);
+                        write(stream.str());
                         writeDocString(0, propGroup);
                         propertyIndent = 1;
                     }
@@ -245,7 +338,7 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
                            prop.getReadFunction().getInstructions().size() == 1 &&
                            prop.getReadFunction().getInstructions()[0].getOpCode() == Pex::OpCode::RETURN &&
                            prop.getReadFunction().getInstructions()[0].getArgs().size() == 1;
-    stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName();
+    stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName().asString();
     if (prop.hasAutoVar()) {
         auto var = object.getVariables().findByName(prop.getAutoVarName());
         if (var == nullptr)
@@ -265,7 +358,7 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
       stream << " AutoReadOnly";
     }
     writeUserFlag(stream, prop, pex);
-    write(stream);
+    write(stream.str());
     writeDocString(i, prop);
 
     if (!prop.hasAutoVar() && !isAutoReadOnly) {
@@ -305,7 +398,7 @@ void Decompiler::PscCoder::writeVariables(const Pex::Object &object, const Pex::
 
         if (m_CommentAsm || !compilerGenerated)
         {
-            write(stream);
+            write(stream.str());
         }
     }
 }
@@ -340,7 +433,7 @@ void Decompiler::PscCoder::writeStates(const Pex::Object &object, const Pex::Bin
             {
                 stream << "Auto ";
             }
-            write(stream << "State " << state.getName().asString());
+            write(stream.str() + "State " + state.getName().asString());
             writeFunctions(1, state, object, pex);
             write(indent(0) << "EndState");
         }
@@ -423,13 +516,13 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             stream << " Native";
         }
         writeUserFlag(stream, function, pex);
-        write(stream);
+        write(stream.str());
 
         writeDocString(i, function);
 
         if (! function.isNative())
         {
-            for (auto& line : PscDecompiler(function, object, m_CommentAsm))
+            for (auto& line : PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree, m_OutputDir))
             {
                 write(indent(i+1) << line);
             }
@@ -458,7 +551,7 @@ void Decompiler::PscCoder::writeUserFlag(std::ostream& stream, const Pex::UserFl
     {
         if (flags & flag.getFlagMask())
         {
-            stream << " " << flag.getName();
+            stream << " " << flag.getName().asString();
         }
     }
 }
@@ -567,6 +660,11 @@ static const std::map<std::string, std::string> prettyTypeNameMap {
     { "worldspace", "WorldSpace" },
 };
 
+void str_to_lower(std::string &p_str){
+    for (int i = 0; i < p_str.size(); i++){
+        p_str[i] = tolower(p_str[i]);
+    }
+}
 /**
 * @brief Map the type name used by the compiler to the form most used by people.
 * @param type The type to map.
@@ -576,7 +674,7 @@ std::string Decompiler::PscCoder::mapType(std::string type)
     if (type.length() > 2 && type[type.length() - 2] == '[' && type[type.length() - 1] == ']')
         return mapType(type.substr(0, type.length() - 2)) + "[]";
     auto lowerType = type;
-    boost::algorithm::to_lower(lowerType);
+    str_to_lower(lowerType);
     auto a = prettyTypeNameMap.find(lowerType);
     if (a != prettyTypeNameMap.end())
         return a->second;

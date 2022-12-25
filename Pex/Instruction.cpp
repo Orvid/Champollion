@@ -25,7 +25,7 @@ struct OpCodeInfo {
 /**
  * Opcode definition table
  */
-static const OpCodeInfo OPCODES[Pex::OpCode::MAX_OPCODE] = {
+static const OpCodeInfo OPCODES[int(Pex::OpCode::MAX_OPCODE)] = {
     {"nop", 0, false},
     {"iadd", 3, false},
     {"fadd", 3, false},

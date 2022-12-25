@@ -8,6 +8,8 @@
  */
 Pex::Object::Object()
 {
+    // set to false at first due to on-disk Skyrim scripts not having this flag
+    m_ConstFlag = false; 
 }
 
 /**

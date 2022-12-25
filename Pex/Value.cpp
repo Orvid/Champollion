@@ -238,8 +238,8 @@ bool Pex::Value::operator ==(const Pex::Value &rhs) const
 std::string Pex::Value::toString() const
 {
     std::ostringstream result;
-
-    switch(getType())
+    auto type = getType();
+    switch(type)
     {
         case Pex::ValueType::None:
         {
@@ -307,7 +307,7 @@ std::string Pex::Value::toString() const
             result << (getBool() ? "True" : "False");
             break;
         default:
-            result << "*error invalid value type*";
+            result << "*error invalid value type #" << (uint8_t) type << "*";
             break;
     }
 

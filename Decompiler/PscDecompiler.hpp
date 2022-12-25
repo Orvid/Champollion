@@ -11,8 +11,6 @@
 
 #include "Node/Base.hpp"
 
-#define TRACE_DECOMPILATION
-
 namespace Decompiler {
 
 /**
@@ -25,7 +23,12 @@ class PscDecompiler :
         public std::vector<std::string>
 {
 public:
-    PscDecompiler(const Pex::Function& function, const Pex::Object& object, bool commentAsm);
+    PscDecompiler(  const Pex::Function& function,
+                    const Pex::Object& object, 
+                    bool commentAsm, 
+                    bool traceDecompilation, 
+                    bool dumpTree,
+                    std::string outputDir);
     ~PscDecompiler();
 
     void decodeToAsm(std::uint8_t level, size_t begin, size_t end);
@@ -58,9 +61,7 @@ protected:
     Node::BasePtr fromValue(size_t ip, const Pex::Value& value) const;
     Node::BasePtr checkAssign(Node::BasePtr expression) const;
 
-#ifdef TRACE_DECOMPILATION
     void dumpBlock(size_t startBlock, size_t endBlock);
-#endif
 protected:
     typedef std::map<size_t, PscCodeBlock*> CodeBlocs;
     CodeBlocs m_CodeBlocs;
@@ -78,10 +79,11 @@ protected:
     bool m_ReturnNone;
 
     bool m_CommentAsm;
+    bool m_TraceDecompilation;
+    bool m_DumpTree;
+    std::string m_OutputDir;
 
-#ifdef TRACE_DECOMPILATION
     std::ofstream m_Log;
-#endif
     Pex::StringTable m_TempTable;
 };
 }
