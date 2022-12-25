@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Coder.hpp"
 
 
@@ -11,11 +10,14 @@ class PscCoder :
         public Coder
 {
 public:
+    PscCoder(OutputWriter* writer, bool commentAsm, bool writeHeader, bool traceDecompilation, bool dumpTree, std::string traceDir);
     PscCoder(OutputWriter* writer);
     ~PscCoder();
 
     virtual void code(const Pex::Binary& pex);
 
+    PscCoder& outputDecompilationTrace(bool traceDecompilation);
+    PscCoder& outputDumpTree(bool dumpTree);
     PscCoder& outputAsmComment(bool commentAsm);
     PscCoder& outputWriteHeader(bool writeHeader);
     static std::string mapType(std::string type);
@@ -38,5 +40,8 @@ protected:
 protected:
     bool m_CommentAsm;
     bool m_WriteHeader;
+    bool m_TraceDecompilation;
+    bool m_DumpTree;
+    std::string m_OutputDir;
 };
 }

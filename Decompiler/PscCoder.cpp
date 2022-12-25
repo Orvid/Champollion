@@ -15,11 +15,42 @@
  * Builds an object associated with an output writer.
  *
  * @param writer Pointer to the output writer. The ownership is transferred.
+ * @param commentAsm True to output assembly instruction comments (default: false).
+ * @param writeHeader True to write the header (default: false).
+ * @param traceDecompilation True to output decompilation tracing to the rebuild log (default: false).
+ * @param dumpTree True to output the entire tree for each block (true by default if traceDecompilation is true).
+ * @param traceDir If tracing is enabled, write rebuild logs to this dir (default is cwd)
+ */
+
+Decompiler::PscCoder::PscCoder( OutputWriter* writer,
+                                bool commentAsm = false,
+                                bool writeHeader = false,
+                                bool traceDecompilation = false,
+                                bool dumpTree = true,   
+                                std::string traceDir = ""):
+    Coder(writer),
+    m_CommentAsm(commentAsm),
+    m_WriteHeader(writeHeader),
+    m_TraceDecompilation(traceDecompilation),
+    m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
+    m_OutputDir(traceDir)
+{
+    
+}
+
+/**
+ * @brief Constructor
+ * Builds an object associated with an output writer.
+ *
+ * @param writer Pointer to the output writer. The ownership is transferred.
  */
 Decompiler::PscCoder::PscCoder(Decompiler::OutputWriter *writer)  :
     Coder(writer),
     m_CommentAsm(false),
-    m_WriteHeader(false)
+    m_WriteHeader(false),
+    m_TraceDecompilation(false),
+    m_DumpTree(true),
+    m_OutputDir("")
 {
 }
 
@@ -55,6 +86,28 @@ void Decompiler::PscCoder::code(const Pex::Binary &pex)
 Decompiler::PscCoder &Decompiler::PscCoder::outputAsmComment(bool commentAsm)
 {
     m_CommentAsm = commentAsm;
+    return *this;
+}
+
+/**
+ * @brief Set the option to write decompilation trace information to the rebuild log
+ * @param traceDecompilation True to trace decompilation.
+ * @return A reference to this.
+ */
+Decompiler::PscCoder &Decompiler::PscCoder::outputDecompilationTrace(bool traceDecompilation)
+{
+    m_TraceDecompilation = traceDecompilation;
+    return *this;
+}
+
+/**
+ * @brief Set the option to output the tree for each node during decompilation tracing
+ * @param dumpTree True to dump node trees during decompilation tracing.
+ * @return A reference to this.
+ */
+Decompiler::PscCoder &Decompiler::PscCoder::outputDumpTree(bool dumpTree)
+{
+    m_DumpTree = dumpTree;
     return *this;
 }
 
@@ -469,7 +522,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
 
         if (! function.isNative())
         {
-            for (auto& line : PscDecompiler(function, object, m_CommentAsm))
+            for (auto& line : PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree, m_OutputDir))
             {
                 write(indent(i+1) << line);
             }

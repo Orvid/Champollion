@@ -26,6 +26,8 @@ struct Params
     bool outputComment;
     bool writeHeader;
     bool parallel;
+    bool traceDecompilation;
+    bool dumpTree;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
@@ -39,18 +41,21 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     params.outputComment = false;
     params.writeHeader = false;
     params.parallel = false;
-    params.assemblyDir = fs::path(".");
-    params.papyrusDir = fs::path(".");
-
+    params.traceDecompilation = false;
+    params.dumpTree = true;
+    params.assemblyDir = fs::current_path();
+    params.papyrusDir = fs::current_path();
 
     options::options_description desc("Champollion PEX decompiler V1.0.8");
     desc.add_options()
             ("help,h", "Display the help message")
-            ("asm,a", options::value<std::string>()->implicit_value(""), "Output assembly file")
+            ("asm,a", options::value<std::string>()->implicit_value(""), "Output assembly file(s) to this directory")
             ("psc,p", options::value<std::string>(), "Name of the output dir for psc decompilation")
             ("comment,c", "Output assembly in comments of the decompiled psc file")
             ("header,e", "Write header to decompiled psc file")
             ("threaded,t", "Run decompilation in parallel mode")
+            ("trace,g", "Trace the decompilation and output results to rebuild log")
+            ("no-dump-tree", "Do not dump tree for each node during decompilation tracing (requires --trace)")
     ;
     options::options_description files;
     files.add_options()
@@ -84,6 +89,8 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     params.outputComment = (args.count("comment") != 0);
     params.writeHeader = (args.count("header") != 0);
     params.parallel = (args.count("threaded") != 0);
+    params.traceDecompilation = (args.count("trace") != 0);
+    params.dumpTree = params.traceDecompilation && args.count("no-dump-tree") == 0;
 
     try
     {
@@ -186,10 +193,19 @@ ProcessResults processFile(fs::path file, Params params)
     fs::path pscFile = params.papyrusDir / file.filename().replace_extension(".psc");
     try
     {
-        std::ofstream pscStream(pscFile.string());
-        Decompiler::PscCoder pscCoder(new Decompiler::StreamWriter(pscStream));
+        std::ofstream pscStream(pscFile);
+        if (pscStream.fail()){
+            throw std::runtime_error(std::format("Failed to open {} for writing", pscFile.string()));
+        }
+        Decompiler::PscCoder pscCoder(
+            new Decompiler::StreamWriter(pscStream),
+            params.outputAssembly,
+            params.writeHeader,
+            params.traceDecompilation,
+            params.dumpTree,
+            params.papyrusDir.string() ); // using string instead of path here for C++14 compatability for staticlib targets
 
-        pscCoder.outputAsmComment(params.outputComment).outputWriteHeader(params.writeHeader).code(pex);
+        pscCoder.code(pex);
         result.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));
     }
     catch(std::exception& ex)

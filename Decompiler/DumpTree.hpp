@@ -16,7 +16,7 @@ namespace Decompiler
 class DumpTree : public Node::VisitorBase
 {
 private:
-    std::function<void (std::ostream&& stream)> m_Callback;
+    std::function<void (std::ostringstream stream)> m_Callback;
     std::uint32_t m_Indent;
 public:
     DumpTree(decltype(m_Callback) callback) :
@@ -62,7 +62,7 @@ public:
     virtual void visit(Node::BinaryOperator* node)
     {
         enter("Binary", node);
-        m_Callback(indent() << "In:" << node->getResult().asString()) ;
+        m_Callback(indent() << "In:" << node->getResult()) ;
         m_Callback(indent() << "Left:");
         node->getLeft()->visit(this);
         m_Callback(indent() << "Op:" << node->getOperator() << " P:" << (int)node->getPrecedence());
@@ -102,7 +102,7 @@ public:
     virtual void visit(Node::Copy* node)
     {
         enter("Copy", node);
-        m_Callback(indent() << "In:" << node->getResult().asString());
+        m_Callback(indent() << "In:" << node->getResult());
         m_Callback(indent() << "Value:");
         node->getValue()->visit(this);
         leave();
@@ -110,8 +110,8 @@ public:
     virtual void visit(Node::Cast* node)
     {
         enter("Cast", node);
-        m_Callback(indent() << "In:" << node->getResult().asString());
-        m_Callback(indent() << "As:" << node->getType().asString());
+        m_Callback(indent() << "In:" << node->getResult());
+        m_Callback(indent() << "As:" << node->getType());
         m_Callback(indent() << "Value:");
         node->getValue()->visit(this);
         leave();
@@ -120,8 +120,8 @@ public:
     virtual void visit(Node::CallMethod* node)
     {
         enter("Call", node);
-        m_Callback(indent() << "In:" << node->getResult().asString());
-        m_Callback(indent() << "Method:" << node->getMethod().asString());
+        m_Callback(indent() << "In:" << node->getResult());
+        m_Callback(indent() << "Method:" << node->getMethod());
         m_Callback(indent() << "On:");
         node->getObject()->visit(this);
         for (auto param : *node->getParameters())
@@ -143,15 +143,19 @@ public:
     {
         enter("Return", node);
         m_Callback(indent() << "Value:");
-        node->getValue()->visit(this);
+        if (node->getValue()) {
+            node->getValue()->visit(this);
+        } else {
+            m_Callback(indent() << "<NONE>");
+        }
         leave();
     }
 
     virtual void visit(Node::PropertyAccess* node)
     {
         enter("PropertyAccess", node);
-        m_Callback(indent() << "In:" << node->getResult().asString());
-        m_Callback(indent() << "Property:" << node->getProperty().asString());
+        m_Callback(indent() << "In:" << node->getResult());
+        m_Callback(indent() << "Property:" << node->getProperty());
         m_Callback(indent() << "On:");
         node->getObject()->visit(this);
         leave();
@@ -160,8 +164,8 @@ public:
     virtual void visit(Node::ArrayCreate* node)
     {
         enter("ArrayCreate", node);
-        m_Callback(indent() << "Type:" << node->getType().asString());
-        //m_Callback(indent() << "Size:" << node->getSize());
+        m_Callback(indent() << "Type:" << node->getType());
+        //m_Callback(indent() << "Size:" << node->getSize()); // TODO: Add size back to ArrayCreate?
         leave();
     }
 
@@ -176,7 +180,7 @@ public:
     virtual void visit(Node::ArrayAccess* node)
     {
         enter("ArrayAccess", node);
-        m_Callback(indent() << "In:" << node->getResult().asString());
+        m_Callback(indent() << "In:" << node->getResult());
         m_Callback(indent() << "Array:");
         node->getArray()->visit(this);
         m_Callback(indent() << "Index:");
@@ -198,12 +202,12 @@ public:
             break;
         case Pex::ValueType::Identifier:
         {
-            m_Callback(indent() << "Identifier:" << value.getId().asString());
+            m_Callback(indent() << "Identifier:" << value.getId());
         }
             break;
         case Pex::ValueType::String:
         {
-            m_Callback(indent() << "String:" << value.getString().asString());
+            m_Callback(indent() << "String:" << value.getString());
         }
             break;
         case Pex::ValueType::Integer:
@@ -259,7 +263,7 @@ public:
     virtual void visit(Node::Declare* node)
     {
         enter("Declare", node);
-        m_Callback(indent() << "Type:" << node->getType().asString());
+        m_Callback(indent() << "Type:" << node->getType());
         m_Callback(indent() << "Name:");
         node->getObject()->visit(this);
         leave();
