@@ -3,7 +3,7 @@ cmake_policy(SET CMP0048 NEW)
 
 # package information
 set(PACKAGE_NAME      "Champollion")
-set(PACKAGE_VERSION   "1.0.8")
+set(PACKAGE_VERSION   "1.1.0")
 set(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 set(PACKAGE_BUGREPORT "https://github.com/Orvid/champollion/issues")
@@ -13,7 +13,7 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 
-project(${PACKAGE_NAME} VERSION 1.0.8 LANGUAGES CXX)
+project(${PACKAGE_NAME} VERSION 1.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 

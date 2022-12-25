@@ -48,7 +48,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
-    options::options_description desc("Champollion PEX decompiler V1.0.8");
+    options::options_description desc("Champollion PEX decompiler V1.1.0");
     desc.add_options()
             ("help,h", "Display the help message")
             ("asm,a", options::value<std::string>()->implicit_value(""), "Output assembly file(s) to this directory")
