@@ -428,7 +428,7 @@ std::uint8_t Pex::FileReader::getUint8()
 
 /**
  * @brief Reads a 16 bit unsigned int from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a short read from the file.
  */
 std::uint16_t Pex::FileReader::getUint16()
@@ -447,7 +447,7 @@ std::uint16_t Pex::FileReader::getUint16()
 
 /**
  * @brief Reads a 32 bit unsigned int from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a long read from the file.
  */
 std::uint32_t Pex::FileReader::getUint32(bool le_override)
@@ -483,7 +483,7 @@ Pex::StringTable::Index Pex::FileReader::getStringIndex()
 
 /**
  * @brief Reads a 16 bit signed int from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a short read from the file.
  */
 std::int16_t Pex::FileReader::getInt16()
@@ -502,26 +502,26 @@ std::int16_t Pex::FileReader::getInt16()
 
 /**
  * @brief Reads a 32 bit float from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a float read from the file.
  */
 float Pex::FileReader::getFloat()
 {
-    uint32_t value; // for byteswapping, float is stored in x86 registers 40-bits wide
+    float value;
     m_iStream->read(reinterpret_cast<char*>(&value), sizeof(value));
     if(m_iStream->fail() || m_iStream->eof())
     {
         throw std::runtime_error("Error reading file");
     }
     if (m_endianness == BIG_ENDIAN){
-        value = byteswap(value);
+       value = byteswap_float(value);
     }
-    return static_cast<float>(value);
+    return value;
 }
 
 /**
  * @brief Reads a 64 bit time_t from the file.
- * The int is store in the file coded in little endian.
+ * If file is big endian, byteswaps to little endian
  * @return a time_t read from the file.
  */
 std::time_t Pex::FileReader::getTime()

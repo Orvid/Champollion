@@ -1,4 +1,5 @@
 #include <type_traits>
+#include <cassert>
 // These are backported from STL C++23
 
 constexpr uint16_t _Byteswap_ushort(const uint16_t _Val) noexcept {
@@ -43,4 +44,17 @@ constexpr Integer byteswap(const Integer _Val) noexcept {
     } else {
         static_assert(_always_false_assert<Integer>, "Unexpected integer size");
     }
+}
+
+float byteswap_float(const float _Val) noexcept {
+    float retVal;
+    const auto pVal = reinterpret_cast<const char*>(& _Val);
+    const auto pRetVal = reinterpret_cast<char*>(& retVal);
+    const std::size_t size = sizeof(float);
+    assert(size == 4);
+    for (std::size_t i = 0; i < size; i++)
+    {
+        pRetVal[size - 1 - i] = pVal[i];
+    }
+    return retVal;
 }
