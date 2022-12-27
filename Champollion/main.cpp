@@ -36,7 +36,13 @@ struct Params
     std::vector<fs::path> inputs;
 };
 
-bool getProgramOptions(int argc, char* argv[], Params& params)
+enum OptionsResult{
+    Invalid = -1,
+    HelpOrVersion,
+    Good
+};
+
+OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
 {
     params.outputAssembly = false;
     params.outputComment = false;
@@ -48,10 +54,11 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
-    options::options_description desc("Champollion PEX decompiler V1.1.0");
+    std::string version_string = "Champollion PEX decompiler v1.1.0";
+    options::options_description desc(version_string);
     desc.add_options()
             ("help,h", "Display the help message")
-            ("asm,a", options::value<std::string>()->implicit_value(""), "Output assembly file(s) to this directory")
+            ("asm,a", options::value<std::string>()->implicit_value(""), "If defined, output assembly file(s) to this directory")
             ("psc,p", options::value<std::string>(), "Name of the output dir for psc decompilation")
             ("recreate-subdirs,s", "Recreates directory structure for script in root of output directory (Fallout 4 only, default false)")
             ("comment,c", "Output assembly in comments of the decompiled psc file")
@@ -59,6 +66,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
             ("threaded,t", "Run decompilation in parallel mode")
             ("trace,g", "Trace the decompilation and output results to rebuild log")
             ("no-dump-tree", "Do not dump tree for each node during decompilation tracing (requires --trace)")
+            ("version", "Output version number")
     ;
     options::options_description files;
     files.add_options()
@@ -80,13 +88,18 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     {
         std::cout << ex.what() << std::endl;
         std::cout << desc << std::endl;
-        return false;
+        return Invalid;
     }
 
     if (args.count("help"))
     {
         std::cout << desc;
-        return false;
+        return HelpOrVersion;
+    }
+    if (args.count("version"))
+    {
+        std::cout << version_string << std::endl;
+        return HelpOrVersion;
     }
 
     params.outputComment = (args.count("comment") != 0);
@@ -112,7 +125,7 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
                 else if (!fs::is_directory(params.assemblyDir))
                 {
                     std::cout << params.assemblyDir << " is not a directory" << std::endl;
-                    return false;
+                    return Invalid;
                 }
             }
         }
@@ -128,14 +141,14 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
             else if (!fs::is_directory(params.papyrusDir))
             {
                 std::cout << params.papyrusDir << " is not a directory" << std::endl;
-                return false;
+                return Invalid;
             }
         }
     }
     catch(const std::exception& ex)
     {
         std::cout << ex.what();
-        return false;
+        return Invalid;
     }
 
     if(args.count("input"))
@@ -158,9 +171,9 @@ bool getProgramOptions(int argc, char* argv[], Params& params)
     if (params.inputs.empty())
     {
         std::cout << "No input file given" << std::endl;
-        return false;
+        return Invalid;
     }
-    return true;
+    return Good;
 }
 
 typedef std::vector<std::string> ProcessResults;
@@ -238,7 +251,8 @@ int main(int argc, char* argv[])
 
     Params args;
     size_t countFiles = 0;
-    if (getProgramOptions(argc, argv, args))
+    auto result = getProgramOptions(argc, argv, args);
+    if (result == Good)
     {
         auto start = std::chrono::steady_clock::now();
         if(!args.parallel)
@@ -311,6 +325,9 @@ int main(int argc, char* argv[])
         auto diff = end - start;
 
         std::cout << countFiles << " files processed in " << std::chrono::duration <double> (diff).count() << " s" << std::endl;
+        return 0;
+    }
+    if (result == HelpOrVersion){
         return 0;
     }
     return 1;
