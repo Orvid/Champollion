@@ -90,7 +90,7 @@ if(CHAMPOLLION_STATIC_LIBRARY)
   )
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-      ${CHAMPOLLION_CMAKE_VERSION_CONFIG_FILE} COMPATIBILITY SameMajorVersion
+      ${CHAMPOLLION_CMAKE_VERSION_CONFIG_FILE} COMPATIBILITY SameMinorVersion
   )
   configure_package_config_file(
     ${CHAMPOLLION_CMAKE_CONFIG_TEMPLATE}
