@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-cmake_policy(SET CMP0048 NEW)
-
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_policy(SET CMP0048 NEW) # VERSION variables
+cmake_policy(SET CMP0091 NEW) # CMAKE_MSVC_RUNTIME_LIBRARY
 # package information
 set(PACKAGE_NAME      "Champollion")
 set(PACKAGE_VERSION   "1.1.0")
@@ -18,6 +18,7 @@ include(GNUInstallDirs)
 
 
 option(CHAMPOLLION_STATIC_LIBRARY "Build Champollion as a static library" OFF)
+option(CHAMPOLLION_USE_STATIC_RUNTIME "Compile Champollion with static runtime" OFF)
 
 if (NOT CHAMPOLLION_STATIC_LIBRARY)
   set(CMAKE_CXX_STANDARD 20)
@@ -59,6 +60,15 @@ function(auto_source_group rootName rootDir)
   endforeach()
 endfunction()
 
+
+if (CHAMPOLLION_USE_STATIC_RUNTIME)
+  if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(MSVC_RUNTIME_LIBRARY ${CMAKE_MSVC_RUNTIME_LIBRARY})
+  else()
+    set(USE_STATIC_RUNTIME ON)
+  endif()
+endif()
 
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 set(CHAMPOLLION_TARGET_NAME               ${PROJECT_NAME})
