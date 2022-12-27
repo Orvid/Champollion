@@ -196,7 +196,7 @@ ProcessResults processFile(fs::path file, Params params)
         }
     }
     fs::path dir_structure = "";
-    if (params.recreateDirStructure && pex.getGameType() == Pex::Binary::FALLOUT4 && pex.getObjects().size() > 0){
+    if (params.recreateDirStructure && pex.getGameType() == Pex::Binary::Fallout4Script && pex.getObjects().size() > 0){
         std::string script_path = pex.getObjects()[0].getName().asString();
         std::replace(script_path.begin(), script_path.end(), ':', '/');
         dir_structure = fs::path(script_path).remove_filename();

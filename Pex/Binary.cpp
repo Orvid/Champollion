@@ -9,7 +9,7 @@
  * This constructor provides a Binary file with empty elements.
  */
 Pex::Binary::Binary():
-    m_GameType(UNKNOWN)
+    m_ScriptType(Unknown)
 {
 }
 
@@ -121,12 +121,12 @@ Pex::Objects &Pex::Binary::getObjects()
     return m_Objects;
 }
 
-Pex::Binary::GameType Pex::Binary::getGameType() const
+Pex::Binary::ScriptType Pex::Binary::getGameType() const
 {
-    return m_GameType;
+    return m_ScriptType;
 }
 
-void Pex::Binary::setGameType(Pex::Binary::GameType game_type)
+void Pex::Binary::setScriptType(Pex::Binary::ScriptType game_type)
 {
-    m_GameType = game_type;
+    m_ScriptType = game_type;
 }

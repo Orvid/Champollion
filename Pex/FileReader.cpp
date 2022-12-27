@@ -57,7 +57,7 @@ Pex::FileReader::~FileReader()
 void Pex::FileReader::read(Pex::Binary &binary)
 {
     readHeader(binary.getHeader());
-    binary.setGameType(m_endianness == BIG_ENDIAN ? Pex::Binary::GameType::SKYRIM : Pex::Binary::GameType::FALLOUT4);
+    binary.setScriptType(m_endianness == BIG_ENDIAN ? Pex::Binary::ScriptType::SkyrimScript : Pex::Binary::ScriptType::Fallout4Script);
     read(binary.getStringTable());
     m_StringTable = & binary.getStringTable();
     read(binary.getDebugInfo());

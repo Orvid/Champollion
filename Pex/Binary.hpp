@@ -20,10 +20,10 @@ class FileReader;
 class Binary
 {
 public:
-    enum GameType {
-        UNKNOWN = -1,
-        SKYRIM,
-        FALLOUT4
+    enum ScriptType {
+        Unknown = -1,
+        SkyrimScript,
+        Fallout4Script
     };
     Binary();
     virtual ~Binary();
@@ -43,16 +43,16 @@ public:
     const Objects& getObjects() const;
     Objects& getObjects();
 
-    GameType getGameType() const;
+    ScriptType getGameType() const;
     
 protected:
     friend FileReader;
-    void setGameType(GameType game_type);
+    void setScriptType(ScriptType game_type);
     Header m_Header;
     StringTable m_StringTable;
     DebugInfo m_DebugInfo;
     UserFlags m_UserFlags;
     Objects m_Objects;
-    GameType m_GameType;
+    ScriptType m_ScriptType;
 };
 }
