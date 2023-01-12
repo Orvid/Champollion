@@ -33,8 +33,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{github.workspace}}/build/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('${{github.workspace}}/repo/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('${{github.workspace}}/vcpkg.json') }}
         restore-keys: |
+          ${{ runner.os }}-vcpkg-${{ hashFiles('${{github.workspace}}/vcpkg.json') }}
           ${{ runner.os }}-vcpkg-
 
     - name: Configure CMake
