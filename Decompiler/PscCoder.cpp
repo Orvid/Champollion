@@ -1,5 +1,6 @@
 #include "PscCoder.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <ctime>
 #include <iostream>
@@ -9,6 +10,8 @@
 #include <string>
 
 #include "PscDecompiler.hpp"
+
+#include "EventNames.hpp"
 
 /**
  * @brief Constructor
@@ -473,8 +476,21 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         functionName = function.getName().asString();
     }
 
-    bool isEvent = functionName.size() > 2 && !_stricmp(functionName.substr(0, 2).c_str(), "on");
-    if (functionName.size() > 9 && !_stricmp(functionName.substr(0, 9).c_str(), "::remote_")) {
+    bool isEvent = false;
+    
+    if (functionName.size() > 2 && !_stricmp(functionName.substr(0, 2).c_str(), "on")) {
+        // We'd have to check for full inheritence to do this by object type
+        // Right now, we're just seeing if matches all the built-in event names.
+        if (pex.getGameType() == Pex::Binary::ScriptType::SkyrimScript){
+            if (std::find(Skyrim::EventNames.begin(), Skyrim::EventNames.end(), functionName) != Skyrim::EventNames.end()) {
+                isEvent = true;
+            }
+        } else if (pex.getGameType() == Pex::Binary::ScriptType::Fallout4Script){
+            if (std::find(Fallout4::EventNames.begin(), Fallout4::EventNames.end(), functionName) != Fallout4::EventNames.end()) {
+                isEvent = true;
+            }
+        }
+    } else if (functionName.size() > 9 && !_stricmp(functionName.substr(0, 9).c_str(), "::remote_")) {
       isEvent = true;
       functionName = functionName.substr(9);
       functionName[function.getParams()[0].getTypeName().asString().size()] = '.';
