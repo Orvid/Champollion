@@ -228,7 +228,7 @@ ProcessResults processFile(fs::path file, Params params)
         }
         Decompiler::PscCoder pscCoder(
             new Decompiler::StreamWriter(pscStream),
-            params.outputAssembly,
+            params.outputComment,
             params.writeHeader,
             params.traceDecompilation,
             params.dumpTree,
