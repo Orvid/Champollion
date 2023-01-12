@@ -24,7 +24,6 @@
  * @param dumpTree True to output the entire tree for each block (true by default if traceDecompilation is true).
  * @param traceDir If tracing is enabled, write rebuild logs to this dir (default is cwd)
  */
-
 Decompiler::PscCoder::PscCoder( OutputWriter* writer,
                                 bool commentAsm = false,
                                 bool writeHeader = false,
