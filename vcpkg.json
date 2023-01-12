@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/master/docs/vcpkg.schema.json",
   "name": "champollion",
-  "version-semver": "1.1.0",
+  "version-semver": "1.1.1",
   "port-version": 0,
   "description": "Papyrus Script Decompiler.",
   "homepage": "https://github.com/Orvid/Champollion",

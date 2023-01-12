@@ -132,7 +132,7 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 {
     auto& header = pex.getHeader();
     auto& debug  = pex.getDebugInfo();
-    write(";/ Decompiled by Champollion V1.1.0"); // TODO: Make this get the version number dynamically
+    write(";/ Decompiled by Champollion V1.1.1"); // TODO: Make this get the version number dynamically
     write(indent(0) << "PEX format v" << (int)header.getMajorVersion() << "." << (int)header.getMinorVersion() << " GameID: " << header.getGameID());
     write(indent(0) << "Source   : " << header.getSourceFileName());
     if (debug.getModificationTime() != 0)
