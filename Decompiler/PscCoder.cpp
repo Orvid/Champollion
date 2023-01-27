@@ -686,6 +686,7 @@ void str_to_lower(std::string &p_str){
 */
 std::string Decompiler::PscCoder::mapType(std::string type)
 {
+    std::replace(type.begin(), type.end(), '#', ':');
     if (type.length() > 2 && type[type.length() - 2] == '[' && type[type.length() - 1] == ']')
         return mapType(type.substr(0, type.length() - 2)) + "[]";
     auto lowerType = type;
