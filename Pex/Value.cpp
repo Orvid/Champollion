@@ -297,7 +297,7 @@ std::string Pex::Value::toString() const
             for (; i >= 0; i--) {
                 if (str[i] != '0') {
                     if (str[i] == '.')
-                        i--;
+                        i++;
                     break;
                 }
             }
