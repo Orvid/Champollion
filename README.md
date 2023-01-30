@@ -8,7 +8,7 @@ Champollion is a CLI-only program.
 
 ### Parameters
 
-Champollion *<files or directories>* [-p *<output directory>*] [-a [*<assembly directory>*]] [-c] [-t]
+`Champollion <files or directories> [-p <output directory>] [-a [<assembly directory>]] [-c] [-t]`
 
 | Short                     | Long                         | Description                                                  |
 | ------------------------- | ---------------------------- | ------------------------------------------------------------ |
@@ -32,6 +32,9 @@ Champollion *<files or directories>* [-p *<output directory>*] [-a [*<assembly d
 ## Copyright
 
 Copyright (c) 2022 Nikita Lita
+
 Copyright (c) 2015 Orvid King
+
 Copyright (c) 2013 Paul-Henry Perrin
+
 See LICENSE for the LGPL V3 license.
