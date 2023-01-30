@@ -3,7 +3,7 @@ cmake_policy(SET CMP0048 NEW) # VERSION variables
 cmake_policy(SET CMP0091 NEW) # CMAKE_MSVC_RUNTIME_LIBRARY
 # package information
 set(PACKAGE_NAME      "Champollion")
-set(PACKAGE_VERSION   "1.1.1")
+set(PACKAGE_VERSION   "1.1.2")
 set(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 set(PACKAGE_BUGREPORT "https://github.com/Orvid/champollion/issues")
@@ -13,7 +13,7 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 
-project(${PACKAGE_NAME} VERSION 1.1.1 LANGUAGES CXX)
+project(${PACKAGE_NAME} VERSION 1.1.2 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 
