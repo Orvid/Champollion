@@ -177,16 +177,16 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
         writeStructs(object, pex);
     }
 
-    if (object.getProperties().size()) {
-        write("");
-        write(";-- Properties --------------------------------------");
-        writeProperties(object, pex);
-    }
-
     if (object.getVariables().size()) {
         write("");
         write(";-- Variables ---------------------------------------");
         writeVariables(object, pex);
+    }
+
+    if (object.getProperties().size()) {
+        write("");
+        write(";-- Properties --------------------------------------");
+        writeProperties(object, pex);
     }
 
     writeStates(object, pex);
@@ -339,7 +339,8 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
                           !prop.isWritable() &&
                            prop.getReadFunction().getInstructions().size() == 1 &&
                            prop.getReadFunction().getInstructions()[0].getOpCode() == Pex::OpCode::RETURN &&
-                           prop.getReadFunction().getInstructions()[0].getArgs().size() == 1;
+                           prop.getReadFunction().getInstructions()[0].getArgs().size() == 1 &&
+                           prop.getReadFunction().getInstructions()[0].getArgs()[0].getType() != Pex::ValueType::Identifier;
     stream << mapType(prop.getTypeName().asString()) << " Property " << prop.getName().asString();
     if (prop.hasAutoVar()) {
         auto var = object.getVariables().findByName(prop.getAutoVarName());
