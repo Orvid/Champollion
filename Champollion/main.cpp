@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 
 #include <chrono>
 #include <future>
+#include <ctime>
 
 #include "Pex/Binary.hpp"
 #include "Pex/FileReader.hpp"
@@ -29,6 +30,8 @@ struct Params
     bool traceDecompilation;
     bool dumpTree;
     bool recreateDirStructure;
+    bool printInfo;
+    bool printCompileTime;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
@@ -51,6 +54,9 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.traceDecompilation = false;
     params.dumpTree = true;
     params.recreateDirStructure = true;
+    params.printInfo = true;
+    params.printCompileTime = true;
+
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
@@ -66,7 +72,9 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
             ("threaded,t", "Run decompilation in parallel mode")
             ("trace,g", "Trace the decompilation and output results to rebuild log")
             ("no-dump-tree", "Do not dump tree for each node during decompilation tracing (requires --trace)")
-            ("version", "Output version number")
+            ("print-info,i", "Print header info from the specified PEX file(s) and exit")
+            ("print-compile-time", "Print the compile time of the script in format of {filename}: {time_integer} and exit")
+            ("version,V", "Output version number")
     ;
     options::options_description files;
     files.add_options()
@@ -108,49 +116,54 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.traceDecompilation = (args.count("trace") != 0);
     params.dumpTree = params.traceDecompilation && args.count("no-dump-tree") == 0;
     params.recreateDirStructure = (args.count("recreate-subdirs") != 0);
-
-    try
+    params.printInfo = (args.count("print-info") != 0);
+    params.printCompileTime = (args.count("print-compile-time") != 0);
+    if (!params.printInfo)
     {
-        if (args.count("asm"))
+        try
         {
-            params.outputAssembly = true;
-            auto dir = args["asm"].as<std::string>();
-            if (! dir.empty())
-            {
-                params.assemblyDir = fs::path(dir);
-                if (!fs::exists(params.assemblyDir))
+                if (args.count("asm"))
                 {
-                    fs::create_directories(params.assemblyDir);
+                    params.outputAssembly = true;
+                    auto dir = args["asm"].as<std::string>();
+                    if (! dir.empty())
+                    {
+                        params.assemblyDir = fs::path(dir);
+                        if (!fs::exists(params.assemblyDir))
+                        {
+                            fs::create_directories(params.assemblyDir);
+                        }
+                        else if (!fs::is_directory(params.assemblyDir))
+                        {
+                            std::cout << params.assemblyDir << " is not a directory" << std::endl;
+                            return Invalid;
+                        }
+                    }
                 }
-                else if (!fs::is_directory(params.assemblyDir))
+                if (args.count("psc"))
                 {
-                    std::cout << params.assemblyDir << " is not a directory" << std::endl;
-                    return Invalid;
-                }
-            }
-        }
-        if (args.count("psc"))
-        {
-            auto dir = args["psc"].as<std::string>();
+                    auto dir = args["psc"].as<std::string>();
 
-            params.papyrusDir = fs::path(dir);
-            if (!fs::exists(params.papyrusDir))
-            {
-                fs::create_directories(params.papyrusDir);
-            }
-            else if (!fs::is_directory(params.papyrusDir))
-            {
-                std::cout << params.papyrusDir << " is not a directory" << std::endl;
-                return Invalid;
-            }
+                    params.papyrusDir = fs::path(dir);
+                    if (!fs::exists(params.papyrusDir))
+                    {
+                        fs::create_directories(params.papyrusDir);
+                    }
+                    else if (!fs::is_directory(params.papyrusDir))
+                    {
+                        std::cout << params.papyrusDir << " is not a directory" << std::endl;
+                        return Invalid;
+                    }
+                }
+            
+
+        }
+        catch(const std::exception& ex)
+        {
+            std::cout << ex.what();
+            return Invalid;
         }
     }
-    catch(const std::exception& ex)
-    {
-        std::cout << ex.what();
-        return Invalid;
-    }
-
     if(args.count("input"))
     {
         auto input_args = args["input"].as<std::vector<std::string>>();
@@ -176,6 +189,8 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     return Good;
 }
 
+
+
 typedef std::vector<std::string> ProcessResults;
 ProcessResults processFile(fs::path file, Params params)
 {
@@ -190,6 +205,31 @@ ProcessResults processFile(fs::path file, Params params)
     {
        result.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
        return result;
+    }
+    if (params.printInfo)
+    {
+        result.push_back(std::format("Script:             {}", file.string() ));
+        // print out all the info contained in the header and exit
+        result.push_back(std::format("  Game:             {}", pex.getGameType() == Pex::Binary::Fallout4Script ? "Fallout 4" : "Skyrim"));
+        auto header = pex.getHeader();
+        result.push_back(std::format("  Game Version:     {}.{}", header.getMajorVersion(), header.getMinorVersion()));
+        result.push_back(std::format("  GameID:           {}", header.getGameID()));
+        auto time = header.getCompilationTime();
+        std::string hrtime = ctime(&time);
+        // trim trailing line break
+        hrtime.erase(hrtime.find_last_not_of("\n") + 1);
+        result.push_back(std::format("  Compilation Time: {} ({}) ", time, hrtime));
+        result.push_back(std::format("  Source File:      {}", header.getSourceFileName()));
+        result.push_back(std::format("  User Name:        {}", header.getUserName()));
+        result.push_back(std::format("  Computer Name:    {}\n", header.getComputerName()));
+        return result;
+    }
+    if (params.printCompileTime)
+    {
+        auto header = pex.getHeader();
+        auto time = header.getCompilationTime();
+        result.push_back(std::format("{}: {}", file.string(), time));
+        return result;
     }
     if (params.outputAssembly)
     {
@@ -255,7 +295,8 @@ int main(int argc, char* argv[])
     if (result == Good)
     {
         auto start = std::chrono::steady_clock::now();
-        if(!args.parallel)
+        // ignore parallel if we are printing info
+        if(!args.parallel || args.printInfo || args.printCompileTime)
         {
             for (auto path : args.inputs)
             {
