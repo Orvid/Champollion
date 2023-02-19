@@ -490,7 +490,9 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
                 isEvent = true;
             }
         }
-    } else if (functionName.size() > 9 && !_stricmp(functionName.substr(0, 9).c_str(), "::remote_")) {
+    }
+
+    if (functionName.size() > 9 && !_stricmp(functionName.substr(0, 9).c_str(), "::remote_")) {
       isEvent = true;
       functionName = functionName.substr(9);
       functionName[function.getParams()[0].getTypeName().asString().size()] = '.';
