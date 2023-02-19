@@ -21,8 +21,18 @@ CMakeUserPresets.json
 
 # End of https://www.toptal.com/developers/gitignore/api/cmake
 
+# Visual Studio
 .vs/
+
+# Visual Studio Code
 .vscode/
+
+# vcpkg
 vcpkg_installed/
 vcpkg_installed/**
+# Default build directory
 build
+
+# Jetbrains IDEs
+.idea/
+cmake-build-*
