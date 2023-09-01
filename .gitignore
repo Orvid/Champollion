@@ -30,9 +30,43 @@ CMakeUserPresets.json
 # vcpkg
 vcpkg_installed/
 vcpkg_installed/**
+vcpkg-manifest-install.log
 # Default build directory
 build
 
 # Jetbrains IDEs
 .idea/
 cmake-build-*
+
+ALL_BUILD.vcxproj
+ALL_BUILD.vcxproj.filters
+ALL_BUILD.vcxproj.user
+INSTALL.vcxproj
+INSTALL.vcxproj.filters
+ZERO_CHECK.vcxproj
+ZERO_CHECK.vcxproj.filters
+Champollion.sln
+Champollion/Champollion.dir/
+Champollion/Champollion.vcxproj
+Champollion/Champollion.vcxproj.filters
+Champollion/Champollion.vcxproj.user
+Champollion/Debug/
+Champollion/Release/
+Champollion/INSTALL.vcxproj
+Champollion/INSTALL.vcxproj.filters
+Decompiler/Debug/
+Decompiler/Release/
+Decompiler/Decompiler.dir/
+Decompiler/Decompiler.vcxproj
+Decompiler/Decompiler.vcxproj.filters
+Decompiler/INSTALL.vcxproj
+Decompiler/INSTALL.vcxproj.filters
+Pex/Debug/
+Pex/Release/
+Pex/Pex.dir/
+Pex/Pex.vcxproj
+Pex/Pex.vcxproj.filters
+Pex/Pex.vcxproj.user
+Pex/INSTALL.vcxproj
+Pex/INSTALL.vcxproj.filters
+x64/
