@@ -54,7 +54,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
-    std::string version_string = "Champollion PEX decompiler v1.1.3";
+    std::string version_string = "Champollion PEX decompiler v1.2.0";
     options::options_description desc(version_string);
     desc.add_options()
             ("help,h", "Display the help message")
