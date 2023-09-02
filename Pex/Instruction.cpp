@@ -73,7 +73,10 @@ static const OpCodeInfo OPCODES[int(Pex::OpCode::MAX_OPCODE)] = {
     {"array_removelast", 1, false},
     {"array_remove", 3, false},
     {"array_clear", 1, false},
-	{"array_getallmatchingstructs", 6, false},
+    {"array_getallmatchingstructs", 6, false},
+    {"lock_guards", 0, true},
+    {"unlock_guards", 0, true},
+    {"try_lock_guards", 1, true},
 };
 
 /**

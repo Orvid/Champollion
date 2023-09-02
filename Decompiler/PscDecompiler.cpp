@@ -115,6 +115,9 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
         m_TempTable.push_back("getallmatchingstructs");
+        m_TempTable.push_back("lock");
+        m_TempTable.push_back("unlock");
+        m_TempTable.push_back("trylock");
 
         //findReplacedVars();
         findVarTypes();
@@ -403,8 +406,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
             auto& varargs = ins.getVarArgs();
 
             Node::BasePtr node;
-            switch(ins.getOpCode())
-            {
+            switch (ins.getOpCode()) {
                 case Pex::OpCode::NOP:
                     //do nothing
                     break;
@@ -456,15 +458,11 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::CAST:
                 {
-                    if(args[1].getType() == Pex::ValueType::None)
-                    {
+                    if (args[1].getType() == Pex::ValueType::None) {
                         node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
-                    }
-                    else if (args[1].getType() != Pex::ValueType::Identifier || (typeOfVar(args[0].getId()) != typeOfVar(args[1].getId()) && args[1].getId() != m_NoneVar) )
-                    {                    
+                    } else if (args[1].getType() != Pex::ValueType::Identifier || (typeOfVar(args[0].getId()) != typeOfVar(args[1].getId()) && args[1].getId() != m_NoneVar)) {
                         node = std::make_shared<Node::Cast>(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
-                    }
-                    else // two variables of the same type, equivalent to an assign
+                    } else // two variables of the same type, equivalent to an assign
                     {
                         node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                     }
@@ -504,10 +502,9 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 {
                     auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[1]), args[0].getId());
                     auto argNode = callNode->getParameters();
-                    for (auto varg : varargs)
-                    {
+                    for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
-                    }                
+                    }
                     node = callNode;
                     break;
                 }
@@ -515,8 +512,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 {
                     auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), std::make_shared<Node::IdentifierString>(ip, "Parent"), args[0].getId());
                     auto argNode = callNode->getParameters();
-                    for (auto varg : varargs)
-                    {
+                    for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
                     }
                     node = callNode;
@@ -526,8 +522,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 {
                     auto callNode = std::make_shared<Node::CallMethod>(ip, args[2].getId(), fromValue(ip, args[0]), args[1].getId());
                     auto argNode = callNode->getParameters();
-                    for (auto varg : varargs)
-                    {
+                    for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
                     }
                     node = callNode;
@@ -535,12 +530,9 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::RETURN:
                 {
-                    if(m_ReturnNone)
-                    {
+                    if (m_ReturnNone) {
                         node = std::make_shared<Node::Return>(ip, nullptr);
-                    }
-                    else
-                    {
+                    } else {
                         node = std::make_shared<Node::Return>(ip, fromValue(ip, args[0]));
                     }
                     break;
@@ -693,7 +685,40 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                     node = callNode;
                     break;
                 }
-
+                case Pex::OpCode::LOCK_GUARDS:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "lfunc"), m_TempTable.findIdentifier("lock"));
+                    auto argNode = callNode->getParameters();
+                    for (auto varg : varargs) {
+                        *argNode << fromValue(ip, varg);
+                    }
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::UNLOCK_GUARDS:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "lfunc"), m_TempTable.findIdentifier("unlock"));
+                    auto argNode = callNode->getParameters();
+                    for (auto varg : varargs) {
+                        *argNode << fromValue(ip, varg);
+                    }
+                    node = callNode;
+                    break;
+                }
+                case Pex::OpCode::TRY_LOCK_GUARDS:
+                {
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[0].getId(), std::make_shared<Node::IdentifierString>(ip, "lfunc"), m_TempTable.findIdentifier("trylock"));
+                    auto argNode = callNode->getParameters();
+                    for (auto varg : varargs) {
+                        *argNode << fromValue(ip, varg);
+                    }
+                    node = callNode;
+                    break;
+                }
+                default:
+                {
+                    throw std::exception("Unsupported opcode");
+                }
             }
             if (node)
             {                

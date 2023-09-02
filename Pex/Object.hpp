@@ -11,6 +11,7 @@
 #include "Variable.hpp"
 #include "Property.hpp"
 #include "State.hpp"
+#include "Guard.hpp"
 
 namespace Pex {
 
@@ -52,6 +53,9 @@ public:
     const States& getStates() const;
     States& getStates();
 
+    const Guards& getGuards() const;
+    Guards& getGuards();
+
 private:
     StringTable::Index m_ParentClassName;
     StringTable::Index m_AutoStateName;
@@ -61,7 +65,7 @@ private:
     Variables m_Variables;
     Properties m_Properties;
     States m_States;
-
+    Guards m_Guards;
 };
 
 typedef std::vector<Object> Objects;

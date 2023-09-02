@@ -58,8 +58,12 @@ enum class OpCode {
     ARRAY_REMOVELAST,
     ARRAY_REMOVE,
     ARRAY_CLEAR,
-    //New in Fallout 76
+    // New in Fallout 76
     ARRAY_GETALLMATCHINGSTRUCTS,
+    // New in Starfield
+    LOCK_GUARDS,
+    UNLOCK_GUARDS,
+    TRY_LOCK_GUARDS,
     MAX_OPCODE
 };
 

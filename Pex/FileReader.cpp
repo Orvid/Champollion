@@ -62,7 +62,7 @@ void Pex::FileReader::read(Pex::Binary &binary)
     m_StringTable = & binary.getStringTable();
     read(binary.getDebugInfo());
     read(binary.getUserFlags());
-    read(binary.getObjects());    
+    read(binary.getHeader(), binary.getObjects());    
 }
 
 /**
@@ -88,7 +88,6 @@ void Pex::FileReader::readHeader(Pex::Header &header)
     } else {
         m_endianness = LITTLE_ENDIAN;
     }
-
     header.setMajorVersion(getUint8());
     header.setMinorVersion(getUint8());
     header.setGameID(getUint16());
@@ -201,7 +200,7 @@ void Pex::FileReader::read(Pex::UserFlags &userFlags)
  * @brief Reads the Objects definitions from the file.
  * @param[in] objects Object collection to fill in.
  */
-void Pex::FileReader::read(Pex::Objects &objects)
+void Pex::FileReader::read(const Pex::Header &header, Pex::Objects &objects)
 {
     auto count = getUint16();
     objects.resize(count);
@@ -224,6 +223,9 @@ void Pex::FileReader::read(Pex::Objects &objects)
             read(object.getStructInfos());
         }
         read(object.getVariables());
+        if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() >= 12)) {
+            read(object.getGuards());
+        }
         read(object.getProperties());
         read(object.getStates());
     }
@@ -323,6 +325,18 @@ void Pex::FileReader::read(Pex::States &states)
     {
         state.setName(getStringIndex());
         read(state.getFunctions());
+    }
+}
+
+/**
+ * @brief Reads the Guards definition for an object
+ * @param[in] guards collection to fill in.
+ */
+void Pex::FileReader::read(Pex::Guards& guards) {
+    auto guardCount = getUint16();
+    guards.resize(guardCount);
+    for (auto& guard : guards) {
+        guard.setName(getStringIndex());
     }
 }
 

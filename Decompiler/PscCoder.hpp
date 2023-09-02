@@ -30,6 +30,7 @@ protected:
     void writeProperties(const Pex::Object& object, const Pex::Binary& pex);
     void writeProperty(int i, const Pex::Property& prop, const Pex::Object &object, const Pex::Binary& pex);
     void writeVariables(const Pex::Object& object, const Pex::Binary& pex);
+    void writeGuards(const Pex::Object& object, const Pex::Binary& pex);
     void writeStates(const Pex::Object& object, const Pex::Binary& pex);
     void writeFunctions(int i, const Pex::State& state, const Pex::Object &object, const Pex::Binary& pex);
     void writeFunction(int i, const Pex::Function& function, const Pex::Object &object, const Pex::Binary& pex, const std::string& name = "");

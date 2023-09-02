@@ -183,6 +183,12 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
         writeVariables(object, pex);
     }
 
+    if (object.getGuards().size()) {
+        write("");
+        write(";-- Guards ------------------------------------------");
+        writeGuards(object, pex);
+    }
+
     if (object.getProperties().size()) {
         write("");
         write(";-- Properties --------------------------------------");
@@ -406,6 +412,17 @@ void Decompiler::PscCoder::writeVariables(const Pex::Object &object, const Pex::
     }
 }
 
+/**
+ * @brief Write the guards contained in the object.
+ * @param object Object containing the guards.
+ * @param pex Binary to decompile.
+ */
+void Decompiler::PscCoder::writeGuards(const Pex::Object& object, const Pex::Binary& pex) {
+    for (auto& guard : object.getGuards()) {
+        auto name = guard.getName().asString();
+        write("Guard " + name);
+    }
+}
 
 /**
  * @brief Write the states contained in the object.

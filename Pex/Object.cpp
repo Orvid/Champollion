@@ -111,3 +111,19 @@ Pex::States &Pex::Object::getStates()
 {
     return m_States;
 }
+
+/**
+ * @brief Get the guards list
+ * @return The const guards list
+ */
+const Pex::Guards& Pex::Object::getGuards() const {
+    return m_Guards;
+}
+
+/**
+ * @brief Get the guards list
+ * @return The const guards list
+ */
+Pex::Guards& Pex::Object::getGuards() {
+    return m_Guards;
+}

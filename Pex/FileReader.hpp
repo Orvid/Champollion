@@ -35,11 +35,12 @@ protected:
     void read(StringTable& stringTable);
     void read(DebugInfo& debugInfo);
     void read(UserFlags& userFlags);
-    void read(Objects& objects);
+    void read(const Pex::Header& header, Objects& objects);
     void read(StructInfos& structInfos);
     void read(Variables& variables);
     void read(Properties& properties);
     void read(States& states);
+    void read(Guards& guards);
     void read(Functions& functions);
     void read(Function& function);
     void read(TypedNames& typednames);
