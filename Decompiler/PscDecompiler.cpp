@@ -115,9 +115,9 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
         m_TempTable.push_back("getallmatchingstructs");
-        m_TempTable.push_back("lock");
-        m_TempTable.push_back("unlock");
-        m_TempTable.push_back("trylock");
+        m_TempTable.push_back("Lock");
+        m_TempTable.push_back("Unlock");
+        m_TempTable.push_back("TryLock");
 
         //findReplacedVars();
         findVarTypes();
@@ -687,7 +687,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::LOCK_GUARDS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "lfunc"), m_TempTable.findIdentifier("lock"));
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "Self"), m_TempTable.findIdentifier("Lock"));
                     auto argNode = callNode->getParameters();
                     for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
@@ -697,7 +697,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::UNLOCK_GUARDS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "lfunc"), m_TempTable.findIdentifier("unlock"));
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "Self"), m_TempTable.findIdentifier("Unlock"));
                     auto argNode = callNode->getParameters();
                     for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
@@ -707,7 +707,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::TRY_LOCK_GUARDS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[0].getId(), std::make_shared<Node::IdentifierString>(ip, "lfunc"), m_TempTable.findIdentifier("trylock"));
+                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[0].getId(), std::make_shared<Node::IdentifierString>(ip, "Self"), m_TempTable.findIdentifier("TryLock"));
                     auto argNode = callNode->getParameters();
                     for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
