@@ -67,7 +67,19 @@ void Decompiler::PscCodeGenerator::visit(Node::Scope* node)
 void Decompiler::PscCodeGenerator::visit(Node::BinaryOperator* node)
 {
     bool parenOnLeft = node->getPrecedence() < node->getLeft()->getPrecedence();
+    if (node->getLeft()->is<Node::BinaryOperator>()) {
+        auto l = node->getLeft()->as<Node::BinaryOperator>();
+        if (l->getLeft()->is<Node::Cast>() || l->getRight()->is<Node::Cast>()) {
+            parenOnLeft = true;
+        }
+    }
     bool parenOnRight = node->getPrecedence() < node->getRight()->getPrecedence();
+    if (node->getRight()->is<Node::BinaryOperator>()) {
+        auto r = node->getRight()->as<Node::BinaryOperator>();
+        if (r->getLeft()->is<Node::Cast>() || r->getRight()->is<Node::Cast>()) {
+            parenOnRight = true;
+        }
+    }
     if (parenOnLeft)
     {
         m_Result << "(";
