@@ -35,7 +35,7 @@ protected:
     void read(StringTable& stringTable);
     void read(DebugInfo& debugInfo);
     void read(UserFlags& userFlags);
-    void read(const Pex::Header& header, Objects& objects);
+    void read(Pex::Binary::ScriptType script_type, Objects& objects);
     void read(StructInfos& structInfos);
     void read(Variables& variables);
     void read(Properties& properties);

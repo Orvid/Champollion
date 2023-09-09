@@ -506,6 +506,8 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             if (std::find(Fallout4::EventNames.begin(), Fallout4::EventNames.end(), functionName) != Fallout4::EventNames.end()) {
                 isEvent = true;
             }
+        } else if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
+            // TODO: Add Starfield event names
         }
     }
 
