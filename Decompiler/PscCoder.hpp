@@ -10,7 +10,8 @@ class PscCoder :
         public Coder
 {
 public:
-    PscCoder(OutputWriter* writer, bool commentAsm, bool writeHeader, bool traceDecompilation, bool dumpTree, std::string traceDir);
+    PscCoder(OutputWriter *writer, bool commentAsm, bool writeHeader, bool traceDecompilation, bool dumpTree,
+             bool writeDebugFuncs, std::string traceDir);
     PscCoder(OutputWriter* writer);
     ~PscCoder();
 
@@ -43,6 +44,7 @@ protected:
     bool m_WriteHeader;
     bool m_TraceDecompilation;
     bool m_DumpTree;
+    bool m_WriteDebugFuncs;
     std::string m_OutputDir;
 };
 }

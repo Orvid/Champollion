@@ -29,12 +29,14 @@ Decompiler::PscCoder::PscCoder( OutputWriter* writer,
                                 bool writeHeader = false,
                                 bool traceDecompilation = false,
                                 bool dumpTree = true,   
+                                bool writeDebugFuncs = false,
                                 std::string traceDir = ""):
     Coder(writer),
     m_CommentAsm(commentAsm),
     m_WriteHeader(writeHeader),
     m_TraceDecompilation(traceDecompilation),
     m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
+    m_WriteDebugFuncs(writeDebugFuncs),
     m_OutputDir(traceDir)
 {
     
@@ -52,6 +54,7 @@ Decompiler::PscCoder::PscCoder(Decompiler::OutputWriter *writer)  :
     m_WriteHeader(false),
     m_TraceDecompilation(false),
     m_DumpTree(true),
+    m_WriteDebugFuncs(false),
     m_OutputDir("")
 {
 }
@@ -517,8 +520,14 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
       functionName[function.getParams()[0].getTypeName().asString().size()] = '.';
     }
 
-    if (functionName != "GetState" && functionName != "GotoState")
-    {
+    if (!m_WriteDebugFuncs
+        && (functionName == "GetState" || functionName == "GotoState" ||
+            // Starfield compiler generated functions
+            (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript
+                && (!_stricmp(functionName.c_str(), "warning")
+                    || !_stricmp(functionName.c_str(), "Trace"))))) {
+        write(indent(i) << "; Skipped compiler generated " << functionName);
+    } else {
         auto stream = indent(i);
         if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
             stream << mapType(function.getReturnTypeName().asString()) << " ";
@@ -559,8 +568,8 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
 
         if (! function.isNative())
         {
-            for (auto& line : PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree, m_OutputDir))
-            {
+            for (auto &line: PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
+                                           m_OutputDir)) {
                 write(indent(i+1) << line);
             }
             if (isEvent)
@@ -568,10 +577,6 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             else
               write(indent(i) << "EndFunction");
         }
-    }
-    else
-    {
-        write(indent(i) << "; Skipped compiler generated " << functionName);
     }
 }
 
