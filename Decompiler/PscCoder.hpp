@@ -46,5 +46,7 @@ protected:
     bool m_DumpTree;
     bool m_WriteDebugFuncs;
     std::string m_OutputDir;
+
+    bool isCompilerGeneratedFunc(const std::string &name, const Pex::Binary::ScriptType scriptType) const;
 };
 }

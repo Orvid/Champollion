@@ -1476,3 +1476,19 @@ void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
         ++it;
     }
 }
+
+bool Decompiler::PscDecompiler::isDebugFunction() {
+    // TODO: Actually walk the tree instead of doing dump string comparisons
+    // We need to check if there are still ::temp variables in the tree.
+    // If there are, then this indicates that this read from debug variables that
+    // were not actually initialized because they were marked DebugOnly
+    // and weren't properly poisoned by the Papyrus debugger.
+    for (auto& line : *this) {
+        size_t i = line.find("::temp");
+        size_t comment = line.find(";");
+        if (i != std::string::npos && (comment == std::string::npos || i < comment)) {
+            return true;
+        }
+    }
+    return false;
+}

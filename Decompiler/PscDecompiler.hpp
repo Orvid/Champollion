@@ -32,6 +32,7 @@ public:
     ~PscDecompiler();
 
     void decodeToAsm(std::uint8_t level, size_t begin, size_t end);
+    bool isDebugFunction();
 
 protected:
 

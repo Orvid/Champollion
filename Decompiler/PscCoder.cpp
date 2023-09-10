@@ -501,12 +501,14 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
     if (functionName.size() > 2 && !_stricmp(functionName.substr(0, 2).c_str(), "on")) {
         // We'd have to check for full inheritence to do this by object type
         // Right now, we're just seeing if matches all the built-in event names.
+        std::string functionLower = functionName;
+        std::transform(functionLower.begin(), functionLower.end(), functionLower.begin(), ::tolower);
         if (pex.getGameType() == Pex::Binary::ScriptType::SkyrimScript){
-            if (std::find(Skyrim::EventNames.begin(), Skyrim::EventNames.end(), functionName) != Skyrim::EventNames.end()) {
+            if (std::find(Skyrim::EventNamesLowerCase.begin(), Skyrim::EventNamesLowerCase.end(), functionLower) != Skyrim::EventNamesLowerCase.end()) {
                 isEvent = true;
             }
         } else if (pex.getGameType() == Pex::Binary::ScriptType::Fallout4Script){
-            if (std::find(Fallout4::EventNames.begin(), Fallout4::EventNames.end(), functionName) != Fallout4::EventNames.end()) {
+            if (std::find(Fallout4::EventNamesLowerCase.begin(), Fallout4::EventNamesLowerCase.end(), functionLower) != Fallout4::EventNamesLowerCase.end()) {
                 isEvent = true;
             }
         } else if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
@@ -520,14 +522,14 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
       functionName[function.getParams()[0].getTypeName().asString().size()] = '.';
     }
 
-    if (!m_WriteDebugFuncs
-        && (functionName == "GetState" || functionName == "GotoState" ||
-            // Starfield compiler generated functions
-            (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript
-                && (!_stricmp(functionName.c_str(), "warning")
-                    || !_stricmp(functionName.c_str(), "Trace"))))) {
+    if (isCompilerGeneratedFunc(functionName, pex.getGameType())) {
+        if (!m_WriteDebugFuncs)
+        {
         write(indent(i) << "; Skipped compiler generated " << functionName);
-    } else {
+            return;
+        }
+        write(indent(i) << "; Compiler generated function");
+    }
         auto stream = indent(i);
         if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
             stream << mapType(function.getReturnTypeName().asString()) << " ";
@@ -553,6 +555,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         }
         stream << ")";
 
+
         if (function.isGlobal())
         {
             stream << " Global";
@@ -560,16 +563,25 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         if (function.isNative())
         {
             stream << " Native";
+        writeUserFlag(stream, function, pex);
+        write(stream.str());
+        writeDocString(i, function);
+    } else {
+        auto decomp = PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
+                                    m_OutputDir);
+        if (decomp.isDebugFunction()){
+            // reset stream, so we don't write this
+            if (!m_WriteDebugFuncs) {
+                write(indent(i) << "; Skipped inoperative debug function " << functionName);
+                return;
+            } else {
+                write(indent(i) << "; WARNING: possibly inoperative debug function " << functionName << "");
+            }
         }
         writeUserFlag(stream, function, pex);
         write(stream.str());
-
         writeDocString(i, function);
-
-        if (! function.isNative())
-        {
-            for (auto &line: PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
-                                           m_OutputDir)) {
+        for (auto &line: decomp) {
                 write(indent(i+1) << line);
             }
             if (isEvent)
@@ -577,7 +589,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             else
               write(indent(i) << "EndFunction");
         }
-    }
+
 }
 
 /**
@@ -722,4 +734,22 @@ std::string Decompiler::PscCoder::mapType(std::string type)
     if (a != prettyTypeNameMap.end())
         return a->second;
     return type;
+}
+
+bool Decompiler::PscCoder::isCompilerGeneratedFunc(const std::string &name, const Pex::Binary::ScriptType scriptType) const {
+    static const std::vector<std::string> globalCompilerGeneratedFuncs = {
+            "GetState",
+            "GoToState",
+    };
+    static const std::vector<std::string> starfieldCompilerGeneratedFuncs = {
+            "warning",
+            "Trace"
+    };
+    std::string nameLower = name;
+    str_to_lower(nameLower);
+    if (std::find(globalCompilerGeneratedFuncs.begin(), globalCompilerGeneratedFuncs.end(), name) != globalCompilerGeneratedFuncs.end())
+        return true;
+    if (scriptType == Pex::Binary::ScriptType::StarfieldScript && std::find(starfieldCompilerGeneratedFuncs.begin(), starfieldCompilerGeneratedFuncs.end(), name) != starfieldCompilerGeneratedFuncs.end())
+        return true;
+    return false;
 }
