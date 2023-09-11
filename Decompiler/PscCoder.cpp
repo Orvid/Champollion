@@ -547,39 +547,39 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         }
         write(indent(i) << "; Compiler generated function");
     }
-        auto stream = indent(i);
-        if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
-            stream << mapType(function.getReturnTypeName().asString()) << " ";
+    auto stream = indent(i);
+    if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
+        stream << mapType(function.getReturnTypeName().asString()) << " ";
 
-        if (isEvent)
-          stream << "Event ";
+    if (isEvent)
+      stream << "Event ";
+    else
+      stream << "Function ";
+    stream << functionName << "(";
+
+    auto first = true;
+    for (auto& param : function.getParams())
+    {
+        if (first)
+        {
+            first = false;
+        }
         else
-          stream << "Function ";
-        stream << functionName << "(";
-
-        auto first = true;
-        for (auto& param : function.getParams())
         {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                stream << ", ";
-            }
-            stream << mapType(param.getTypeName().asString()) << " " << param.getName();
+            stream << ", ";
         }
-        stream << ")";
+        stream << mapType(param.getTypeName().asString()) << " " << param.getName();
+    }
+    stream << ")";
 
 
-        if (function.isGlobal())
-        {
-            stream << " Global";
-        }
-        if (function.isNative())
-        {
-            stream << " Native";
+    if (function.isGlobal())
+    {
+        stream << " Global";
+    }
+    if (function.isNative())
+    {
+        stream << " Native";
         writeUserFlag(stream, function, pex);
         write(stream.str());
         writeDocString(i, function);
