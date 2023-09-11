@@ -71,6 +71,11 @@ void Pex::FileReader::read(Pex::Binary &binary)
     m_StringTable = & binary.getStringTable();
     read(binary.getDebugInfo());
     read(binary.getUserFlags());
+    std::vector<std::string> userFlagsstrs;
+    for (auto &flag : binary.getUserFlags())
+    {
+        userFlagsstrs.push_back(flag.getName().asString());
+    }
     read(binary.getGameType(), binary.getObjects());
 }
 

@@ -166,6 +166,21 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
     {
         stream << " Extends " << object.getParentClassName().asString();
     }
+
+    if (pex.getGameType() == Pex::Binary::ScriptType::Fallout4Script)
+    {
+        // TODO: Fallout 4 native classes
+    }
+    else if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript)
+    {
+        for (auto& native : Starfield::NativeClasses)
+        {
+            if (_stricmp(object.getName().asString().c_str(), native.c_str()) == 0){
+                stream << " Native";
+                break;
+            }
+        }
+    }
     if (object.getConstFlag())
       stream << " Const";
 
@@ -512,7 +527,9 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
                 isEvent = true;
             }
         } else if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
-            // TODO: Add Starfield event names
+            if (std::find(Starfield::EventNamesLowerCase.begin(), Starfield::EventNamesLowerCase.end(), functionLower) != Starfield::EventNamesLowerCase.end()) {
+                isEvent = true;
+            }
         }
     }
 
