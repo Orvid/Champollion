@@ -589,9 +589,6 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         write(stream.str());
         writeDocString(i, function);
     } else {
-        if (functionName == "TaskmasterPossibleRestore"){
-            int i = 0; // TODO: REMOVE THIS HACK
-        }
         auto decomp = PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
                                     m_OutputDir);
         if (decomp.isDebugFunction()) {
