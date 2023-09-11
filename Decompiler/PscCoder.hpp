@@ -47,6 +47,11 @@ protected:
     bool m_WriteDebugFuncs;
     std::string m_OutputDir;
 
-    bool isCompilerGeneratedFunc(const std::string &name, const Pex::Binary::ScriptType scriptType) const;
+
+
+    bool isNativeObject(const Pex::Object &object, const Pex::Binary::ScriptType &scriptType) const;
+
+    bool isCompilerGeneratedFunc(const std::string &name, const Pex::Object &object,
+                                 Pex::Binary::ScriptType scriptType) const;
 };
 }
