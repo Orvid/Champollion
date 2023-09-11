@@ -297,6 +297,7 @@ void Decompiler::PscCodeGenerator::visit(Node::While* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
 {
+    auto cond = node->getCondition();
     m_Result << "If ";
     node->getCondition()->visit(this);
     m_Level++;
@@ -336,5 +337,32 @@ void Decompiler::PscCodeGenerator::visit(Node::Declare *node)
 {
     m_Result << PscCoder::mapType(node->getType().asString()) << " ";
     node->getObject()->visit(this);
+}
+
+void Decompiler::PscCodeGenerator::visit(Node::Lock *node) {
+    m_Result << "Lock ";
+    node->getParameters()->visit(this);
+    m_Level++;
+    newLine();
+    node->getBody()->visit(this);
+    m_Level--;
+    newLine();
+    m_Result << "EndLock";
+}
+
+void Decompiler::PscCodeGenerator::visit(Node::TryLock *node) {
+    m_Result << "TryLock ";
+    node->getParameters()->visit(this);
+    m_Level++;
+    newLine();
+    node->getBody()->visit(this);
+    m_Level--;
+    newLine();
+    m_Result << "EndLock";
+
+}
+
+void Decompiler::PscCodeGenerator::visit(Node::Unlock *node) {
+    // NONE
 }
 

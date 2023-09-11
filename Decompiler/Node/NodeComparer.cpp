@@ -182,7 +182,6 @@ void Node::NodeComparer::visit(Node::While *node)
     };
     m_Reference->visit(& m_Visitor);
 }
-
 void Node::NodeComparer::visit(Node::IfElse *node)
 {
     m_Visitor << (DynamicVisitor::LambdaIfElse)[&](IfElse* ref, DynamicVisitor*) {
@@ -195,6 +194,30 @@ void Node::NodeComparer::visit(Node::Declare *node)
 {
     m_Visitor << (DynamicVisitor::LambdaDeclare)[&](Declare* ref, DynamicVisitor*) {
         m_Result = ref->getType() == node->getType() && isSameChildren(ref, node);
+    };
+    m_Reference->visit(& m_Visitor);
+}
+
+void Node::NodeComparer::visit(Node::Lock *node)
+{
+    m_Visitor << (DynamicVisitor::LambdaLock)[&](Lock* ref, DynamicVisitor*) {
+        m_Result = isSameChildren(ref, node);
+    };
+    m_Reference->visit(& m_Visitor);
+}
+
+void Node::NodeComparer::visit(Node::TryLock *node)
+{
+    m_Visitor << (DynamicVisitor::LambdaLock)[&](Lock* ref, DynamicVisitor*) {
+        m_Result = isSameChildren(ref, node);
+    };
+    m_Reference->visit(& m_Visitor);
+}
+
+void Node::NodeComparer::visit(Node::Unlock *node)
+{
+    m_Visitor << (DynamicVisitor::LambdaLock)[&](Lock* ref, DynamicVisitor*) {
+        m_Result = isSameChildren(ref, node);
     };
     m_Reference->visit(& m_Visitor);
 }

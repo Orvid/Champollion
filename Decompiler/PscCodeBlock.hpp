@@ -27,6 +27,8 @@ class PscCodeBlock
 public:
     static const size_t END = 0xFFFFFFFF;
 
+    void addLockGuard(Pex::StringTable::Index index);
+
 public:
     PscCodeBlock(size_t getBegin, size_t getEnd);
     ~PscCodeBlock();
@@ -40,6 +42,7 @@ public:
     const Pex::StringTable::Index& getCondition() const;
 
     bool isConditional() const;
+    bool isLock() const;
 
     void setEnd(size_t getEnd);
     void setNext(size_t getNext);
@@ -56,6 +59,7 @@ protected:
     size_t m_Next;
     size_t m_OnFalse;
     Pex::StringTable::Index m_Condition;
+    std::vector<Pex::StringTable::Index> m_Guards;
 
     Node::BasePtr m_Scope;
 

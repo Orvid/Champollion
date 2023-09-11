@@ -268,6 +268,41 @@ public:
         node->getObject()->visit(this);
         leave();
     }
+
+    virtual void visit(Node::Lock* node)
+    {
+        enter("Lock", node);
+        for (auto param : *node->getParameters())
+        {
+            m_Callback(indent() << "Param:");
+            param->visit(this);
+        }
+        m_Callback(indent() << "Body:");
+        node->getBody()->visit(this);
+        leave();
+    }
+    virtual void visit(Node::TryLock* node)
+    {
+        enter("Lock", node);
+        for (auto param : *node->getParameters())
+        {
+            m_Callback(indent() << "Param:");
+            param->visit(this);
+        }
+        m_Callback(indent() << "Body:");
+        node->getBody()->visit(this);
+        leave();
+    }
+    virtual void visit(Node::Unlock* node)
+    {
+        enter("Unlock", node);
+        for (auto param : *node->getParameters())
+        {
+            m_Callback(indent() << "Param:");
+            param->visit(this);
+        }
+        leave();
+    }
 };
 
 }
