@@ -620,6 +620,7 @@ namespace Decompiler{
                 "ConstructibleObject",
                 "Container",
                 "Curve",
+                "Debug",
                 "Door",
                 "EffectShader",
                 "Enchantment",

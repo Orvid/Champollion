@@ -601,29 +601,50 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             // Starfield debug function fixup hacks
             // These functions were supposed to have been compiled out of the pex, but the compiler left it in without restoring whatever the temp variable pointed to
             // This causes the recompilation to fail, so we need to replace the temp variable with false
+
+            bool fixed = false;
             if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
-                bool thing = _stricmp(object.getName().asString().c_str(), "ENV_Hazard_ParentScript");
                 if (functionName == "warning" ||
-                        (_stricmp(object.getName().asString().c_str(), "ENV_Hazard_ParentScript") == 0 && functionName == "GlobalWarning") || // only present on this script
-                        (_stricmp(object.getName().asString().c_str(), "ENV_AfflictionScript") == 0 && functionName == "TraceStats")) { // Only present on this script
-                    // find the `::temp\d+` variable in the lines with regex
-                    // replace it with `false`
-                    write(indent(i) << "; Fixup hacks for debug-only function: " << functionName);
-                    for (auto &line: decomp) {
+                    (_stricmp(object.getName().asString().c_str(), "ENV_Hazard_ParentScript") == 0 &&
+                     functionName == "GlobalWarning") || // only present on this script
+                    (_stricmp(object.getName().asString().c_str(), "ENV_AfflictionScript") == 0 &&
+                     functionName == "TraceStats")) { // Only present on this script
+                  // find the `::temp\d+` variable in the lines with regex
+                  // replace it with `false`
+                  fixed = true;
+                  for (auto &line: decomp) {
+                    if (std::regex_search(line, tempRegex)) {
+                      line = std::regex_replace(line, tempRegex, "false");
+                    }
+                  }
+                } else if ((_stricmp(object.getName().asString().c_str(), "RobotQuestRunner") == 0)) {
+                    if (functionName == "UpdateState") {
+                      fixed = true;
+                      for (auto &line: decomp) {
                         if (std::regex_search(line, tempRegex)) {
-                          line = std::regex_replace(line, tempRegex, "false");
+                          line = std::regex_replace(line, tempRegex, "None");
                         }
+                      }
+                    } else if (functionName == "MakeQuestNameSave") {
+                      fixed = true;
+                      for (auto &line: decomp) {
+                        if (std::regex_search(line, tempRegex)) {
+                          line = std::regex_replace(line, tempRegex, "questName");
+                        }
+                      }
                     }
                 }
+
             }
-            else if (!m_WriteDebugFuncs) {
-                write(indent(i) << "; Skipped inoperative debug function " << functionName);
-                return;
+            if (fixed){
+              write(indent(i) << "; Fixup hacks for debug-only function: " << functionName);
+            } else if (m_WriteDebugFuncs) {
+              write(indent(i) << "; WARNING: possibly inoperative debug function " << functionName << "");
             } else {
-                write(indent(i) << "; WARNING: possibly inoperative debug function " << functionName << "");
+              write(indent(i) << "; Skipped inoperative debug function " << functionName);
+              return;
             }
-        }
-        if (_stricmp(functionName.c_str(), "GotoState") == 0 || _stricmp(functionName.c_str(), "GetState") == 0) {
+        } else if (_stricmp(functionName.c_str(), "GotoState") == 0 || _stricmp(functionName.c_str(), "GetState") == 0) {
             // Starfield GotoState/GetState function fixup hacks
             if (_stricmp(object.getName().asString().c_str(), "ScriptObject") == 0) {
                 // find the `::State` variable in the lines

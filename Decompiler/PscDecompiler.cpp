@@ -1643,8 +1643,8 @@ bool Decompiler::PscDecompiler::isDebugFunction() {
     // were not actually initialized because they were marked DebugOnly
     // and weren't properly poisoned by the Papyrus debugger.
     for (auto& line : *this) {
-        size_t i = line.find("::temp");
-        size_t comment = line.find(";");
+        int64_t i = line.find("::temp");
+        int64_t comment = line.find(";");
         if (i != std::string::npos && (comment == std::string::npos || i < comment)) {
             return true;
         }

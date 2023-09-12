@@ -285,7 +285,7 @@ std::string Pex::Value::toString() const
         }
         case Pex::ValueType::Float:
         {
-            result << std::showpoint << std::defaultfloat << getFloat();
+            result << std::showpoint << std::fixed << std::setprecision(9) << getFloat();
 
             // Prevent a point to be the last character.
             if (result.str().back() == '.') {
