@@ -52,6 +52,7 @@ protected:
 
     std::ostringstream m_Result;
     std::uint8_t m_Level{ 0 };
+    std::vector<std::string> m_ExperimentalSyntaxWarning{};
     Decompiler::PscDecompiler* m_Decompiler;
 };
 

@@ -31,6 +31,13 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
 
 void Decompiler::PscCodeGenerator::newLine()
 {
+    if (!m_ExperimentalSyntaxWarning.empty()) {
+        m_Result << " ;*** Experimental syntax used, may be incorrect: ";
+        for (auto warn: m_ExperimentalSyntaxWarning){
+            m_Result << warn << " ";
+        }
+        m_ExperimentalSyntaxWarning.clear();
+    }
     m_Decompiler->push_back(m_Result.str());
     m_Result = std::ostringstream();
     for (auto i = 0; i < m_Level; ++i)
@@ -175,6 +182,9 @@ void Decompiler::PscCodeGenerator::visit(Node::CallMethod* node)
     m_Result << "." << node->getMethod() << "(";
     node->getParameters()->visit(this);
     m_Result << ")";
+    if (node->isExperimentalSyntax()) {
+        m_ExperimentalSyntaxWarning.push_back(node->getMethod().asString());
+    }
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::Params *node)
@@ -343,6 +353,8 @@ void Decompiler::PscCodeGenerator::visit(Node::Lock *node) {
     m_Result << "Lock ";
     node->getParameters()->visit(this);
     m_Level++;
+    // TODO: VERIFY: Remove this when syntax is verified
+    m_ExperimentalSyntaxWarning.push_back("Lock");
     newLine();
     node->getBody()->visit(this);
     m_Level--;
@@ -354,6 +366,8 @@ void Decompiler::PscCodeGenerator::visit(Node::TryLock *node) {
     m_Result << "TryLock ";
     node->getParameters()->visit(this);
     m_Level++;
+    // TODO: VERIFY: Remove this when syntax is verified
+    m_ExperimentalSyntaxWarning.push_back("TryLock");
     newLine();
     node->getBody()->visit(this);
     m_Level--;

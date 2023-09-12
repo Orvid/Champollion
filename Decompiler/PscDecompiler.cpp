@@ -114,7 +114,7 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         m_TempTable.push_back("removelast");
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
-        m_TempTable.push_back("ArrayGetMatchingStructs");
+        m_TempTable.push_back("GetMatchingStructs"); // TODO: VERIFY: Need to verify syntax when CK for Starfield comes out
 
         //findReplacedVars();
         findVarTypes();
@@ -690,7 +690,12 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::ARRAY_GETALLMATCHINGSTRUCTS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("ArrayGetMatchingStructs"));
+                    auto callNode = std::make_shared<Node::CallMethod>(
+                            ip,
+                            args[1].getId(),
+                            fromValue(ip, args[0]),
+                            m_TempTable.findIdentifier("GetMatchingStructs"),
+                            true); // TODO: VERIFY: remove this after verifying syntax when CK for Starfield comes out
                     auto argNode = callNode->getParameters();
                     *argNode << fromValue(ip, args[2]);
                     *argNode << fromValue(ip, args[3]);
