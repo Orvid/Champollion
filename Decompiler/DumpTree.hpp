@@ -283,7 +283,7 @@ public:
     }
     virtual void visit(Node::TryLock* node)
     {
-        enter("Lock", node);
+        enter("TryLock", node);
         for (auto param : *node->getParameters())
         {
             m_Callback(indent() << "Param:");
