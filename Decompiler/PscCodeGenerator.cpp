@@ -349,36 +349,36 @@ void Decompiler::PscCodeGenerator::visit(Node::Declare *node)
     node->getObject()->visit(this);
 }
 
-void Decompiler::PscCodeGenerator::visit(Node::Lock *node) {
-    m_Result << "Lock ";
+void Decompiler::PscCodeGenerator::visit(Node::GuardStatement *node) {
+    m_Result << "Guard ";
     node->getParameters()->visit(this);
     m_Level++;
     // TODO: VERIFY: Remove this when syntax is verified
-    m_ExperimentalSyntaxWarning.push_back("Lock");
+    m_ExperimentalSyntaxWarning.push_back("Guard");
     newLine();
     node->getBody()->visit(this);
     m_Level--;
     newLine();
-    m_Result << "EndLock";
-    m_ExperimentalSyntaxWarning.push_back("EndLock");
+    m_Result << "EndGuard";
+    m_ExperimentalSyntaxWarning.push_back("EndGuard");
 }
 
-void Decompiler::PscCodeGenerator::visit(Node::TryLock *node) {
-    m_Result << "TryLock ";
+void Decompiler::PscCodeGenerator::visit(Node::TryGuard *node) {
+    m_Result << "TryGuard ";
     node->getParameters()->visit(this);
     m_Level++;
     // TODO: VERIFY: Remove this when syntax is verified
-    m_ExperimentalSyntaxWarning.push_back("TryLock");
+    m_ExperimentalSyntaxWarning.push_back("TryGuard");
     newLine();
     node->getBody()->visit(this);
     m_Level--;
     newLine();
-    m_Result << "EndLock";
-    m_ExperimentalSyntaxWarning.push_back("EndLock");
+    m_Result << "EndGuard";
+    m_ExperimentalSyntaxWarning.push_back("EndGuard");
 
 }
 
-void Decompiler::PscCodeGenerator::visit(Node::Unlock *node) {
+void Decompiler::PscCodeGenerator::visit(Node::EndGuard *node) {
     // NONE
 }
 

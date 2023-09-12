@@ -198,25 +198,25 @@ void Node::NodeComparer::visit(Node::Declare *node)
     m_Reference->visit(& m_Visitor);
 }
 
-void Node::NodeComparer::visit(Node::Lock *node)
+void Node::NodeComparer::visit(Node::GuardStatement *node)
 {
-    m_Visitor << (DynamicVisitor::LambdaLock)[&](Lock* ref, DynamicVisitor*) {
+    m_Visitor << (DynamicVisitor::LambdaGuardStatement)[&](GuardStatement* ref, DynamicVisitor*) {
         m_Result = isSameChildren(ref, node);
     };
     m_Reference->visit(& m_Visitor);
 }
 
-void Node::NodeComparer::visit(Node::TryLock *node)
+void Node::NodeComparer::visit(Node::TryGuard *node)
 {
-    m_Visitor << (DynamicVisitor::LambdaLock)[&](Lock* ref, DynamicVisitor*) {
+    m_Visitor << (DynamicVisitor::LambdaTryGuard)[&](TryGuard* ref, DynamicVisitor*) {
         m_Result = isSameChildren(ref, node);
     };
     m_Reference->visit(& m_Visitor);
 }
 
-void Node::NodeComparer::visit(Node::Unlock *node)
+void Node::NodeComparer::visit(Node::EndGuard *node)
 {
-    m_Visitor << (DynamicVisitor::LambdaLock)[&](Lock* ref, DynamicVisitor*) {
+    m_Visitor << (DynamicVisitor::LambdaEndGuard)[&](EndGuard* ref, DynamicVisitor*) {
         m_Result = isSameChildren(ref, node);
     };
     m_Reference->visit(& m_Visitor);

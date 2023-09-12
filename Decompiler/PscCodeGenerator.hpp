@@ -42,9 +42,9 @@ public:
     virtual void visit(Node::While* node);
     virtual void visit(Node::IfElse* node);
     virtual void visit(Node::Declare* node);
-    virtual void visit(Node::Lock* node);
-    virtual void visit(Node::TryLock* node);
-    virtual void visit(Node::Unlock* node);
+    virtual void visit(Node::GuardStatement* node);
+    virtual void visit(Node::TryGuard* node);
+    virtual void visit(Node::EndGuard* node);
 
 
 protected:    

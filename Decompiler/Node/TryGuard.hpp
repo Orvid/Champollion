@@ -11,19 +11,19 @@
 
 namespace Node {
 
-    class Lock final :
+    class TryGuard final :
             public Base,
             public FieldParametersNodeMixin<0>,
             public FieldBodyNodeMixin<1>
     {
     public:
-        Lock(size_t ip, BasePtr body) :
-                Base(2, ip, 10),
+        TryGuard(size_t ip, const Pex::StringTable::Index& result, BasePtr body) :
+                Base(2, ip, 10, result),
                 FieldParametersNodeMixin(this, std::make_shared<Params>()),
                 FieldBodyNodeMixin(this, body)
         {
         }
-        virtual ~Lock() = default;
+        virtual ~TryGuard() = default;
 
         void visit(Visitor* visitor) override
         {

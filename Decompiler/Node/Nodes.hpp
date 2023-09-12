@@ -31,9 +31,9 @@
 
 #include "Declare.hpp"
 
-#include "Lock.hpp"
-#include "TryLock.hpp"
-#include "Unlock.hpp"
+#include "GuardStatement.hpp"
+#include "TryGuard.hpp"
+#include "EndGuard.hpp"
 
 
 #endif // NODES_HPP

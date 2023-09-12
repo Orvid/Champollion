@@ -269,9 +269,9 @@ public:
         leave();
     }
 
-    virtual void visit(Node::Lock* node)
+    virtual void visit(Node::GuardStatement* node)
     {
-        enter("Lock", node);
+        enter("Guard", node);
         for (auto param : *node->getParameters())
         {
             m_Callback(indent() << "Param:");
@@ -281,9 +281,9 @@ public:
         node->getBody()->visit(this);
         leave();
     }
-    virtual void visit(Node::TryLock* node)
+    virtual void visit(Node::TryGuard* node)
     {
-        enter("TryLock", node);
+        enter("TryGuard", node);
         for (auto param : *node->getParameters())
         {
             m_Callback(indent() << "Param:");
@@ -293,9 +293,9 @@ public:
         node->getBody()->visit(this);
         leave();
     }
-    virtual void visit(Node::Unlock* node)
+    virtual void visit(Node::EndGuard* node)
     {
-        enter("Unlock", node);
+        enter("EndGuard", node);
         for (auto param : *node->getParameters())
         {
             m_Callback(indent() << "Param:");

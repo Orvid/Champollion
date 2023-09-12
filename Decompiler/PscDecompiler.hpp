@@ -89,7 +89,7 @@ protected:
 
     void rebuildLocks(Node::BasePtr &program);
     void RemoveUnlocksFromBody(Node::BasePtr &body, const Node::BasePtr &matchingLock);
-    void LiftLockBody(std::shared_ptr<Node::Base> &lock);
+    void LiftLockBody(std::shared_ptr<Node::Base> &guard);
 
 };
 }

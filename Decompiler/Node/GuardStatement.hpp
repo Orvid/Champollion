@@ -11,17 +11,19 @@
 
 namespace Node {
 
-    class Unlock final :
+    class GuardStatement final :
             public Base,
-            public FieldParametersNodeMixin<0>
+            public FieldParametersNodeMixin<0>,
+            public FieldBodyNodeMixin<1>
     {
     public:
-        Unlock(size_t ip) :
-                Base(1, ip, 10),
-                FieldParametersNodeMixin(this, std::make_shared<Params>())
+        GuardStatement(size_t ip, BasePtr body) :
+                Base(2, ip, 10),
+                FieldParametersNodeMixin(this, std::make_shared<Params>()),
+                FieldBodyNodeMixin(this, body)
         {
         }
-        virtual ~Unlock() = default;
+        virtual ~GuardStatement() = default;
 
         void visit(Visitor* visitor) override
         {
