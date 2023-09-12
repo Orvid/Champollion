@@ -157,7 +157,12 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 bool Decompiler::PscCoder::isNativeObject(const Pex::Object &object, const Pex::Binary::ScriptType &scriptType) const {
     if (scriptType == Pex::Binary::ScriptType::Fallout4Script)
     {
-        // TODO: Fallout 4 native classes
+        for (auto& native : Fallout4::NativeClasses)
+        {
+            if (_stricmp(object.getName().asString().c_str(), native.c_str()) == 0){
+                return true;
+            }
+        }
     }
     else if (scriptType == Pex::Binary::ScriptType::StarfieldScript)
     {
