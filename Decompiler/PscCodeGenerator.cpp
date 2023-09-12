@@ -32,7 +32,7 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
 void Decompiler::PscCodeGenerator::newLine()
 {
     if (!m_ExperimentalSyntaxWarning.empty()) {
-        m_Result << " ;*** Experimental syntax used, may be incorrect: ";
+        m_Result << " ;*** WARNING: Experimental syntax, may be incorrect: ";
         for (auto warn: m_ExperimentalSyntaxWarning){
             m_Result << warn << " ";
         }
@@ -360,6 +360,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Lock *node) {
     m_Level--;
     newLine();
     m_Result << "EndLock";
+    m_ExperimentalSyntaxWarning.push_back("EndLock");
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::TryLock *node) {
@@ -373,6 +374,7 @@ void Decompiler::PscCodeGenerator::visit(Node::TryLock *node) {
     m_Level--;
     newLine();
     m_Result << "EndLock";
+    m_ExperimentalSyntaxWarning.push_back("EndLock");
 
 }
 
