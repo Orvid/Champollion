@@ -115,9 +115,6 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
         m_TempTable.push_back("ArrayGetMatchingStructs");
-        m_TempTable.push_back("Lock");
-        m_TempTable.push_back("Unlock");
-        m_TempTable.push_back("TryLock");
 
         //findReplacedVars();
         findVarTypes();
