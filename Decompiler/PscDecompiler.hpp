@@ -86,5 +86,10 @@ protected:
 
     std::ofstream m_Log;
     Pex::StringTable m_TempTable;
+
+    void rebuildLocks(Node::BasePtr &program);
+    void RemoveUnlocksFromBody(Node::BasePtr &body, const Node::BasePtr &matchingLock);
+    void LiftLockBody(std::shared_ptr<Node::Base> &lock);
+
 };
 }

@@ -132,6 +132,9 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         Node::BasePtr programTree = rebuildControlFlow(0, m_Function.getInstructions().size());
 
         declareVariables(programTree);
+
+        rebuildLocks(programTree);
+
         cleanUpTree(programTree);
 
         generateCode(programTree);
@@ -1293,6 +1296,15 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
         .on(program);
 
 
+    // Replace the identifiers name index with a string value, unmangling names and property autovar
+    Node::WithNode<Node::Constant>()
+            .select([&] (Node::Constant* node) {
+                return node->getConstant().getType() == Pex::ValueType::Identifier;
+            })
+            .transform([&] (Node::Constant* node) {
+                return std::make_shared<Node::IdentifierString>(node->getBegin(), getVarName(node->getConstant().getId()));
+            })
+            .on(program);
 
 
     // Apply ! operator on == comparison
@@ -1357,11 +1369,30 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
         .transform([&] (Node::Assign* node) {
             auto binaryOp = node->getValue()->as<Node::BinaryOperator>();
             return std::make_shared<Node::AssignOperator>(node->getBegin(), node->getDestination(), binaryOp->getOperator() + "=", binaryOp->getRight());
-
         })
         .on(program);
 
-    // Lift TryLock
+    program->computeInstructionBounds();
+
+}
+
+
+
+
+
+// Lock node body building
+// This is a bit of a hack to avoid messing with the current codeblocks processing
+// Instead of creating these bodies during `rebuildControlFlow`, we create them after the fact
+// This is because we have to determine the scope of each of lock/trylock/unlock nodes and
+// it's a lot easier if we know the existing scopes beforehand
+// TODO: Verify and clean this up
+void Decompiler::PscDecompiler::rebuildLocks(Node::BasePtr &program) {
+
+    // Lift TryLocks
+    // We are making the assumption (based on the limited `TryLock`s present in the vanilla game)
+    // that all TryLocks will always be the condition of an IfElse node.
+    // All we do is replace the IfElse node with a TryLock node
+    // TODO: Verify that this is always what PCompiler produces
     Node::WithNode<Node::IfElse>()
             .select([&] (Node::IfElse* node) {
                 // If the condition is a TryLock
@@ -1370,109 +1401,116 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
             .transform([&] (Node::IfElse* node) {
                 //replace with trylock
                 auto trylock = node->getCondition()->as<Node::TryLock>();
-                trylock->setBody(node->getBody());
+                auto body = node->getBody();
+                trylock->setBody(body);
+                RemoveUnlocksFromBody(body, trylock->shared_from_this());
                 return trylock->shared_from_this();
             })
             .on(program);
 
-    // Lock node body building
-    // This is a bit of a hack to avoid messing with codeblocks
-    // TODO: Verify and clean this up
+    // create lock bodies
     auto lockNodes = Node::WithNode<Node::Lock>()
             .select([&] (Node::Lock* node) {
                 return true;
             }).from(program);
     for (auto nodeptr: lockNodes){
-        // Find all the unlocks statements within the current scope
-        auto node = nodeptr->as<Node::Lock>();
-        auto unlocks = Node::WithNode<Node::Unlock>()
-                .select([&] (Node::Unlock* unode) {
-                    // check that the parameters for node and unode match
-                    return Node::isSameTree(node->getParameters(), unode->getParameters());
-                })
-                .from(node->getParent());
-        if (unlocks.size() == 1){
-            auto newscope = std::make_shared<Node::Scope>();
-            node->setBody(newscope);
-            auto parent = node->getParent();
-            auto it = node->getParent()->begin();
-            bool seenLock = false;
-            std::deque<Node::BasePtr> toRemove;
-            while (it != node->getParent()->end() && (*it)->as<Node::Lock>() != node) {
-                std::advance(it, 1);
-            }
-            std::advance(it, 1);
-            while (it != node->getParent()->end() && *it != unlocks.front())
-            {
-                if ((*it)->as<Node::Lock>() != node) {
-                    toRemove.push_back(*it);
-                }
-                std::advance(it, 1);
-            }
-            for (auto& n : toRemove){
-                *newscope << n;
-            }
-            node->getParent()->removeChild(unlocks.front());
-            rebuildExpression(newscope);
-        } else {
-            auto newscope = std::make_shared<Node::Scope>();
-            node->setBody(newscope);
-            auto parent = node->getParent();
-            auto it = node->getParent()->begin();
-            while (it != node->getParent()->end() && (*it)->as<Node::Lock>() != node) {
-                std::advance(it, 1);
-            }
-            std::advance(it, 1);
-            bool seenUnlock = false;
-            std::deque<Node::BasePtr> toRemove;
-            std::deque<Node::BasePtr> unlocksToRemove;
-            while (it != node->getParent()->end())
-            {
-                // check if this is an unlock node in `unlocks`
-                toRemove.push_back(*it);
-                if (std::find(unlocks.begin(), unlocks.end(), *it) != unlocks.end()){
-                    // check if the very next statement is a return node
-                    unlocksToRemove.push_back(*it);
-                    if (((std::next(it))) != node->getParent()->end() && (*(std::next(it)))->is<Node::Return>()){
-                        seenUnlock = true;
-                    } else {
-                        break;
-                    }
-                }
-                std::advance(it, 1);
-            }
-            for (auto& n : toRemove){
-                *newscope << n;
-            }
-            for (auto& n : unlocksToRemove){
-                newscope->removeChild(n);
-                node->getParent()->removeChild(n);
-            }
-            rebuildExpression(newscope);
-        }
+        LiftLockBody(nodeptr);
     }
-    // Remove remaining unlock nodes
+
+    // Find remaining unlock nodes
     auto unlockNodes = Node::WithNode<Node::Unlock>()
             .select([&] (Node::Unlock* node) {
                 return true;
             }).from(program);
+    // We should have removed all the remaining unlock nodes at this point
+    assert(unlockNodes.size() == 0);
+}
+
+void Decompiler::PscDecompiler::LiftLockBody(std::shared_ptr<Node::Base> &lock) {
+    // Find all the unlocks statements within the current scope
+    auto node = lock->as<Node::Lock>();
+    auto parentScope = node->getParent();
+    auto unlocks = Node::WithNode<Node::Unlock>()
+            .select([&] (Node::Unlock* unode) {
+                // check that the parameters for node and unode match
+                return Node::isSameTree(node->getParameters(), unode->getParameters());
+            })
+            .from(parentScope);
+
+    auto lockScope = node->getBody();
+
+    // We are going to iterate along all the children on the parentScope node in order until we find the matching unlock
+    auto it = parentScope->begin();
+
+    // iterate on parentScope's children until we get to this lock node
+    while (it != parentScope->end()) {
+        if ((*it)->as<Node::Lock>() == node){
+            std::advance(it, 1);
+            break;
+        }
+        std::advance(it, 1);
+    }
+    // If there's no more nodes after the `lock` node, we have a problem...
+    assert(it != parentScope->end());
+
+    bool foundMatchingUnlock = false;
+    std::deque<Node::BasePtr> toLift;
+    // Find the matching `unlock` node
+    // The matching `unlock` node should be in the same scope as the `lock` node
+    while (it != parentScope->end())
+    {
+        toLift.push_back(*it);
+        // check if this is an unlock node in `unlocks`
+        if (std::find(unlocks.begin(), unlocks.end(), *it) != unlocks.end()){
+            if (unlocks.size() == 1){
+                foundMatchingUnlock = true;
+                break;
+            }
+            // check if the very next statement is a return node
+            auto next = std::next(it);
+            // The compiler will insert an unlock right before a return statement if that statement is within a lock body
+            // in addition to the matching unlock statement at the end of the scope
+            if (next != parentScope->end() && ((*next)->is<Node::Return>())){
+                // check the next statement to see if it's the end of this scope; if so, this is the matching unlock
+                if (std::next(next) == parentScope->end()){
+                    foundMatchingUnlock = true;
+                    break;
+                }
+            } else {
+                foundMatchingUnlock = true;
+                break;
+            }
+        }
+        std::advance(it, 1);
+    }
+    assert(foundMatchingUnlock);
+    // Lift the statements between the lock statements to the body
+    for (auto& n : toLift){
+        *lockScope << n;
+    }
+
+    // Remove the matching unlocks
+    RemoveUnlocksFromBody(lockScope, node->shared_from_this());
+
+    // Now that we've lifted the lock body and removed the extraneous `unlock` nodes, we have to rebuild the expressions
+    // in case some `::temp` variables were still used in the lock body
+    rebuildExpression(lockScope);
+}
+
+void Decompiler::PscDecompiler::RemoveUnlocksFromBody(Node::BasePtr &body, const Node::BasePtr &matchingLock) {
+    // Remove matching unlock nodes
+    assert(matchingLock->as<Node::Lock>() || matchingLock->as<Node::TryLock>());
+    auto unlockNodes = Node::WithNode<Node::Unlock>()
+            .select([&] (Node::Unlock* unode) {
+                auto lockparams = matchingLock->as<Node::Lock>() ?
+                        matchingLock->as<Node::Lock>()->getParameters() :
+                        matchingLock->as<Node::TryLock>()->getParameters();
+                return Node::isSameTree(lockparams, unode->getParameters());
+            }).from(body);
     for (auto nodeptr: unlockNodes){
         // remove the unlock node
         nodeptr->getParent()->removeChild(nodeptr);
     }
-
-    // Replace the identifiers name index with a string value, unmangling names and property autovar
-    Node::WithNode<Node::Constant>()
-            .select([&] (Node::Constant* node) {
-                return node->getConstant().getType() == Pex::ValueType::Identifier;
-            })
-            .transform([&] (Node::Constant* node) {
-                return std::make_shared<Node::IdentifierString>(node->getBegin(), getVarName(node->getConstant().getId()));
-            })
-            .on(program);
-
-    program->computeInstructionBounds();
-
 }
 
 #include "DumpTree.hpp"
