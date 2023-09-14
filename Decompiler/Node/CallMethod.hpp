@@ -16,11 +16,12 @@ class CallMethod final :
     public FieldParametersNodeMixin<1>
 {
 public:
-    CallMethod(size_t ip, const Pex::StringTable::Index& result, BasePtr object, const Pex::StringTable::Index& method) :
+    CallMethod(size_t ip, const Pex::StringTable::Index& result, BasePtr object, const Pex::StringTable::Index& method, const bool experimental = false) :
         Base(2, ip, 0, result),
         FieldObjectNodeMixin(this, object),
         FieldParametersNodeMixin(this, std::make_shared<Params>()),
-        m_Method(method)
+        m_Method(method),
+        m_Experimental(experimental)
     {
     }
     virtual ~CallMethod() = default;
@@ -31,10 +32,15 @@ public:
         visitor->visit(this);
     }
 
+    bool isExperimentalSyntax(){
+        return m_Experimental;
+    }
+
     const Pex::StringTable::Index& getMethod() const { return m_Method; }
 
 private:
     Pex::StringTable::Index m_Method;
+    bool m_Experimental;
 };
 
 }

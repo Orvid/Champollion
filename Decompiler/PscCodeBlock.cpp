@@ -148,3 +148,11 @@ Node::Scope *Decompiler::PscCodeBlock::getScope() const
 {
     return static_cast<Node::Scope*>(m_Scope.get());
 }
+
+void Decompiler::PscCodeBlock::addLockGuard(Pex::StringTable::Index index) {
+    m_Guards.push_back(index);
+}
+
+bool Decompiler::PscCodeBlock::isLock() const {
+    return !m_Guards.empty();
+}

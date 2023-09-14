@@ -8,6 +8,7 @@
 #include <locale>
 #include <map>
 #include <string>
+#include <regex>
 
 #include "PscDecompiler.hpp"
 
@@ -29,12 +30,14 @@ Decompiler::PscCoder::PscCoder( OutputWriter* writer,
                                 bool writeHeader = false,
                                 bool traceDecompilation = false,
                                 bool dumpTree = true,   
+                                bool writeDebugFuncs = false,
                                 std::string traceDir = ""):
     Coder(writer),
     m_CommentAsm(commentAsm),
     m_WriteHeader(writeHeader),
     m_TraceDecompilation(traceDecompilation),
     m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
+    m_WriteDebugFuncs(writeDebugFuncs),
     m_OutputDir(traceDir)
 {
     
@@ -52,6 +55,7 @@ Decompiler::PscCoder::PscCoder(Decompiler::OutputWriter *writer)  :
     m_WriteHeader(false),
     m_TraceDecompilation(false),
     m_DumpTree(true),
+    m_WriteDebugFuncs(false),
     m_OutputDir("")
 {
 }
@@ -150,6 +154,28 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
     write("/;");
 }
 
+bool Decompiler::PscCoder::isNativeObject(const Pex::Object &object, const Pex::Binary::ScriptType &scriptType) const {
+    if (scriptType == Pex::Binary::ScriptType::Fallout4Script)
+    {
+        for (auto& native : Fallout4::NativeClasses)
+        {
+            if (_stricmp(object.getName().asString().c_str(), native.c_str()) == 0){
+                return true;
+            }
+        }
+    }
+    else if (scriptType == Pex::Binary::ScriptType::StarfieldScript)
+    {
+        for (auto& native : Starfield::NativeClasses)
+        {
+            if (_stricmp(object.getName().asString().c_str(), native.c_str()) == 0){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 /**
  * @brief Write an object contained in the binary.
  * @param object Object to decompile
@@ -163,6 +189,10 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
     {
         stream << " Extends " << object.getParentClassName().asString();
     }
+
+    if (isNativeObject(object, pex.getGameType()))
+        stream << " Native";
+
     if (object.getConstFlag())
       stream << " Const";
 
@@ -186,6 +216,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
     if (object.getGuards().size()) {
         write("");
         write(";-- Guards ------------------------------------------");
+        write(";*** WARNING: Guard declaration syntax is EXPERIMENTAL, subject to change");
         writeGuards(object, pex);
     }
 
@@ -475,6 +506,7 @@ void Decompiler::PscCoder::writeFunctions(int i, const Pex::State &state, const 
         writeFunction(i, func, object, pex);
     }
 }
+static const std::regex tempRegex = std::regex("::temp\\d+");
 
 /**
  * @brief Decompile a function.
@@ -498,12 +530,18 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
     if (functionName.size() > 2 && !_stricmp(functionName.substr(0, 2).c_str(), "on")) {
         // We'd have to check for full inheritence to do this by object type
         // Right now, we're just seeing if matches all the built-in event names.
+        std::string functionLower = functionName;
+        std::transform(functionLower.begin(), functionLower.end(), functionLower.begin(), ::tolower);
         if (pex.getGameType() == Pex::Binary::ScriptType::SkyrimScript){
-            if (std::find(Skyrim::EventNames.begin(), Skyrim::EventNames.end(), functionName) != Skyrim::EventNames.end()) {
+            if (std::find(Skyrim::EventNamesLowerCase.begin(), Skyrim::EventNamesLowerCase.end(), functionLower) != Skyrim::EventNamesLowerCase.end()) {
                 isEvent = true;
             }
         } else if (pex.getGameType() == Pex::Binary::ScriptType::Fallout4Script){
-            if (std::find(Fallout4::EventNames.begin(), Fallout4::EventNames.end(), functionName) != Fallout4::EventNames.end()) {
+            if (std::find(Fallout4::EventNamesLowerCase.begin(), Fallout4::EventNamesLowerCase.end(), functionLower) != Fallout4::EventNamesLowerCase.end()) {
+                isEvent = true;
+            }
+        } else if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
+            if (std::find(Starfield::EventNamesLowerCase.begin(), Starfield::EventNamesLowerCase.end(), functionLower) != Starfield::EventNamesLowerCase.end()) {
                 isEvent = true;
             }
         }
@@ -515,62 +553,125 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
       functionName[function.getParams()[0].getTypeName().asString().size()] = '.';
     }
 
-    if (functionName != "GetState" && functionName != "GotoState")
+    if (isCompilerGeneratedFunc(functionName, object, pex.getGameType())) {
+        write(indent(i) << "; Skipped compiler generated " << functionName);
+        return;
+    }
+
+    auto stream = indent(i);
+    if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
+        stream << mapType(function.getReturnTypeName().asString()) << " ";
+
+    if (isEvent)
+      stream << "Event ";
+    else
+      stream << "Function ";
+    stream << functionName << "(";
+
+    auto first = true;
+    for (auto& param : function.getParams())
     {
-        auto stream = indent(i);
-        if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
-            stream << mapType(function.getReturnTypeName().asString()) << " ";
-
-        if (isEvent)
-          stream << "Event ";
+        if (first)
+        {
+            first = false;
+        }
         else
-          stream << "Function ";
-        stream << functionName << "(";
+        {
+            stream << ", ";
+        }
+        stream << mapType(param.getTypeName().asString()) << " " << param.getName();
+    }
+    stream << ")";
 
-        auto first = true;
-        for (auto& param : function.getParams())
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                stream << ", ";
-            }
-            stream << mapType(param.getTypeName().asString()) << " " << param.getName();
-        }
-        stream << ")";
 
-        if (function.isGlobal())
-        {
-            stream << " Global";
-        }
-        if (function.isNative())
-        {
-            stream << " Native";
-        }
+    if (function.isGlobal())
+    {
+        stream << " Global";
+    }
+    if (function.isNative())
+    {
+        stream << " Native";
         writeUserFlag(stream, function, pex);
         write(stream.str());
-
         writeDocString(i, function);
+    } else {
+        auto decomp = PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
+                                    m_OutputDir);
+        if (decomp.isDebugFunction()) {
+            // Starfield debug function fixup hacks
+            // These functions were supposed to have been compiled out of the pex, but the compiler left it in without restoring whatever the temp variable pointed to
+            // This causes the recompilation to fail, so we need to replace the temp variable with false
 
-        if (! function.isNative())
-        {
-            for (auto& line : PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree, m_OutputDir))
-            {
-                write(indent(i+1) << line);
+            bool fixed = false;
+            if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
+                if (functionName == "warning" ||
+                    (_stricmp(object.getName().asString().c_str(), "ENV_Hazard_ParentScript") == 0 &&
+                     functionName == "GlobalWarning") || // only present on this script
+                    (_stricmp(object.getName().asString().c_str(), "ENV_AfflictionScript") == 0 &&
+                     functionName == "TraceStats")) { // Only present on this script
+                  // find the `::temp\d+` variable in the lines with regex
+                  // replace it with `false`
+                  fixed = true;
+                  for (auto &line: decomp) {
+                    if (std::regex_search(line, tempRegex)) {
+                      line = std::regex_replace(line, tempRegex, "false");
+                    }
+                  }
+                } else if ((_stricmp(object.getName().asString().c_str(), "RobotQuestRunner") == 0)) {
+                    if (functionName == "UpdateState") {
+                      fixed = true;
+                      for (auto &line: decomp) {
+                        if (std::regex_search(line, tempRegex)) {
+                          line = std::regex_replace(line, tempRegex, "None");
+                        }
+                      }
+                    } else if (functionName == "MakeQuestNameSave") {
+                      fixed = true;
+                      for (auto &line: decomp) {
+                        if (std::regex_search(line, tempRegex)) {
+                          line = std::regex_replace(line, tempRegex, "questName");
+                        }
+                      }
+                    }
+                }
+
             }
-            if (isEvent)
-              write(indent(i) << "EndEvent");
-            else
-              write(indent(i) << "EndFunction");
+            if (fixed){
+              write(indent(i) << "; Fixup hacks for debug-only function: " << functionName);
+            } else if (m_WriteDebugFuncs) {
+              write(indent(i) << "; WARNING: possibly inoperative debug function " << functionName << "");
+            } else {
+              write(indent(i) << "; Skipped inoperative debug function " << functionName);
+              return;
+            }
+        } else if (_stricmp(functionName.c_str(), "GotoState") == 0 || _stricmp(functionName.c_str(), "GetState") == 0) {
+            // Starfield GotoState/GetState function fixup hacks
+            if (_stricmp(object.getName().asString().c_str(), "ScriptObject") == 0) {
+                // find the `::State` variable in the lines
+                // replace it with `__state`
+                write(indent(i) << "; Fixup hacks for native ScriptObject::GotoState/GetState");
+                for (auto &line : decomp){
+                    if (line.find("::State") != std::string::npos)
+                    {
+                        line = std::regex_replace(line, std::regex("::State"), "__state");
+                    }
+                }
+            }
         }
+
+
+        writeUserFlag(stream, function, pex);
+        write(stream.str());
+        writeDocString(i, function);
+        for (auto &line: decomp) {
+            write(indent(i+1) << line);
+        }
+        if (isEvent)
+          write(indent(i) << "EndEvent");
+        else
+          write(indent(i) << "EndFunction");
     }
-    else
-    {
-        write(indent(i) << "; Skipped compiler generated " << functionName);
-    }
+
 }
 
 /**
@@ -715,4 +816,24 @@ std::string Decompiler::PscCoder::mapType(std::string type)
     if (a != prettyTypeNameMap.end())
         return a->second;
     return type;
+}
+
+bool Decompiler::PscCoder::isCompilerGeneratedFunc(const std::string &name, const Pex::Object &object, Pex::Binary::ScriptType scriptType) const {
+    static const std::vector<std::string> globalCompilerGeneratedFuncs = {
+            "getstate",
+            "gotostate",
+    };
+    static const std::vector<std::string> starfieldCompilerGeneratedFuncs = {
+    };
+    // Do not remove these for the actual `scriptobject` script which is the base class for all scripts
+    if (_stricmp(object.getName().asString().c_str(), "ScriptObject") == 0){
+        return false;
+    }
+    std::string nameLower = name;
+    str_to_lower(nameLower);
+    if (std::find(globalCompilerGeneratedFuncs.begin(), globalCompilerGeneratedFuncs.end(), nameLower) != globalCompilerGeneratedFuncs.end())
+        return true;
+    if (scriptType == Pex::Binary::ScriptType::StarfieldScript && std::find(starfieldCompilerGeneratedFuncs.begin(), starfieldCompilerGeneratedFuncs.end(), name) != starfieldCompilerGeneratedFuncs.end())
+        return true;
+    return false;
 }

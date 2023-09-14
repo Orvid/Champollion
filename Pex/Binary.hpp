@@ -23,7 +23,8 @@ public:
     enum ScriptType {
         Unknown = -1,
         SkyrimScript,
-        Fallout4Script
+        Fallout4Script,
+        StarfieldScript
     };
     Binary();
     virtual ~Binary();

@@ -39,11 +39,15 @@ public:
     void visit(Node::While* node) override;
     void visit(Node::IfElse* node) override;
     void visit(Node::Declare* node) override;
+    void visit(Node::GuardStatement *node) override;
+    void visit(Node::TryGuard *node) override;
 
 private:
     BasePtr m_Reference;
     DynamicVisitor m_Visitor;
     bool m_Result;
+
+    void visit(EndGuard *node);
 };
 
 bool isSameTree(BasePtr left, BasePtr right);

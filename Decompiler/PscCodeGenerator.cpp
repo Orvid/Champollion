@@ -31,6 +31,13 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
 
 void Decompiler::PscCodeGenerator::newLine()
 {
+    if (!m_ExperimentalSyntaxWarning.empty()) {
+        m_Result << " ;*** WARNING: Experimental syntax, may be incorrect: ";
+        for (auto warn: m_ExperimentalSyntaxWarning){
+            m_Result << warn << " ";
+        }
+        m_ExperimentalSyntaxWarning.clear();
+    }
     m_Decompiler->push_back(m_Result.str());
     m_Result = std::ostringstream();
     for (auto i = 0; i < m_Level; ++i)
@@ -175,6 +182,9 @@ void Decompiler::PscCodeGenerator::visit(Node::CallMethod* node)
     m_Result << "." << node->getMethod() << "(";
     node->getParameters()->visit(this);
     m_Result << ")";
+    if (node->isExperimentalSyntax()) {
+        m_ExperimentalSyntaxWarning.push_back(node->getMethod().asString());
+    }
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::Params *node)
@@ -297,6 +307,7 @@ void Decompiler::PscCodeGenerator::visit(Node::While* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
 {
+    auto cond = node->getCondition();
     m_Result << "If ";
     node->getCondition()->visit(this);
     m_Level++;
@@ -336,5 +347,38 @@ void Decompiler::PscCodeGenerator::visit(Node::Declare *node)
 {
     m_Result << PscCoder::mapType(node->getType().asString()) << " ";
     node->getObject()->visit(this);
+}
+
+void Decompiler::PscCodeGenerator::visit(Node::GuardStatement *node) {
+    m_Result << "Guard ";
+    node->getParameters()->visit(this);
+    m_Level++;
+    // TODO: VERIFY: Remove this when syntax is verified
+    m_ExperimentalSyntaxWarning.push_back("Guard");
+    newLine();
+    node->getBody()->visit(this);
+    m_Level--;
+    newLine();
+    m_Result << "EndGuard";
+    m_ExperimentalSyntaxWarning.push_back("EndGuard");
+}
+
+void Decompiler::PscCodeGenerator::visit(Node::TryGuard *node) {
+    m_Result << "TryGuard ";
+    node->getParameters()->visit(this);
+    m_Level++;
+    // TODO: VERIFY: Remove this when syntax is verified
+    m_ExperimentalSyntaxWarning.push_back("TryGuard");
+    newLine();
+    node->getBody()->visit(this);
+    m_Level--;
+    newLine();
+    m_Result << "EndGuard";
+    m_ExperimentalSyntaxWarning.push_back("EndGuard");
+
+}
+
+void Decompiler::PscCodeGenerator::visit(Node::EndGuard *node) {
+    // NONE
 }
 

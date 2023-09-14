@@ -29,6 +29,7 @@ struct Params
     bool traceDecompilation;
     bool dumpTree;
     bool recreateDirStructure;
+    bool decompileDebugFuncs;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
@@ -51,6 +52,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.traceDecompilation = false;
     params.dumpTree = true;
     params.recreateDirStructure = true;
+    params.decompileDebugFuncs = false;
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
@@ -66,6 +68,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
             ("threaded,t", "Run decompilation in parallel mode")
             ("trace,g", "Trace the decompilation and output results to rebuild log")
             ("no-dump-tree", "Do not dump tree for each node during decompilation tracing (requires --trace)")
+            ("debug-funcs,d", "Decompile debug and compiler-generated functions (default false)")
             ("version", "Output version number")
     ;
     options::options_description files;
@@ -108,7 +111,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.traceDecompilation = (args.count("trace") != 0);
     params.dumpTree = params.traceDecompilation && args.count("no-dump-tree") == 0;
     params.recreateDirStructure = (args.count("recreate-subdirs") != 0);
-
+    params.decompileDebugFuncs = (args.count("debug-funcs") != 0);
     try
     {
         if (args.count("asm"))
@@ -209,7 +212,7 @@ ProcessResults processFile(fs::path file, Params params)
         }
     }
     fs::path dir_structure = "";
-    if (params.recreateDirStructure && pex.getGameType() == Pex::Binary::Fallout4Script && pex.getObjects().size() > 0){
+    if (params.recreateDirStructure && (pex.getGameType() == Pex::Binary::Fallout4Script || pex.getGameType() == Pex::Binary::StarfieldScript) && pex.getObjects().size() > 0){
         std::string script_path = pex.getObjects()[0].getName().asString();
         std::replace(script_path.begin(), script_path.end(), ':', '/');
         dir_structure = fs::path(script_path).remove_filename();
@@ -227,12 +230,13 @@ ProcessResults processFile(fs::path file, Params params)
             throw std::runtime_error(std::format("Failed to open {} for writing", pscFile.string()));
         }
         Decompiler::PscCoder pscCoder(
-            new Decompiler::StreamWriter(pscStream),
-            params.outputComment,
-            params.writeHeader,
-            params.traceDecompilation,
-            params.dumpTree,
-            params.papyrusDir.string() ); // using string instead of path here for C++14 compatability for staticlib targets
+                new Decompiler::StreamWriter(pscStream),
+                params.outputComment,
+                params.writeHeader,
+                params.traceDecompilation,
+                params.dumpTree, 
+                params.decompileDebugFuncs,
+                params.papyrusDir.string()); // using string instead of path here for C++14 compatability for staticlib targets
 
         pscCoder.code(pex);
         result.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));

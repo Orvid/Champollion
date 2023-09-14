@@ -27,7 +27,10 @@ namespace Node {
     DO_NODE(While) \
     DO_NODE(IfElse) \
     DO_NODE(Declare) \
-    DO_NODE(StructCreate) \
+    DO_NODE(StructCreate)     \
+    DO_NODE(GuardStatement)   \
+    DO_NODE(TryGuard)          \
+    DO_NODE(EndGuard)
 
 #define DO_NODE(NODE) class NODE;
 FOR_EACH_NODE_CLASS()

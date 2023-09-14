@@ -42,12 +42,17 @@ public:
     virtual void visit(Node::While* node);
     virtual void visit(Node::IfElse* node);
     virtual void visit(Node::Declare* node);
+    virtual void visit(Node::GuardStatement* node);
+    virtual void visit(Node::TryGuard* node);
+    virtual void visit(Node::EndGuard* node);
+
 
 protected:    
     void newLine();
 
     std::ostringstream m_Result;
     std::uint8_t m_Level{ 0 };
+    std::vector<std::string> m_ExperimentalSyntaxWarning{};
     Decompiler::PscDecompiler* m_Decompiler;
 };
 

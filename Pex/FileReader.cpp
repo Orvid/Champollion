@@ -57,12 +57,26 @@ Pex::FileReader::~FileReader()
 void Pex::FileReader::read(Pex::Binary &binary)
 {
     readHeader(binary.getHeader());
-    binary.setScriptType(m_endianness == BIG_ENDIAN ? Pex::Binary::ScriptType::SkyrimScript : Pex::Binary::ScriptType::Fallout4Script);
+    if (m_endianness == BIG_ENDIAN){
+        binary.setScriptType(Pex::Binary::ScriptType::SkyrimScript);
+    } else { // LITTLE_ENDIAN
+        auto header = binary.getHeader();
+        if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() >= 12)){
+            binary.setScriptType(Pex::Binary::ScriptType::StarfieldScript);
+        } else {
+            binary.setScriptType(Pex::Binary::ScriptType::Fallout4Script);
+        }
+    }
     read(binary.getStringTable());
     m_StringTable = & binary.getStringTable();
     read(binary.getDebugInfo());
     read(binary.getUserFlags());
-    read(binary.getHeader(), binary.getObjects());    
+    std::vector<std::string> userFlagsstrs;
+    for (auto &flag : binary.getUserFlags())
+    {
+        userFlagsstrs.push_back(flag.getName().asString());
+    }
+    read(binary.getGameType(), binary.getObjects());
 }
 
 /**
@@ -198,9 +212,10 @@ void Pex::FileReader::read(Pex::UserFlags &userFlags)
 
 /**
  * @brief Reads the Objects definitions from the file.
+ * @param[in] script_type The type of script being decompiled.
  * @param[in] objects Object collection to fill in.
  */
-void Pex::FileReader::read(const Pex::Header &header, Pex::Objects &objects)
+void Pex::FileReader::read(const Pex::Binary::ScriptType script_type, Pex::Objects &objects)
 {
     auto count = getUint16();
     objects.resize(count);
@@ -223,7 +238,7 @@ void Pex::FileReader::read(const Pex::Header &header, Pex::Objects &objects)
             read(object.getStructInfos());
         }
         read(object.getVariables());
-        if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() >= 12)) {
+        if (script_type == Pex::Binary::ScriptType::StarfieldScript) {
             read(object.getGuards());
         }
         read(object.getProperties());

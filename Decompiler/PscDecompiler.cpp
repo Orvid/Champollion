@@ -114,10 +114,7 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         m_TempTable.push_back("removelast");
         m_TempTable.push_back("remove");
         m_TempTable.push_back("clear");
-        m_TempTable.push_back("getallmatchingstructs");
-        m_TempTable.push_back("Lock");
-        m_TempTable.push_back("Unlock");
-        m_TempTable.push_back("TryLock");
+        m_TempTable.push_back("GetMatchingStructs"); // TODO: VERIFY: Need to verify syntax when CK for Starfield comes out
 
         //findReplacedVars();
         findVarTypes();
@@ -132,6 +129,9 @@ Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
         Node::BasePtr programTree = rebuildControlFlow(0, m_Function.getInstructions().size());
 
         declareVariables(programTree);
+
+        rebuildLocks(programTree);
+
         cleanUpTree(programTree);
 
         generateCode(programTree);
@@ -285,7 +285,22 @@ void Decompiler::PscDecompiler::createFlowBlocks()
     {
         auto block = findBlockForInstruction(ip);
         switch(ins.getOpCode())
-        {     
+        {
+//        case Pex::OpCode::LOCK_GUARDS:
+//        {
+//            assert(ins.getArgs().size() >= 1);
+//            for (auto& arg : ins.getArgs())
+//            {
+//                assert(arg.getType() == Pex::ValueType::Identifier);
+//                auto var = arg.getId();
+//                auto& varName = var.asString();
+//                if (varName.length() > 6 && varName.substr(0, 6) == "::temp")
+//                {
+//                    auto& block = m_CodeBlocs[ip];
+//                    block->addLockGuard(var);
+//                }
+//            }
+//        }
         case Pex::OpCode::JMP:
         {
             assert(ins.getArgs().size() == 1);
@@ -675,7 +690,12 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::ARRAY_GETALLMATCHINGSTRUCTS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[1].getId(), fromValue(ip, args[0]), m_TempTable.findIdentifier("getallmatchingstructs"));
+                    auto callNode = std::make_shared<Node::CallMethod>(
+                            ip,
+                            args[1].getId(),
+                            fromValue(ip, args[0]),
+                            m_TempTable.findIdentifier("GetMatchingStructs"),
+                            true); // TODO: VERIFY: remove this after verifying syntax when CK for Starfield comes out
                     auto argNode = callNode->getParameters();
                     *argNode << fromValue(ip, args[2]);
                     *argNode << fromValue(ip, args[3]);
@@ -687,32 +707,35 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 case Pex::OpCode::LOCK_GUARDS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "Self"), m_TempTable.findIdentifier("Lock"));
-                    auto argNode = callNode->getParameters();
+                    Node::BasePtr newscope = std::make_shared<Node::Scope>();
+
+                    auto lockNode = std::make_shared<Node::GuardStatement>(ip, newscope);
+                    auto argNode = lockNode->getParameters();
                     for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
                     }
-                    node = callNode;
+                    node = lockNode;
                     break;
                 }
                 case Pex::OpCode::UNLOCK_GUARDS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, Pex::StringTable::Index(), std::make_shared<Node::IdentifierString>(ip, "Self"), m_TempTable.findIdentifier("Unlock"));
-                    auto argNode = callNode->getParameters();
+                    auto unlockNode = std::make_shared<Node::EndGuard>(ip);
+                    auto argNode = unlockNode->getParameters();
                     for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
                     }
-                    node = callNode;
+                    node = unlockNode;
                     break;
                 }
                 case Pex::OpCode::TRY_LOCK_GUARDS:
                 {
-                    auto callNode = std::make_shared<Node::CallMethod>(ip, args[0].getId(), std::make_shared<Node::IdentifierString>(ip, "Self"), m_TempTable.findIdentifier("TryLock"));
-                    auto argNode = callNode->getParameters();
+                    Node::BasePtr newscope = std::make_shared<Node::Scope>();
+                    auto trylockNode = std::make_shared<Node::TryGuard>(ip, args[0].getId(), newscope);
+                    auto argNode = trylockNode->getParameters();
                     for (auto varg : varargs) {
                         *argNode << fromValue(ip, varg);
                     }
-                    node = callNode;
+                    node = trylockNode;
                     break;
                 }
                 default:
@@ -779,7 +802,7 @@ void Decompiler::PscDecompiler::rebuildExpression(Node::BasePtr scope)
         if (! expressionGeneration->isFinal() && nextIt != scope->end())
         {
             auto expressionUse = *nextIt;
-
+            auto thing = expressionGeneration->getResult();
             // Check if an identifier in expressionUse references the result of expressionGeneration
             // If so, perform a replacement
             // At this steps of the decompilation, there should be only one replacement.
@@ -1338,7 +1361,7 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
                     && !node->getDestination()->is<Node::PropertyAccess>()
                     && !node->getDestination()->is<Node::ArrayAccess>()
                 )
-                {                    
+                {
                     auto left = binaryOp->getLeft();
                     return Node::isSameTree(destination, left);
                 }
@@ -1348,12 +1371,148 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
         .transform([&] (Node::Assign* node) {
             auto binaryOp = node->getValue()->as<Node::BinaryOperator>();
             return std::make_shared<Node::AssignOperator>(node->getBegin(), node->getDestination(), binaryOp->getOperator() + "=", binaryOp->getRight());
-
         })
         .on(program);
 
     program->computeInstructionBounds();
 
+}
+
+
+
+
+
+// Guard node body building
+// This is a bit of a hack to avoid messing with the current codeblocks processing
+// Instead of creating these bodies during `rebuildControlFlow`, we create them after the fact
+// This is because we have to determine the scope of each of guard/tryGuard/endguard nodes and
+// it's a lot easier if we know the existing scopes beforehand
+// TODO: Verify and clean this up
+void Decompiler::PscDecompiler::rebuildLocks(Node::BasePtr &program) {
+
+    // Lift TryLocks
+    // We are making the assumption (based on the limited `TryGuard`s present in the vanilla game)
+    // that all TryLocks will always be the condition of an IfElse node.
+    // All we do is replace the IfElse node with a TryGuard node
+    // TODO: Verify that this is always what PCompiler produces
+    Node::WithNode<Node::IfElse>()
+            .select([&] (Node::IfElse* node) {
+                // If the condition is a TryGuard
+                return node->getCondition()->is<Node::TryGuard>();
+            })
+            .transform([&] (Node::IfElse* node) {
+                //replace with tryguard
+                auto tryguard = node->getCondition()->as<Node::TryGuard>();
+                auto body = node->getBody();
+                tryguard->setBody(body);
+                RemoveUnlocksFromBody(body, tryguard->shared_from_this());
+                return tryguard->shared_from_this();
+            })
+            .on(program);
+
+    // create guard bodies
+    auto lockNodes = Node::WithNode<Node::GuardStatement>()
+            .select([&] (Node::GuardStatement* node) {
+                return true;
+            }).from(program);
+    for (auto nodeptr: lockNodes){
+        LiftLockBody(nodeptr);
+    }
+
+    // Find remaining endguard nodes
+    auto unlockNodes = Node::WithNode<Node::EndGuard>()
+            .select([&] (Node::EndGuard* node) {
+                return true;
+            }).from(program);
+    // We should have removed all the remaining endguard nodes at this point
+    assert(unlockNodes.size() == 0);
+}
+
+void Decompiler::PscDecompiler::LiftLockBody(std::shared_ptr<Node::Base> &guard) {
+    // Find all the unlocks statements within the current scope
+    auto node = guard->as<Node::GuardStatement>();
+    auto parentScope = node->getParent();
+    auto unlocks = Node::WithNode<Node::EndGuard>()
+            .select([&] (Node::EndGuard* unode) {
+                // check that the parameters for node and unode match
+                return Node::isSameTree(node->getParameters(), unode->getParameters());
+            })
+            .from(parentScope);
+
+    auto lockScope = node->getBody();
+
+    // We are going to iterate along all the children on the parentScope node in order until we find the matching endguard
+    auto it = parentScope->begin();
+
+    // iterate on parentScope's children until we get to this guard node
+    while (it != parentScope->end()) {
+        if ((*it)->as<Node::GuardStatement>() == node){
+            std::advance(it, 1);
+            break;
+        }
+        std::advance(it, 1);
+    }
+    // If there's no more nodes after the `guard` node, we have a problem...
+    assert(it != parentScope->end());
+
+    bool foundMatchingUnlock = false;
+    std::deque<Node::BasePtr> toLift;
+    // Find the matching `endguard` node
+    // The matching `endguard` node should be in the same scope as the `guard` node
+    while (it != parentScope->end())
+    {
+        toLift.push_back(*it);
+        // check if this is an endguard node in `unlocks`
+        if (std::find(unlocks.begin(), unlocks.end(), *it) != unlocks.end()){
+            if (unlocks.size() == 1){
+                foundMatchingUnlock = true;
+                break;
+            }
+            // check if the very next statement is a return node
+            auto next = std::next(it);
+            // The compiler will insert an endguard right before a return statement if that statement is within a guard body
+            // in addition to the matching endguard statement at the end of the scope
+            if (next != parentScope->end() && ((*next)->is<Node::Return>())){
+                // check the next statement to see if it's the end of this scope; if so, this is the matching endguard
+                if (std::next(next) == parentScope->end()){
+                    foundMatchingUnlock = true;
+                    break;
+                }
+            } else {
+                foundMatchingUnlock = true;
+                break;
+            }
+        }
+        std::advance(it, 1);
+    }
+    assert(foundMatchingUnlock);
+    // Lift the statements between the guard statements to the body
+    for (auto& n : toLift){
+        *lockScope << n;
+    }
+
+    // Remove the matching unlocks
+    RemoveUnlocksFromBody(lockScope, node->shared_from_this());
+
+    // Now that we've lifted the guard body and removed the extraneous `endguard` nodes, we have to rebuild the expressions
+    // in case some `::temp` variables were still used in the guard body
+    rebuildExpression(lockScope);
+}
+
+void Decompiler::PscDecompiler::RemoveUnlocksFromBody(Node::BasePtr &body, const Node::BasePtr &matchingLock) {
+    // Remove matching endguard nodes
+    assert(matchingLock->as<Node::GuardStatement>() || matchingLock->as<Node::TryGuard>());
+    auto unlockNodes = Node::WithNode<Node::EndGuard>()
+            .select([&] (Node::EndGuard* unode) {
+                auto lockparams = matchingLock->as<Node::GuardStatement>() ?
+                        matchingLock->as<Node::GuardStatement>()->getParameters() :
+                        matchingLock->as<Node::TryGuard>()->getParameters();
+                return Node::isSameTree(lockparams, unode->getParameters());
+            }).from(body);
+    for (auto nodeptr: unlockNodes){
+        // remove the endguard node
+        nodeptr->getParent()->removeChild(nodeptr);
+    }
 }
 
 #include "DumpTree.hpp"
@@ -1475,4 +1634,20 @@ void Decompiler::PscDecompiler::dumpBlock(size_t startBlock, size_t endBlock)
         m_Log << "------- cond:" << b->getCondition() << " true:" << b->onTrue() << " false:" << b->onFalse() << std::endl;
         ++it;
     }
+}
+
+bool Decompiler::PscDecompiler::isDebugFunction() {
+    // TODO: Actually walk the tree instead of doing dump string comparisons
+    // We need to check if there are still ::temp variables in the tree.
+    // If there are, then this indicates that this read from debug variables that
+    // were not actually initialized because they were marked DebugOnly
+    // and weren't properly poisoned by the Papyrus debugger.
+    for (auto& line : *this) {
+        int64_t i = line.find("::temp");
+        int64_t comment = line.find(";");
+        if (i != std::string::npos && (comment == std::string::npos || i < comment)) {
+            return true;
+        }
+    }
+    return false;
 }
