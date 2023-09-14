@@ -1,5 +1,6 @@
 #include "Binary.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 #include "FileReader.hpp"
@@ -129,4 +130,33 @@ Pex::Binary::ScriptType Pex::Binary::getGameType() const
 void Pex::Binary::setScriptType(Pex::Binary::ScriptType game_type)
 {
     m_ScriptType = game_type;
+}
+
+static bool namedLessThan(const Pex::NamedItem& a, const Pex::NamedItem& b) {
+    return a.getName().asString() < b.getName().asString();
+}
+
+void Pex::Binary::sort() {
+    std::sort(m_Objects.begin(), m_Objects.end(), namedLessThan);
+    std::sort(m_UserFlags.begin(), m_UserFlags.end(), namedLessThan);
+    for (auto& obj : m_Objects) {
+        std::sort(obj.getGuards().begin(), obj.getGuards().end(), namedLessThan);
+        std::sort(obj.getProperties().begin(), obj.getProperties().end(), namedLessThan);
+        std::sort(obj.getStates().begin(), obj.getStates().end(), namedLessThan);
+        std::sort(obj.getStructInfos().begin(), obj.getStructInfos().end(), namedLessThan);
+        std::sort(obj.getVariables().begin(), obj.getVariables().end(), namedLessThan);
+
+        for (auto& state : obj.getStates()) {
+            std::sort(state.getFunctions().begin(), state.getFunctions().end(), [this, obj, state](const Pex::Function& a, const Pex::Function& b) {
+                auto linesA = this->getDebugInfo().getFunctionInfo(obj.getName(), state.getName(), a.getName());
+                auto lA = !linesA || linesA->getLineNumbers().empty() ? 0 : linesA->getLineNumbers()[0];
+                auto linesB = this->getDebugInfo().getFunctionInfo(obj.getName(), state.getName(), b.getName());
+                auto lB = !linesB || linesB->getLineNumbers().empty() ? 0 : linesB->getLineNumbers()[0];
+                if (lA == lB) {
+                    return a.getName().asString() < b.getName().asString();
+                }
+                return lA < lB;
+            });
+        }
+    }
 }

@@ -188,6 +188,7 @@ ProcessResults processFile(fs::path file, Params params)
     {
         Pex::FileReader reader(file.string());
         reader.read(pex);
+        pex.sort();
     }
     catch(std::exception& ex)
     {
