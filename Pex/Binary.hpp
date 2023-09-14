@@ -45,6 +45,8 @@ public:
     Objects& getObjects();
 
     ScriptType getGameType() const;
+
+    void sort();
     
 protected:
     friend FileReader;
