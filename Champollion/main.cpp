@@ -30,9 +30,12 @@ struct Params
     bool dumpTree;
     bool recreateDirStructure;
     bool decompileDebugFuncs;
+    bool recursive;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
+
+    fs::path parentDir{};
 
     std::vector<fs::path> inputs;
 };
@@ -62,6 +65,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
             ("help,h", "Display the help message")
             ("asm,a", options::value<std::string>()->implicit_value(""), "If defined, output assembly file(s) to this directory")
             ("psc,p", options::value<std::string>(), "Name of the output dir for psc decompilation")
+            ("recursive,r", "Recursively scan directories for pex files")
             ("recreate-subdirs,s", "Recreates directory structure for script in root of output directory (Fallout 4 only, default false)")
             ("comment,c", "Output assembly in comments of the decompiled psc file")
             ("header,e", "Write header to decompiled psc file")
@@ -110,6 +114,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.parallel = (args.count("threaded") != 0);
     params.traceDecompilation = (args.count("trace") != 0);
     params.dumpTree = params.traceDecompilation && args.count("no-dump-tree") == 0;
+    params.recursive = (args.count("recursive") != 0);
     params.recreateDirStructure = (args.count("recreate-subdirs") != 0);
     params.decompileDebugFuncs = (args.count("debug-funcs") != 0);
     try
@@ -221,11 +226,13 @@ ProcessResults processFile(fs::path file, Params params)
             fs::remove(asmFile);
         }
     }
-    fs::path dir_structure = "";
+    fs::path dir_structure;
     if (params.recreateDirStructure && (pex.getGameType() == Pex::Binary::Fallout4Script || pex.getGameType() == Pex::Binary::StarfieldScript) && pex.getObjects().size() > 0){
         std::string script_path = pex.getObjects()[0].getName().asString();
         std::replace(script_path.begin(), script_path.end(), ':', '/');
         dir_structure = fs::path(script_path).remove_filename();
+    } else if (!params.parentDir.empty()) {
+      dir_structure = fs::relative(file, params.parentDir).remove_filename();
     }
     fs::path basedir = !dir_structure.empty() ? (params.papyrusDir / dir_structure) : params.papyrusDir;
     if (!dir_structure.empty()){
@@ -260,16 +267,30 @@ ProcessResults processFile(fs::path file, Params params)
     return result;
 
 }
+size_t countFiles = 0;
+size_t failedFiles = 0;
+bool printStarfieldWarning = false;
+
+void processResult(ProcessResults result)
+{
+    if (result.failed){
+        ++failedFiles;
+    }
+    if (!printStarfieldWarning && result.isStarfield){
+      printStarfieldWarning = true;
+    }
+    for (auto line : result.output)
+    {
+        std::cout << line << '\n';
+    }
+}
 
 
 int main(int argc, char* argv[])
 {
 
     Params args;
-    size_t countFiles = 0;
     auto result = getProgramOptions(argc, argv, args);
-    size_t failedFiles = 0;
-    bool printStarfieldWarning = false;
     if (result == Good)
     {
         auto start = std::chrono::steady_clock::now();
@@ -277,45 +298,31 @@ int main(int argc, char* argv[])
         {
             for (auto path : args.inputs)
             {
-                if (fs::is_directory(path))
-                {
+                if (args.recursive && fs::is_directory(path)){
+                    args.parentDir = path;
+                    // recursively get all files in the directory
+                    for (auto& entry : fs::recursive_directory_iterator(path)){
+                        if (fs::is_regular_file(entry) && _stricmp(entry.path().extension().string().c_str(), ".pex") == 0){
+                            processResult(processFile(entry, args));
+                        }
+                    }
+                } else if (fs::is_directory(path)){
+                    args.parentDir = fs::path();
                     fs::directory_iterator end;
                     fs::directory_iterator entry(path);
                     while(entry != end)
                     {
                         if (_stricmp(entry->path().extension().string().c_str(), ".pex") == 0)
                         {
-                            auto processResult = processFile(path, args);
-                            if (!printStarfieldWarning && processResult.isStarfield){
-                                printStarfieldWarning = true;
-                            }
-                            for (auto line : processResult.output)
-                            {
-                                std::cout << line << '\n';
-                            }
-                            ++countFiles;
-                            if (processResult.failed){
-                                ++failedFiles;
-                            }
+                            processResult(processFile(path, args));
                         }
                         entry++;
                     }
                 }
                 else
                 {
-                    ++countFiles;
-                    auto processResult = processFile(path, args);
-                    if (processResult.failed){
-                      ++failedFiles;
-                    }
-
-                    if (!printStarfieldWarning && processResult.isStarfield){
-                      printStarfieldWarning = true;
-                    }
-                    for (auto line : processResult.output)
-                    {
-                        std::cout << line << '\n';
-                    }
+                  args.parentDir = fs::path();
+                  processResult(processFile(path, args));
                 }
             }
         }
@@ -324,8 +331,19 @@ int main(int argc, char* argv[])
             std::vector<std::future<ProcessResults>> results;
             for (auto& path : args.inputs)
             {
-                if (fs::is_directory(path))
+
+                if (args.recursive && fs::is_directory(path)){
+                  args.parentDir = path;
+                  // recursively get all files in the directory
+                  for (auto& entry : fs::recursive_directory_iterator(path)){
+                    if (fs::is_regular_file(entry) && _stricmp(entry.path().extension().string().c_str(), ".pex") == 0){
+                        results.push_back(std::move(std::async(std::launch::async, processFile, fs::path(entry.path()), args)));
+                    }
+                  }
+                }
+                else if (fs::is_directory(path))
                 {
+                    args.parentDir = fs::path();
                     fs::directory_iterator end;
                     fs::directory_iterator entry(path);
                     while(entry != end)
@@ -340,6 +358,7 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
+                    args.parentDir = fs::path();
                     results.push_back(std::move(std::async(std::launch::async, processFile, path, args)));
                 }
             }
