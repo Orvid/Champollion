@@ -216,7 +216,7 @@ void Decompiler::PscCoder::writeObject(const Pex::Object &object, const Pex::Bin
     if (object.getGuards().size()) {
         write("");
         write(";-- Guards ------------------------------------------");
-        write(";*** WARNING: Guard declaration syntax is EXPERIMENTAL, subject to change");
+        write(std::string(Decompiler::WARNING_COMMENT_PREFIX) + " WARNING: Guard declaration syntax is EXPERIMENTAL, subject to change");
         writeGuards(object, pex);
     }
 

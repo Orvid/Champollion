@@ -179,7 +179,12 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     return Good;
 }
 
-typedef std::vector<std::string> ProcessResults;
+struct _ProcessResults{
+    std::vector<std::string> output;
+    bool isStarfield = false;
+};
+
+typedef _ProcessResults ProcessResults;
 ProcessResults processFile(fs::path file, Params params)
 {
     ProcessResults result;
@@ -192,9 +197,10 @@ ProcessResults processFile(fs::path file, Params params)
     }
     catch(std::exception& ex)
     {
-       result.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
+       result.output.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
        return result;
     }
+    pex.getGameType() == Pex::Binary::StarfieldScript ? result.isStarfield = true : result.isStarfield = false;
     if (params.outputAssembly)
     {
         fs::path asmFile = params.assemblyDir / file.filename().replace_extension(".pas");
@@ -204,11 +210,11 @@ ProcessResults processFile(fs::path file, Params params)
             Decompiler::AsmCoder asmCoder(new Decompiler::StreamWriter(asmStream));
 
             asmCoder.code(pex);
-            result.push_back(std::format("{} dissassembled to {}", file.string(), asmFile.string()));
+            result.output.push_back(std::format("{} dissassembled to {}", file.string(), asmFile.string()));
         }
         catch(std::exception& ex)
         {
-            result.push_back(std::format("ERROR: {} : {}",file.string(),ex.what()));
+            result.output.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
             fs::remove(asmFile);
         }
     }
@@ -240,11 +246,11 @@ ProcessResults processFile(fs::path file, Params params)
                 params.papyrusDir.string()); // using string instead of path here for C++14 compatability for staticlib targets
 
         pscCoder.code(pex);
-        result.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));
+        result.output.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));
     }
     catch(std::exception& ex)
     {
-        result.push_back(std::format("ERROR: {} : {}", file.string() , ex.what()));
+        result.output.push_back(std::format("ERROR: {} : {}", file.string() , ex.what()));
         fs::remove(pscFile);
     }
     return result;
@@ -257,6 +263,7 @@ int main(int argc, char* argv[])
     Params args;
     size_t countFiles = 0;
     auto result = getProgramOptions(argc, argv, args);
+    bool printStarfieldWarning = false;
     if (result == Good)
     {
         auto start = std::chrono::steady_clock::now();
@@ -272,7 +279,11 @@ int main(int argc, char* argv[])
                     {
                         if (_stricmp(entry->path().extension().string().c_str(), ".pex") == 0)
                         {
-                            for (auto line : processFile(entry->path(), args))
+                            auto processResult = processFile(path, args);
+                            if (!printStarfieldWarning && processResult.isStarfield){
+                                printStarfieldWarning = true;
+                            }
+                            for (auto line : processResult.output)
                             {
                                 std::cout << line << '\n';
                             }
@@ -284,7 +295,11 @@ int main(int argc, char* argv[])
                 else
                 {
                     ++countFiles;
-                    for (auto line : processFile(path, args))
+                    auto processResult = processFile(path, args);
+                    if (!printStarfieldWarning && processResult.isStarfield){
+                      printStarfieldWarning = true;
+                    }
+                    for (auto line : processResult.output)
                     {
                         std::cout << line << '\n';
                     }
@@ -318,7 +333,12 @@ int main(int argc, char* argv[])
 
             for (auto& result : results)
             {
-                for(auto& line : result.get())
+                auto processResult = result.get();
+                if (!printStarfieldWarning && processResult.isStarfield){
+                  printStarfieldWarning = true;
+                }
+
+                for(auto& line : processResult.output)
                 {
                     std::cout << line << '\n';
                 }
@@ -330,6 +350,21 @@ int main(int argc, char* argv[])
         auto diff = end - start;
 
         std::cout << countFiles << " files processed in " << std::chrono::duration <double> (diff).count() << " s" << std::endl;
+
+
+        if (printStarfieldWarning){
+          // TODO: Remove this warning when the CK comes out
+          std::cout << "********************* STARFIELD PRELIMINARY SYNTAX WARNING *********************" << std::endl;
+          std::cout << "The syntax for new features in Starfield (Guard, TryGuard, GetMatchingStructs) is not yet known." << std::endl;
+          std::cout << "Decompiled Starfield scripts use guessed-at syntax for these features." << std::endl;
+          std::cout << "This syntax should be considered as experimental, unstable, and subject to change." << std::endl << std::endl;
+          std::cout << "The proper syntax will only be known when the Creation Kit comes out in early 2024." << std::endl;
+          std::cout << "If you are using decompiled scripts as the basis for mods, please be aware of this," << std::endl;
+          std::cout << "and be prepared to update your scripts when the final syntax is known." << std::endl << std::endl;
+          std::cout << "The lines in the decompiled scripts which contain this guessed-at syntax are" << std::endl;
+          std::cout << "marked with a comment beginning with '" << Decompiler::WARNING_COMMENT_PREFIX << "'." << std::endl;
+          std::cout << "********************* STARFIELD PRELIMINARY SYNTAX WARNING *********************" << std::endl;
+        }
         return 0;
     }
     if (result == HelpOrVersion){

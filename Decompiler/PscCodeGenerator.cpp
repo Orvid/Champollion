@@ -32,7 +32,7 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
 void Decompiler::PscCodeGenerator::newLine()
 {
     if (!m_ExperimentalSyntaxWarning.empty()) {
-        m_Result << " ;*** WARNING: Experimental syntax, may be incorrect: ";
+        m_Result << " " << Decompiler::WARNING_COMMENT_PREFIX << " WARNING: Experimental syntax, may be incorrect: ";
         for (auto warn: m_ExperimentalSyntaxWarning){
             m_Result << warn << " ";
         }
