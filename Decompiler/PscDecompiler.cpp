@@ -828,7 +828,8 @@ void Decompiler::PscDecompiler::rebuildExpression(Node::BasePtr scope)
             }
             else
             {
-                throw std::runtime_error("Decompilation failed");
+              auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+              throw std::runtime_error("Failed to rebuild expression in " + funcname + " at instruction " + std::to_string(expressionUse->getBegin()));
             }
         }
         else
@@ -1017,7 +1018,8 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
 {
     if (endBlock < startBlock)
     {
-        throw std::runtime_error("Decompilation failed");
+      auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+      throw std::runtime_error("Failed to rebuild control flow for " + funcname + ".");
     }
     auto begin = m_CodeBlocs.find(startBlock);
     auto end = m_CodeBlocs.find(endBlock);
@@ -1038,7 +1040,8 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
             if (beforeExit == PscCodeBlock::END)
             {
                 // Decompilation failed
-                throw std::runtime_error("Decompilation failed");
+                auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+                throw std::runtime_error("Failed to rebuild control flow for " + funcname + ".");
             }
             Node::BasePtr condition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
