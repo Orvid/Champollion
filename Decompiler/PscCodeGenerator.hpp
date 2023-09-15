@@ -49,11 +49,17 @@ public:
 
 protected:    
     void newLine();
-
+    void addIpRangeForCurrentLine(int64_t begin, int64_t end);
     std::ostringstream m_Result;
+    int64_t minIpForCurrentLine{ -1 };
+    int64_t maxIpForCurrentLine{ -1 };
     std::uint8_t m_Level{ 0 };
     std::vector<std::string> m_ExperimentalSyntaxWarning{};
     Decompiler::PscDecompiler* m_Decompiler;
+
+    void writeDebugInfoLineNumbers(int64_t begin, int64_t end);
+    std::vector<int64_t> getDebugInfoLineNumbers(int64_t begin, int64_t end);
+    void resetIpsForCurrentLine();
 };
 
 }

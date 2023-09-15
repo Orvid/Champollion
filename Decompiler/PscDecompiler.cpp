@@ -56,17 +56,16 @@ static std::atomic_size_t unnamed_num{0};
  * @param traceDecompilation True to output decompilation tracing to the rebuild log.
  * @param dumpTree True to output the entire tree for each block (true by default if traceDecompilation is true).
  */
-Decompiler::PscDecompiler::PscDecompiler(   const Pex::Function &function,
-                                            const Pex::Object &object,
-                                            bool commentAsm = false,
-                                            bool traceDecompilation = false,
-                                            bool dumpTree = true,
-                                            std::string outputDir = "" ) :
+Decompiler::PscDecompiler::PscDecompiler(const Pex::Function &function, const Pex::Object &object,
+                                         const Pex::DebugInfo::FunctionInfo *debugInfo, bool commentAsm = false,
+                                         bool traceDecompilation = false, bool dumpTree = true,
+                                         std::string outputDir = "") :
     m_Function(function),
     m_Object(object),
     m_CommentAsm(commentAsm),
     m_TraceDecompilation(traceDecompilation),
     m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
+    m_DebugInfo(debugInfo ? *debugInfo : Pex::DebugInfo::FunctionInfo()),
     m_OutputDir(outputDir)
 {
     if (m_TraceDecompilation)
@@ -942,6 +941,8 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                                 m_Log << "AND? " << "detected" << std::endl;
                                 dumpBlock(source->getBegin(), source->getEnd()+1);
                             }
+//                            andOperator->includeInstruction(right->getBegin());
+//                            andOperator->includeInstruction(left->getEnd());
                         }
                     }
                     it = m_CodeBlocs.find(source->getBegin());
@@ -989,6 +990,8 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                             m_Log << "OR? " << "detected" << std::endl;
                             dumpBlock(source->getBegin(), source->getEnd()+1);
                         }
+//                        orOperator->includeInstruction(right->getBegin());
+//                        orOperator->includeInstruction(left->getEnd());
                     }
                     it = m_CodeBlocs.find(source->getBegin());
                     advance = 0;
@@ -1043,11 +1046,13 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                 auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
                 throw std::runtime_error("Failed to rebuild control flow for " + funcname + ".");
             }
+            //Node::BasePtr condition = std::make_shared<Node::Constant>(source->getEnd(), Pex::Value(source->getCondition(), true));
             Node::BasePtr condition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
             if (m_CodeBlocs[beforeExit] == source){
                 assert(source->onFalse() < source->onTrue());
                 auto scope = source->getScope();
+                //condition = std::make_shared<Node::UnaryOperator>(source->getEnd(), 10, source->getCondition(), "!", condition);
                 condition = std::make_shared<Node::UnaryOperator>(-1, 10, source->getCondition(), "!", condition);
                 source->setCondition(source->getCondition(), source->onFalse(), source->onTrue());
                 exit = source->onFalse();
@@ -1270,7 +1275,11 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
 
     // Remove the copy node, which was used to assign to temporary variables.;
     Node::WithNode<Node::Copy>()
-        .transform([&] (Node::Copy* node) { return node->getValue();})
+        .transform([&] (Node::Copy* node) {
+            auto val = node->getValue();
+//            val->includeInstruction(node->getEnd());
+            return val;
+        })
         .on(program);
 
     // Remove casting a variable as it's own type as they are useless
@@ -1670,4 +1679,12 @@ bool Decompiler::PscDecompiler::isDebugFunction() {
         }
     }
     return false;
+}
+
+const Pex::DebugInfo::FunctionInfo & Decompiler::PscDecompiler::getDebugInfo() {
+    return m_DebugInfo;
+}
+
+void Decompiler::PscDecompiler::addLineMapping(size_t decompiledLine, std::vector<int64_t> &originalLines) {
+    m_LineMap[decompiledLine] = std::move(originalLines);
 }

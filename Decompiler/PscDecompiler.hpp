@@ -10,6 +10,7 @@
 #include "PscCodeBlock.hpp"
 
 #include "Node/Base.hpp"
+#include "Pex/DebugInfo.hpp"
 
 namespace Decompiler {
 
@@ -23,17 +24,15 @@ class PscDecompiler :
         public std::vector<std::string>
 {
 public:
-    PscDecompiler(  const Pex::Function& function,
-                    const Pex::Object& object, 
-                    bool commentAsm, 
-                    bool traceDecompilation, 
-                    bool dumpTree,
-                    std::string outputDir);
+    PscDecompiler(const Pex::Function &function, const Pex::Object &object,
+                  const Pex::DebugInfo::FunctionInfo *debugInfo, bool commentAsm, bool traceDecompilation,
+                  bool dumpTree, std::string outputDir);
     ~PscDecompiler();
 
     void decodeToAsm(std::uint8_t level, size_t begin, size_t end);
     bool isDebugFunction();
-
+    const Pex::DebugInfo::FunctionInfo & getDebugInfo();
+    void addLineMapping(size_t decompiledLine, std::vector<int64_t> & originalLines);
 protected:
 
 
@@ -56,8 +55,7 @@ protected:
     void declareVariables(Node::BasePtr program);
     void cleanUpTree(Node::BasePtr program);
 
-    void generateCode(Node::BasePtr program);  
-
+    void generateCode(Node::BasePtr program);
     Pex::StringTable::Index toIdentifier(const Pex::Value& value) const;
     Node::BasePtr fromValue(size_t ip, const Pex::Value& value) const;
     Node::BasePtr checkAssign(Node::BasePtr expression) const;
@@ -82,10 +80,13 @@ protected:
     bool m_CommentAsm;
     bool m_TraceDecompilation;
     bool m_DumpTree;
+    const Pex::DebugInfo::FunctionInfo m_DebugInfo;
     std::string m_OutputDir;
-
     std::ofstream m_Log;
     Pex::StringTable m_TempTable;
+
+    // Map of decompiled lines to the range of (potentially multiple) original lines that were in the debug info
+    std::map<size_t, std::vector<int64_t>> m_LineMap;
 
     void rebuildLocks(Node::BasePtr &program);
     void RemoveUnlocksFromBody(Node::BasePtr &body, const Node::BasePtr &matchingLock);

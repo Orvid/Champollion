@@ -29,8 +29,31 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
     assert(decompiler);
 }
 
+
+void Decompiler::PscCodeGenerator::writeDebugInfoLineNumbers(int64_t begin, int64_t end)
+{
+    auto result = getDebugInfoLineNumbers(begin, end);
+    if (result.empty())
+        return;
+
+    m_Result << " ; #DEBUG_LINE_NO:";
+
+    for (auto i = 0; i < result.size(); ++i)
+    {
+        if (i == 0)
+        {
+            m_Result << result[i];
+        }
+        else
+        {
+            m_Result << "," << result[i];
+        }
+    }
+}
+
 void Decompiler::PscCodeGenerator::newLine()
 {
+
     if (!m_ExperimentalSyntaxWarning.empty()) {
         m_Result << " " << Decompiler::WARNING_COMMENT_PREFIX << " WARNING: Experimental syntax, may be incorrect: ";
         for (auto warn: m_ExperimentalSyntaxWarning){
@@ -38,7 +61,12 @@ void Decompiler::PscCodeGenerator::newLine()
         }
         m_ExperimentalSyntaxWarning.clear();
     }
+    auto nums = getDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
+    writeDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
+    resetIpsForCurrentLine();
     m_Decompiler->push_back(m_Result.str());
+    m_Decompiler->addLineMapping(m_Decompiler->size() - 1, nums);
+
     m_Result = std::ostringstream();
     for (auto i = 0; i < m_Level; ++i)
     {
@@ -73,6 +101,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Scope* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::BinaryOperator* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool parenOnLeft = node->getPrecedence() < node->getLeft()->getPrecedence();
     if (node->getLeft()->is<Node::BinaryOperator>()) {
         auto l = node->getLeft()->as<Node::BinaryOperator>();
@@ -114,6 +143,7 @@ void Decompiler::PscCodeGenerator::visit(Node::BinaryOperator* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::UnaryOperator* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool paren = node->getPrecedence() < node->getValue()->getPrecedence();
 
     m_Result << node->getOperator();
@@ -129,6 +159,7 @@ void Decompiler::PscCodeGenerator::visit(Node::UnaryOperator* node)
 }
 void Decompiler::PscCodeGenerator::visit(Node::Assign* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     node->getDestination()->visit(this);
     m_Result << " = ";
     node->getValue()->visit(this);
@@ -136,6 +167,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Assign* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::AssignOperator* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     node->getDestination()->visit(this);
     m_Result << " " << node->getOperator() << " ";
     node->getValue()->visit(this);
@@ -143,11 +175,13 @@ void Decompiler::PscCodeGenerator::visit(Node::AssignOperator* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::Copy *node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     node->getValue()->visit(this);
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::Cast* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool paren = node->getPrecedence() < node->getValue()->getPrecedence() || node->getValue()->is<Node::Cast>();
 
     if (paren)
@@ -164,6 +198,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Cast* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::CallMethod* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool paren = node->getPrecedence() < node->getObject()->getPrecedence();
 
     if (paren)
@@ -189,6 +224,7 @@ void Decompiler::PscCodeGenerator::visit(Node::CallMethod* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::Params *node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool not_first = false;
     for (auto param : *node)
     {
@@ -206,6 +242,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Params *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::Return* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     m_Result << "Return ";
     if (node->getValue())
     {
@@ -214,6 +251,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Return* node)
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node) {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool paren = node->getPrecedence() < node->getObject()->getPrecedence();
 
     if (paren) {
@@ -229,19 +267,23 @@ void Decompiler::PscCodeGenerator::visit(Node::PropertyAccess *node) {
 
 void Decompiler::PscCodeGenerator::visit(Node::StructCreate* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     m_Result << "new " << PscCoder::mapType(node->getType().asString());
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayCreate* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     std::string type = PscCoder::mapType(node->getType().asString());
     m_Result << "new " << type.substr(0, type.length() - 2) << "[";
+
     node->getIndex()->visit(this);
     m_Result << "]";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayLength* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool paren = node->getPrecedence() < node->getArray()->getPrecedence();
 
     if (paren)
@@ -258,6 +300,7 @@ void Decompiler::PscCodeGenerator::visit(Node::ArrayLength* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::ArrayAccess *node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     bool paren = node->getPrecedence() < node->getArray()->getPrecedence();
 
     if (paren)
@@ -276,6 +319,7 @@ void Decompiler::PscCodeGenerator::visit(Node::ArrayAccess *node)
 
 void Decompiler::PscCodeGenerator::visit(Node::Constant* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     auto& value = node->getConstant();
 
     m_Result << value.toString();
@@ -283,6 +327,7 @@ void Decompiler::PscCodeGenerator::visit(Node::Constant* node)
 
 void Decompiler::PscCodeGenerator::visit(Node::IdentifierString *node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     if (node->getIdentifier() == "self")
         m_Result << "Self";
     else
@@ -302,11 +347,14 @@ void Decompiler::PscCodeGenerator::visit(Node::While* node)
     {
         m_Decompiler->decodeToAsm(m_Level, node->getBody()->back()->getEnd() + 1, node->getBody()->back()->getEnd() + 1);
     }
+    // EndWhile does not have valid debug line numbers, reset minIpForCurrentLine and maxIpForCurrentLine
+    resetIpsForCurrentLine();
     m_Result << "EndWhile";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
 {
+    addIpRangeForCurrentLine(node->getBegin(), node->getEnd());
     auto cond = node->getCondition();
     m_Result << "If ";
     node->getCondition()->visit(this);
@@ -335,22 +383,28 @@ void Decompiler::PscCodeGenerator::visit(Node::IfElse* node)
     {
         m_Result << "Else";
         m_Level++;
+        // Else do not have valid debug line numbers, reset minIpForCurrentLine and maxIpForCurrentLine
+        resetIpsForCurrentLine();
         newLine();
         node->getElse()->visit(this);
         m_Level--;
         newLine();
     }
+    // Endif does not have valid debug line numbers, reset minIpForCurrentLine and maxIpForCurrentLine
+    resetIpsForCurrentLine();
     m_Result << "EndIf";
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::Declare *node)
 {
+    addIpRangeForCurrentLine(node->getEnd(), node->getEnd());
     m_Result << PscCoder::mapType(node->getType().asString()) << " ";
     node->getObject()->visit(this);
 }
 
 void Decompiler::PscCodeGenerator::visit(Node::GuardStatement *node) {
     m_Result << "Guard ";
+    addIpRangeForCurrentLine(node->getBegin(), node->getBegin());
     node->getParameters()->visit(this);
     m_Level++;
     // TODO: VERIFY: Remove this when syntax is verified
@@ -365,6 +419,7 @@ void Decompiler::PscCodeGenerator::visit(Node::GuardStatement *node) {
 
 void Decompiler::PscCodeGenerator::visit(Node::TryGuard *node) {
     m_Result << "TryGuard ";
+    addIpRangeForCurrentLine(node->getBegin(), node->getBegin());
     node->getParameters()->visit(this);
     m_Level++;
     // TODO: VERIFY: Remove this when syntax is verified
@@ -380,5 +435,45 @@ void Decompiler::PscCodeGenerator::visit(Node::TryGuard *node) {
 
 void Decompiler::PscCodeGenerator::visit(Node::EndGuard *node) {
     // NONE
+}
+
+void Decompiler::PscCodeGenerator::addIpRangeForCurrentLine(int64_t begin, int64_t end) {
+    if (begin <= -1 || end <= -1) {
+        return;
+    }
+    if (minIpForCurrentLine <= -1 || begin < minIpForCurrentLine) {
+        minIpForCurrentLine = begin;
+    }
+    if (maxIpForCurrentLine <= -1 || end > maxIpForCurrentLine) {
+        maxIpForCurrentLine = end;
+    }
+}
+
+void Decompiler::PscCodeGenerator::resetIpsForCurrentLine() {
+    minIpForCurrentLine = -1;
+    maxIpForCurrentLine = -1;
+}
+
+std::vector<int64_t> Decompiler::PscCodeGenerator::getDebugInfoLineNumbers(int64_t begin, int64_t end) {
+    if (begin < 0 || end < 0){
+        return {};
+    }
+    auto & debugInfo = m_Decompiler->getDebugInfo();
+    auto & lineNumbers = debugInfo.getLineNumbers();
+    // no debug info
+    if (lineNumbers.empty() || begin > lineNumbers.size() - 1) {
+        return {};
+    }
+    std::vector<int64_t> result;
+    int64_t line = -1;
+    for (auto i = begin; i <= end; ++i)
+    {
+        if (i < lineNumbers.size() && lineNumbers[i] != line)
+        {
+            line = lineNumbers[i];
+            result.push_back(line);
+        }
+    }
+    return result;
 }
 

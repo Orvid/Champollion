@@ -370,6 +370,7 @@ void Decompiler::PscCoder::writeProperties(const Pex::Object &object, const Pex:
 */
 void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const Pex::Object &object, const Pex::Binary& pex)
 {
+    const auto noState = pex.getStringTable().findIdentifier("");
     auto stream = indent(i);
     auto isAutoReadOnly = !prop.hasAutoVar() &&
                            prop.isReadable() &&
@@ -403,9 +404,9 @@ void Decompiler::PscCoder::writeProperty(int i, const Pex::Property& prop, const
 
     if (!prop.hasAutoVar() && !isAutoReadOnly) {
         if (prop.isReadable())
-            writeFunction(i + 1, prop.getReadFunction(), object, pex, "Get");
+            writeFunction(i + 1, prop.getReadFunction(), object, pex, pex.getDebugInfo().getFunctionInfo(object.getName(),noState, prop.getName(), Pex::DebugInfo::FunctionType::Getter), "Get");
         if (prop.isWritable())
-            writeFunction(i + 1, prop.getWriteFunction(), object, pex, "Set");
+            writeFunction(i + 1, prop.getWriteFunction(), object, pex, pex.getDebugInfo().getFunctionInfo(object.getName(),noState, prop.getName(), Pex::DebugInfo::FunctionType::Setter), "Set");
         write(indent(i) << "EndProperty");
     }
 }
@@ -503,7 +504,7 @@ void Decompiler::PscCoder::writeFunctions(int i, const Pex::State &state, const 
     for (auto& func : state.getFunctions())
     {
         write("");
-        writeFunction(i, func, object, pex);
+        writeFunction(i, func, object, pex, pex.getDebugInfo().getFunctionInfo(object.getName(), state.getName(), func.getName()));
     }
 }
 static const std::regex tempRegex = std::regex("::temp\\d+");
@@ -516,7 +517,9 @@ static const std::regex tempRegex = std::regex("::temp\\d+");
  * @param pex Binary to decompile.
  * @param name Name of the function. This parameter override the name stored in the function object.
  */
-void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, const Pex::Object& object, const Pex::Binary &pex, const std::string &name)
+void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, const Pex::Object &object,
+                                         const Pex::Binary &pex, const Pex::DebugInfo::FunctionInfo *functionInfo,
+                                         const std::string &name)
 {
     std::string functionName = name;
 
@@ -595,7 +598,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         write(stream.str());
         writeDocString(i, function);
     } else {
-        auto decomp = PscDecompiler(function, object, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
+        auto decomp = PscDecompiler(function, object, functionInfo, m_CommentAsm, m_TraceDecompilation, m_DumpTree,
                                     m_OutputDir);
         if (decomp.isDebugFunction()) {
             // Starfield debug function fixup hacks
