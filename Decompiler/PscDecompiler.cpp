@@ -1382,6 +1382,17 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
 
     program->computeInstructionBounds();
 
+    // check for orphaned nodes on m_CodeBlocs
+    for (auto& bloc_kv : m_CodeBlocs)
+    {
+        auto& bloc = bloc_kv.second;
+        auto scope = bloc->getScope();
+        if (scope->size() > 0) {
+          auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+          throw std::runtime_error("Orphaned nodes in " + funcname + " from instruction " + std::to_string(scope->front()->getBegin()) + " to " + std::to_string(scope->back()->getEnd()) + ".");
+        }
+    }
+
 }
 
 
