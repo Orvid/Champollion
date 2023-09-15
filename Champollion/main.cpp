@@ -182,6 +182,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
 struct _ProcessResults{
     std::vector<std::string> output;
     bool isStarfield = false;
+    bool failed = false;
 };
 
 typedef _ProcessResults ProcessResults;
@@ -198,6 +199,7 @@ ProcessResults processFile(fs::path file, Params params)
     catch(std::exception& ex)
     {
        result.output.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
+       result.failed = true;
        return result;
     }
     pex.getGameType() == Pex::Binary::StarfieldScript ? result.isStarfield = true : result.isStarfield = false;
@@ -215,6 +217,7 @@ ProcessResults processFile(fs::path file, Params params)
         catch(std::exception& ex)
         {
             result.output.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
+            result.failed = true;
             fs::remove(asmFile);
         }
     }
@@ -251,11 +254,13 @@ ProcessResults processFile(fs::path file, Params params)
     catch(std::exception& ex)
     {
         result.output.push_back(std::format("ERROR: {} : {}", file.string() , ex.what()));
+        result.failed = true;
         fs::remove(pscFile);
     }
     return result;
 
 }
+
 
 int main(int argc, char* argv[])
 {
@@ -263,6 +268,7 @@ int main(int argc, char* argv[])
     Params args;
     size_t countFiles = 0;
     auto result = getProgramOptions(argc, argv, args);
+    size_t failedFiles = 0;
     bool printStarfieldWarning = false;
     if (result == Good)
     {
@@ -288,6 +294,9 @@ int main(int argc, char* argv[])
                                 std::cout << line << '\n';
                             }
                             ++countFiles;
+                            if (processResult.failed){
+                                ++failedFiles;
+                            }
                         }
                         entry++;
                     }
@@ -296,6 +305,10 @@ int main(int argc, char* argv[])
                 {
                     ++countFiles;
                     auto processResult = processFile(path, args);
+                    if (processResult.failed){
+                      ++failedFiles;
+                    }
+
                     if (!printStarfieldWarning && processResult.isStarfield){
                       printStarfieldWarning = true;
                     }
@@ -342,6 +355,9 @@ int main(int argc, char* argv[])
                 {
                     std::cout << line << '\n';
                 }
+                if (processResult.failed){
+                    ++failedFiles;
+                }
             }
             countFiles = results.size();
 
@@ -350,7 +366,9 @@ int main(int argc, char* argv[])
         auto diff = end - start;
 
         std::cout << countFiles << " files processed in " << std::chrono::duration <double> (diff).count() << " s" << std::endl;
-
+        if (failedFiles > 0){
+            std::cout << failedFiles << " files failed to decompile." << std::endl;
+        }
 
         if (printStarfieldWarning){
           // TODO: Remove this warning when the CK comes out
