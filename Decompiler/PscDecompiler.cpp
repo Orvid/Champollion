@@ -479,7 +479,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                     } else // two variables of the same type, equivalent to an assign
                     {
                         // check if this is a useless cast
-//                        if (args[0].getId() != args[1].getId())
+                        if (args[0].getId() != args[1].getId())
                           node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                     }
                     break;
@@ -999,14 +999,6 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                                 auto val = onFalse->getScope()->back()->as<Node::Assign>()->getValue();
                                 onFalse->getScope()->removeChild(onFalse->getScope()->back());
                                 onFalse->getScope()->mergeChildren(val);
-//                                if (source->getScope()->back()->is<Node::Assign>()) {
-//                                    auto destnode = source->getScope()->back()->as<Node::Assign>()->getDestination();
-//                                    if (destnode->is<Node::Constant>()) {
-//                                        val = source->getScope()->back()->as<Node::Assign>()->getValue();
-//                                        source->getScope()->removeChild(source->getScope()->back());
-//                                        source->getScope()->mergeChildren(val);
-//                                    }
-//                                }
                             }
                         }
                     }
@@ -1019,10 +1011,8 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         bool fixassign = false;
                         if (left->is<Node::Assign>()) {
                             auto destnode = left->as<Node::Assign>()->getValue();
-                            if (destnode->is<Node::Constant>() || destnode->is<Node::Copy>()) {
-                                leftval = destnode;
-                                fixassign = true;
-                            }
+                            leftval = destnode;
+                            fixassign = true;
                         } else {
                             source->getScope()->removeChild(left);
                         }
