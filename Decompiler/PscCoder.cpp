@@ -31,6 +31,7 @@ Decompiler::PscCoder::PscCoder( OutputWriter* writer,
                                 bool traceDecompilation = false,
                                 bool dumpTree = true,   
                                 bool writeDebugFuncs = false,
+                                bool printDebugLineNo = false,
                                 std::string traceDir = ""):
     Coder(writer),
     m_CommentAsm(commentAsm),
@@ -38,7 +39,8 @@ Decompiler::PscCoder::PscCoder( OutputWriter* writer,
     m_TraceDecompilation(traceDecompilation),
     m_DumpTree(dumpTree), // Note that while dumpTree is true by default, it will not do anything unless traceDecompilation is true
     m_WriteDebugFuncs(writeDebugFuncs),
-    m_OutputDir(traceDir)
+    m_OutputDir(traceDir),
+    m_PrintDebugLineNo(printDebugLineNo)
 {
     
 }
@@ -56,6 +58,7 @@ Decompiler::PscCoder::PscCoder(Decompiler::OutputWriter *writer)  :
     m_TraceDecompilation(false),
     m_DumpTree(true),
     m_WriteDebugFuncs(false),
+    m_PrintDebugLineNo(false),
     m_OutputDir("")
 {
 }
@@ -666,8 +669,23 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         writeUserFlag(stream, function, pex);
         write(stream.str());
         writeDocString(i, function);
+        auto index = 0;
         for (auto &line: decomp) {
+            auto & linemap = decomp.getLineMap();
+            if (m_PrintDebugLineNo){
+              line += " ; #DEBUG_LINE_NO:";
+              // get index of line
+              auto result = linemap[index];
+              for (auto i = 0; i < result.size(); ++i)
+              {
+                if (i > 0){
+                  line += ",";
+                }
+                line += std::to_string(result[i]);
+              }
+            }
             write(indent(i+1) << line);
+            index++;
         }
         if (isEvent)
           write(indent(i) << "EndEvent");

@@ -478,9 +478,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                         node = std::make_shared<Node::Cast>(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
                     } else // two variables of the same type, equivalent to an assign
                     {
-                        // check if this is a useless cast
-//                        if (args[0].getId() != args[1].getId())
-                          node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
+                        node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                     }
                     break;
                 }
@@ -915,6 +913,44 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                 bool maybeOr = (source->onFalse() == source->getEnd() + 1);
                 assert(!(maybeAnd && maybeOr));
 
+                auto next = maybeAnd ? source->onTrue() : source->onFalse();
+                auto jumpnext = maybeAnd ? source->onFalse() : source->onTrue();
+
+              // check debug info
+
+
+                if (!m_DebugInfo.getLineNumbers().empty() && m_CodeBlocs[next]->getEnd() != PscCodeBlock::END){
+                  auto nextBlock = m_CodeBlocs[next];
+                  auto jumpBlock = m_CodeBlocs[jumpnext];
+                  auto srcNode = source->getScope()->back();
+                  auto sourceLines = m_DebugInfo.getLineNumbersForIpRange(srcNode->getBegin(), srcNode->getEnd());
+                  auto nextNode = nextBlock->getScope()->size() > 0 ? nextBlock->getScope()->front() : nextBlock->getScope()->shared_from_this();
+                  auto nextLines = m_DebugInfo.getLineNumbersForIpRange(nextNode->getBegin(), nextNode->getEnd());
+                  auto jumpLines = m_DebugInfo.getLineNumbersForIpRange(jumpBlock->getBegin(), jumpBlock->getEnd());
+
+                  // If the last source line is the same as the first next line, it is a potential and/or
+                  // otherwise, don't attempt to squeeze these together.
+                  if (sourceLines.empty() || nextLines.empty()){
+                    auto thing = 1;
+                  }
+                  else
+                  {
+                    if (*sourceLines.rbegin() != *nextLines.begin()){
+                      if (*nextLines.begin() - *sourceLines.rbegin() == 1) {
+                        // check if the next statement is an assign; if not, then this is probably not a boolean
+                        if (nextNode->is<Node::Assign>()){
+                          maybeAnd = false;
+                          maybeOr = false;
+                        }
+                      } else {
+                        maybeAnd = false;
+                        maybeOr = false;
+                      }
+                    }
+                  }
+                }
+
+
                 if (maybeAnd)
                 {
                     // Rebuild the boolean operators between the true and false block.
@@ -1143,7 +1179,7 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
             //Node::BasePtr condition = std::make_shared<Node::Constant>(source->getEnd(), Pex::Value(source->getCondition(), true));
             Node::BasePtr condition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
-            if (m_CodeBlocs[beforeExit] == source){
+            if (m_CodeBlocs[beforeExit] == source) {
                 assert(source->onFalse() < source->onTrue());
                 auto scope = source->getScope();
                 //condition = std::make_shared<Node::UnaryOperator>(source->getEnd(), 10, source->getCondition(), "!", condition);
@@ -1779,6 +1815,10 @@ const Pex::DebugInfo::FunctionInfo & Decompiler::PscDecompiler::getDebugInfo() {
     return m_DebugInfo;
 }
 
-void Decompiler::PscDecompiler::addLineMapping(size_t decompiledLine, std::vector<int64_t> &originalLines) {
+void Decompiler::PscDecompiler::addLineMapping(size_t decompiledLine, std::vector<uint16_t> &originalLines) {
     m_LineMap[decompiledLine] = std::move(originalLines);
+}
+
+Decompiler::PscDecompiler::DebugLineMap &Decompiler::PscDecompiler::getLineMap() {
+  return m_LineMap;
 }

@@ -24,6 +24,8 @@ class PscDecompiler :
         public std::vector<std::string>
 {
 public:
+    typedef std::map<size_t, std::vector<uint16_t>> DebugLineMap;
+
     PscDecompiler(const Pex::Function &function, const Pex::Object &object,
                   const Pex::DebugInfo::FunctionInfo *debugInfo, bool commentAsm, bool traceDecompilation,
                   bool dumpTree, std::string outputDir);
@@ -32,7 +34,8 @@ public:
     void decodeToAsm(std::uint8_t level, size_t begin, size_t end);
     bool isDebugFunction();
     const Pex::DebugInfo::FunctionInfo & getDebugInfo();
-    void addLineMapping(size_t decompiledLine, std::vector<int64_t> & originalLines);
+    void addLineMapping(size_t decompiledLine, std::vector<uint16_t> &originalLines);
+    DebugLineMap &getLineMap();
 protected:
 
 
@@ -86,7 +89,7 @@ protected:
     Pex::StringTable m_TempTable;
 
     // Map of decompiled lines to the range of (potentially multiple) original lines that were in the debug info
-    std::map<size_t, std::vector<int64_t>> m_LineMap;
+    DebugLineMap m_LineMap;
 
     void rebuildLocks(Node::BasePtr &program);
     void RemoveUnlocksFromBody(Node::BasePtr &body, const Node::BasePtr &matchingLock);

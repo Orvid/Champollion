@@ -57,8 +57,7 @@ protected:
     std::vector<std::string> m_ExperimentalSyntaxWarning{};
     Decompiler::PscDecompiler* m_Decompiler;
 
-    void writeDebugInfoLineNumbers(int64_t begin, int64_t end);
-    std::vector<int64_t> getDebugInfoLineNumbers(int64_t begin, int64_t end);
+    std::vector<uint16_t> getDebugInfoLineNumbers(int64_t begin, int64_t end);
     void resetIpsForCurrentLine();
 };
 

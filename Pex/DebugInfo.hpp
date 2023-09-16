@@ -66,6 +66,7 @@ public:
 
         const LineNumbers& getLineNumbers() const;
         LineNumbers& getLineNumbers();
+        std::vector<uint16_t> getLineNumbersForIpRange(int64_t begin, int64_t end) const;
 
      private:
         StringTable::Index m_ObjectName;
@@ -148,6 +149,7 @@ public:
     StructOrders& getStructOrders() { return m_StructOrder; }
 
     const FunctionInfo *getFunctionInfo(const StringTable::Index& object, const StringTable::Index& state, const StringTable::Index& name, FunctionType type = FunctionType::Method) const;
+
 private:
     std::time_t m_ModificationTime;
     FunctionInfos m_FunctionInfo;

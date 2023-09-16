@@ -30,27 +30,6 @@ Decompiler::PscCodeGenerator::PscCodeGenerator(Decompiler::PscDecompiler* decomp
 }
 
 
-void Decompiler::PscCodeGenerator::writeDebugInfoLineNumbers(int64_t begin, int64_t end)
-{
-    auto result = getDebugInfoLineNumbers(begin, end);
-    if (result.empty())
-        return;
-
-    m_Result << " ; #DEBUG_LINE_NO:";
-
-    for (auto i = 0; i < result.size(); ++i)
-    {
-        if (i == 0)
-        {
-            m_Result << result[i];
-        }
-        else
-        {
-            m_Result << "," << result[i];
-        }
-    }
-}
-
 void Decompiler::PscCodeGenerator::newLine()
 {
 
@@ -62,7 +41,6 @@ void Decompiler::PscCodeGenerator::newLine()
         m_ExperimentalSyntaxWarning.clear();
     }
     auto nums = getDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
-//    writeDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
     resetIpsForCurrentLine();
     m_Decompiler->push_back(m_Result.str());
     m_Decompiler->addLineMapping(m_Decompiler->size() - 1, nums);
@@ -454,26 +432,7 @@ void Decompiler::PscCodeGenerator::resetIpsForCurrentLine() {
     maxIpForCurrentLine = -1;
 }
 
-std::vector<int64_t> Decompiler::PscCodeGenerator::getDebugInfoLineNumbers(int64_t begin, int64_t end) {
-    if (begin < 0 || end < 0){
-        return {};
-    }
-    auto & debugInfo = m_Decompiler->getDebugInfo();
-    auto & lineNumbers = debugInfo.getLineNumbers();
-    // no debug info
-    if (lineNumbers.empty() || begin > lineNumbers.size() - 1) {
-        return {};
-    }
-    std::vector<int64_t> result;
-    int64_t line = -1;
-    for (auto i = begin; i <= end; ++i)
-    {
-        if (i < lineNumbers.size() && lineNumbers[i] != line)
-        {
-            line = lineNumbers[i];
-            result.push_back(line);
-        }
-    }
-    return result;
+std::vector<uint16_t> Decompiler::PscCodeGenerator::getDebugInfoLineNumbers(int64_t begin, int64_t end) {
+    return m_Decompiler->getDebugInfo().getLineNumbersForIpRange(begin, end);
 }
 
