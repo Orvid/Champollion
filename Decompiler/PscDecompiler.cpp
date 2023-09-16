@@ -479,7 +479,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                     } else // two variables of the same type, equivalent to an assign
                     {
                         // check if this is a useless cast
-                        if (args[0].getId() != args[1].getId())
+//                        if (args[0].getId() != args[1].getId())
                           node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                     }
                     break;
@@ -933,36 +933,65 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         // The true block computes the same value as the current block, and it is the condition variable
                         // This is a "and" operator
                         auto andResult = onTrue->getScope()->back()->getResult();
-//                        if (onTrue->getScope()->back()->is<Node::Assign>()){
-//                            auto destnode = onTrue->getScope()->back()->as<Node::Assign>()->getDestination();
-//                            if (destnode->is<Node::Constant>()){
-//                              andResult = destnode->as<Node::Constant>()->getConstant().getId();
-//                            }
-//                        }
+                        if (onTrue->getScope()->back()->is<Node::Assign>() && source->getScope()->back()->is<Node::Assign>()){
+                            auto ontrueassign = onTrue->getScope()->back()->as<Node::Assign>();
+                            auto destnode = ontrueassign->getDestination();
+                            if (destnode->is<Node::Constant>()){
+                                andResult = destnode->as<Node::Constant>()->getConstant().getId();
+                                if (onTrue->getScope()->size() == 1 && andResult == source->getCondition()) {
+                                    auto val = ontrueassign->getValue();
+                                    onTrue->getScope()->removeChild(onTrue->getScope()->back());
+                                    *(onTrue->getScope()) << val;
+                                }
+                            }
+                        }
 
                         if(onTrue->getScope()->size() == 1 && andResult == source->getCondition())
                         {
                             // Create the binary "&&" operator.
                             auto left = source->getScope()->back();
-                            source->getScope()->removeChild(left);
+                            auto leftval = left;
+                            bool fixassign = false;
+                            if (left->is<Node::Assign>()) {
+                                auto destnode = left->as<Node::Assign>()->getValue();
+                                leftval = destnode;
+                                fixassign = true;
+                            } else {
+                                source->getScope()->removeChild(left);
+                            }
 
                             auto right = onTrue->getScope()->front();
-                            onFalse->getScope()->removeChild(right);
+                            onTrue->getScope()->removeChild(right);
 
-                            auto andOperator = std::make_shared<Node::BinaryOperator>(-1, 7, source->getCondition(), left, "&&", right);
-                            *(source->getScope()) << andOperator;
-
+                            auto andOperator = std::make_shared<Node::BinaryOperator>(-1, 7, source->getCondition(), leftval, "&&", right);
+                            if (fixassign) {
+                                left->as<Node::Assign>()->setValue(andOperator);
+                            } else {
+                                *(source->getScope()) << andOperator;
+                            }
                             // Remove the true block now that the expression is rebuild
                             m_CodeBlocs.erase(onTrue->getBegin());
 
                             // Merge the false block.
                             source->getScope()->mergeChildren(onFalse->getScope()->shared_from_this());
                             rebuildExpression(source->getScope()->shared_from_this());
-                            source->setEnd(onFalse->getEnd());
-                            source->setCondition(onFalse->getCondition(), onFalse->onTrue(), onFalse->onFalse());
-                            m_CodeBlocs.erase(onFalse->getBegin());
+                            if(onFalse->getEnd() != PscCodeBlock::END){
+                                source->setEnd(onFalse->getEnd());
+                                source->setCondition(onFalse->getCondition(), onFalse->onTrue(), onFalse->onFalse());
+                                m_CodeBlocs.erase(onFalse->getBegin());
+                                advance = 0;
+                            } else {
+                                // we've reached the end, no longer conditional
+                                auto end = onFalse->getBegin();
+                                source->setEnd(end);
+                                source->setCondition(onFalse->getCondition(), end, end);
+                                if (m_TraceDecompilation)
+                                {
+                                    m_Log << "OR? " << "detected" << std::endl;
+                                    dumpBlock(source->getBegin(), source->getEnd()+1);
+                                }
+                            }
 
-                            advance = 0;
                             if (m_TraceDecompilation)
                             {
                                 m_Log << "AND? " << "detected" << std::endl;
@@ -998,7 +1027,7 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                             if (onFalse->getScope()->size() == 1 && orResult == source->getCondition()) {
                                 auto val = onFalse->getScope()->back()->as<Node::Assign>()->getValue();
                                 onFalse->getScope()->removeChild(onFalse->getScope()->back());
-                                onFalse->getScope()->mergeChildren(val);
+                                *(onFalse->getScope()) << val;
                             }
                         }
                     }
