@@ -479,7 +479,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                     } else // two variables of the same type, equivalent to an assign
                     {
                         // check if this is a useless cast
-                        if (args[0].getId() != args[1].getId())
+//                        if (args[0].getId() != args[1].getId())
                           node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                     }
                     break;
@@ -850,6 +850,10 @@ void Decompiler::PscDecompiler::rebuildExpression(Node::BasePtr scope)
  */
 void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_t endBlock)
 {
+    bool debugSigil = false;
+    if (m_Function.getName().isValid() && m_Function.getName().asString() == "OnTrackedStatsEvent"){
+        debugSigil = true;
+    }
     if (m_TraceDecompilation)
     {
         m_Log << "--- BEGIN REBUILD : " << startBlock << " " << endBlock << std::endl;
@@ -862,6 +866,7 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
     {
         auto& source = it->second;
         int advance = 1;
+        bool parentIsAssign = false;
         if (m_TraceDecompilation)
         {
             m_Log << "?" << source->getBegin() << " source->isConditional()=" << source->isConditional() <<" "
@@ -877,8 +882,22 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                     << "source->getScope()->back()->getResult()=" << source->getScope()->back()->getResult() << " "
                     << '\n';
             }
+            auto result = source->getScope()->back()->getResult();
+            if (source->getScope()->back()->is<Node::Assign>()){
+                auto destnode = source->getScope()->back()->as<Node::Assign>()->getDestination();
+                if (destnode->is<Node::Constant>()){
+                    result = destnode->as<Node::Constant>()->getConstant().getId();
+                    parentIsAssign = true;
+                    // if (result == source->getCondition()){
+                    //   source->getScope()->back() = source->getScope()->back()->as<Node::Assign>()->getValue();
+                    //
+                    // }
+                }
+
+            }
+
             // Ensure that the last statement computes the value of the condition variable.
-            if (source->getCondition() == source->getScope()->back()->getResult())
+            if (source->getCondition() == result)
             {
                 if (m_TraceDecompilation)
                 {
@@ -913,7 +932,15 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         }
                         // The true block computes the same value as the current block, and it is the condition variable
                         // This is a "and" operator
-                        if(onTrue->getScope()->size() == 1 && onTrue->getScope()->back()->getResult() == source->getCondition())
+                        auto andResult = onTrue->getScope()->back()->getResult();
+//                        if (onTrue->getScope()->back()->is<Node::Assign>()){
+//                            auto destnode = onTrue->getScope()->back()->as<Node::Assign>()->getDestination();
+//                            if (destnode->is<Node::Constant>()){
+//                              andResult = destnode->as<Node::Constant>()->getConstant().getId();
+//                            }
+//                        }
+
+                        if(onTrue->getScope()->size() == 1 && andResult == source->getCondition())
                         {
                             // Create the binary "&&" operator.
                             auto left = source->getScope()->back();
@@ -963,17 +990,52 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         }
                     // The false block computes the same value as the current block, and it is the condition variable
                     // This is a "or operator
-                    if(onFalse->getScope()->size() == 1 && onFalse->getScope()->back()->getResult() == source->getCondition())
+                    auto orResult = onFalse->getScope()->back()->getResult();
+                    if (onFalse->getScope()->back()->is<Node::Assign>()){
+                        auto destnode = onFalse->getScope()->back()->as<Node::Assign>()->getDestination();
+                        if (destnode->is<Node::Constant>()){
+                            orResult = destnode->as<Node::Constant>()->getConstant().getId();
+                            if (onFalse->getScope()->size() == 1 && orResult == source->getCondition()) {
+                                auto val = onFalse->getScope()->back()->as<Node::Assign>()->getValue();
+                                onFalse->getScope()->removeChild(onFalse->getScope()->back());
+                                onFalse->getScope()->mergeChildren(val);
+//                                if (source->getScope()->back()->is<Node::Assign>()) {
+//                                    auto destnode = source->getScope()->back()->as<Node::Assign>()->getDestination();
+//                                    if (destnode->is<Node::Constant>()) {
+//                                        val = source->getScope()->back()->as<Node::Assign>()->getValue();
+//                                        source->getScope()->removeChild(source->getScope()->back());
+//                                        source->getScope()->mergeChildren(val);
+//                                    }
+//                                }
+                            }
+                        }
+                    }
+
+                    if(onFalse->getScope()->size() == 1 && orResult == source->getCondition())
                     {
                         //Create the "||" operator
                         auto left = source->getScope()->back();
-                        source->getScope()->removeChild(left);
+                        auto leftval = left;
+                        bool fixassign = false;
+                        if (left->is<Node::Assign>()) {
+                            auto destnode = left->as<Node::Assign>()->getValue();
+                            if (destnode->is<Node::Constant>() || destnode->is<Node::Copy>()) {
+                                leftval = destnode;
+                                fixassign = true;
+                            }
+                        } else {
+                            source->getScope()->removeChild(left);
+                        }
 
                         auto right = onFalse->getScope()->front();
                         onFalse->getScope()->removeChild(right);
 
-                        auto orOperator = std::make_shared<Node::BinaryOperator>(-1, 8, source->getCondition(), left, "||", right);
-                        *(source->getScope()) << orOperator;
+                        auto orOperator = std::make_shared<Node::BinaryOperator>(-1, 8, source->getCondition(), leftval, "||", right);
+                        if (fixassign) {
+                            left->as<Node::Assign>()->setValue(orOperator);
+                        } else {
+                            *(source->getScope()) << orOperator;
+                        }
 
                         //Remove the false block now that the expression is rebuild
                         m_CodeBlocs.erase(onFalse->getBegin());
@@ -981,15 +1043,28 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                         //Merge the true block.
                         source->getScope()->mergeChildren(onTrue->getScope()->shared_from_this());
                         rebuildExpression(source->getScope()->shared_from_this());
-                        source->setEnd(onTrue->getEnd());
-                        source->setCondition(onTrue->getCondition(), onTrue->onTrue(), onTrue->onFalse());
-                        m_CodeBlocs.erase(onTrue->getBegin());
-                        advance = 0;
+                        if (onTrue->getEnd() != PscCodeBlock::END){
+                            source->setEnd(onTrue->getEnd());
+                            source->setCondition(onTrue->getCondition(), onTrue->onTrue(), onTrue->onFalse());
+                            m_CodeBlocs.erase(onTrue->getBegin());
+                            advance = 0;
+                        } else {
+                            // we've reached the end, no longer conditional
+                            auto end = onTrue->getBegin();
+                            source->setEnd(end);
+                            source->setCondition(onTrue->getCondition(), end, end);
+                            if (m_TraceDecompilation)
+                            {
+                                m_Log << "OR? " << "detected" << std::endl;
+                                dumpBlock(source->getBegin(), source->getEnd()+1);
+                            }
+                        }
                         if (m_TraceDecompilation)
                         {
                             m_Log << "OR? " << "detected" << std::endl;
                             dumpBlock(source->getBegin(), source->getEnd()+1);
                         }
+
 //                        orOperator->includeInstruction(right->getBegin());
 //                        orOperator->includeInstruction(left->getEnd());
                     }

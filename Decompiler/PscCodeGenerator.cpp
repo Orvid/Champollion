@@ -62,7 +62,7 @@ void Decompiler::PscCodeGenerator::newLine()
         m_ExperimentalSyntaxWarning.clear();
     }
     auto nums = getDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
-    writeDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
+//    writeDebugInfoLineNumbers(minIpForCurrentLine, maxIpForCurrentLine);
     resetIpsForCurrentLine();
     m_Decompiler->push_back(m_Result.str());
     m_Decompiler->addLineMapping(m_Decompiler->size() - 1, nums);
