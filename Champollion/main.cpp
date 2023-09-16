@@ -30,9 +30,12 @@ struct Params
     bool dumpTree;
     bool recreateDirStructure;
     bool decompileDebugFuncs;
+    bool recursive;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
+
+    fs::path parentDir{};
 
     std::vector<fs::path> inputs;
 };
@@ -62,6 +65,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
             ("help,h", "Display the help message")
             ("asm,a", options::value<std::string>()->implicit_value(""), "If defined, output assembly file(s) to this directory")
             ("psc,p", options::value<std::string>(), "Name of the output dir for psc decompilation")
+            ("recursive,r", "Recursively scan directories for pex files")
             ("recreate-subdirs,s", "Recreates directory structure for script in root of output directory (Fallout 4 only, default false)")
             ("comment,c", "Output assembly in comments of the decompiled psc file")
             ("header,e", "Write header to decompiled psc file")
@@ -110,6 +114,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.parallel = (args.count("threaded") != 0);
     params.traceDecompilation = (args.count("trace") != 0);
     params.dumpTree = params.traceDecompilation && args.count("no-dump-tree") == 0;
+    params.recursive = (args.count("recursive") != 0);
     params.recreateDirStructure = (args.count("recreate-subdirs") != 0);
     params.decompileDebugFuncs = (args.count("debug-funcs") != 0);
     try
@@ -179,7 +184,13 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     return Good;
 }
 
-typedef std::vector<std::string> ProcessResults;
+struct _ProcessResults{
+    std::vector<std::string> output;
+    bool isStarfield = false;
+    bool failed = false;
+};
+
+typedef _ProcessResults ProcessResults;
 ProcessResults processFile(fs::path file, Params params)
 {
     ProcessResults result;
@@ -192,9 +203,11 @@ ProcessResults processFile(fs::path file, Params params)
     }
     catch(std::exception& ex)
     {
-       result.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
+       result.output.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
+       result.failed = true;
        return result;
     }
+    pex.getGameType() == Pex::Binary::StarfieldScript ? result.isStarfield = true : result.isStarfield = false;
     if (params.outputAssembly)
     {
         fs::path asmFile = params.assemblyDir / file.filename().replace_extension(".pas");
@@ -204,19 +217,22 @@ ProcessResults processFile(fs::path file, Params params)
             Decompiler::AsmCoder asmCoder(new Decompiler::StreamWriter(asmStream));
 
             asmCoder.code(pex);
-            result.push_back(std::format("{} dissassembled to {}", file.string(), asmFile.string()));
+            result.output.push_back(std::format("{} dissassembled to {}", file.string(), asmFile.string()));
         }
         catch(std::exception& ex)
         {
-            result.push_back(std::format("ERROR: {} : {}",file.string(),ex.what()));
+            result.output.push_back(std::format("ERROR: {} : {}", file.string(), ex.what()));
+            result.failed = true;
             fs::remove(asmFile);
         }
     }
-    fs::path dir_structure = "";
+    fs::path dir_structure;
     if (params.recreateDirStructure && (pex.getGameType() == Pex::Binary::Fallout4Script || pex.getGameType() == Pex::Binary::StarfieldScript) && pex.getObjects().size() > 0){
         std::string script_path = pex.getObjects()[0].getName().asString();
         std::replace(script_path.begin(), script_path.end(), ':', '/');
         dir_structure = fs::path(script_path).remove_filename();
+    } else if (!params.parentDir.empty()) {
+      dir_structure = fs::relative(file, params.parentDir).remove_filename();
     }
     fs::path basedir = !dir_structure.empty() ? (params.papyrusDir / dir_structure) : params.papyrusDir;
     if (!dir_structure.empty()){
@@ -240,22 +256,40 @@ ProcessResults processFile(fs::path file, Params params)
                 params.papyrusDir.string()); // using string instead of path here for C++14 compatability for staticlib targets
 
         pscCoder.code(pex);
-        result.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));
+        result.output.push_back(std::format("{} decompiled to {}", file.string(), pscFile.string()));
     }
     catch(std::exception& ex)
     {
-        result.push_back(std::format("ERROR: {} : {}", file.string() , ex.what()));
+        result.output.push_back(std::format("ERROR: {} : {}", file.string() , ex.what()));
+        result.failed = true;
         fs::remove(pscFile);
     }
     return result;
 
 }
+size_t countFiles = 0;
+size_t failedFiles = 0;
+bool printStarfieldWarning = false;
+
+void processResult(ProcessResults result)
+{
+    if (result.failed){
+        ++failedFiles;
+    }
+    if (!printStarfieldWarning && result.isStarfield){
+      printStarfieldWarning = true;
+    }
+    for (auto line : result.output)
+    {
+        std::cout << line << '\n';
+    }
+}
+
 
 int main(int argc, char* argv[])
 {
 
     Params args;
-    size_t countFiles = 0;
     auto result = getProgramOptions(argc, argv, args);
     if (result == Good)
     {
@@ -264,30 +298,31 @@ int main(int argc, char* argv[])
         {
             for (auto path : args.inputs)
             {
-                if (fs::is_directory(path))
-                {
+                if (args.recursive && fs::is_directory(path)){
+                    args.parentDir = path;
+                    // recursively get all files in the directory
+                    for (auto& entry : fs::recursive_directory_iterator(path)){
+                        if (fs::is_regular_file(entry) && _stricmp(entry.path().extension().string().c_str(), ".pex") == 0){
+                            processResult(processFile(entry, args));
+                        }
+                    }
+                } else if (fs::is_directory(path)){
+                    args.parentDir = fs::path();
                     fs::directory_iterator end;
                     fs::directory_iterator entry(path);
                     while(entry != end)
                     {
                         if (_stricmp(entry->path().extension().string().c_str(), ".pex") == 0)
                         {
-                            for (auto line : processFile(entry->path(), args))
-                            {
-                                std::cout << line << '\n';
-                            }
-                            ++countFiles;
+                            processResult(processFile(path, args));
                         }
                         entry++;
                     }
                 }
                 else
                 {
-                    ++countFiles;
-                    for (auto line : processFile(path, args))
-                    {
-                        std::cout << line << '\n';
-                    }
+                  args.parentDir = fs::path();
+                  processResult(processFile(path, args));
                 }
             }
         }
@@ -296,8 +331,19 @@ int main(int argc, char* argv[])
             std::vector<std::future<ProcessResults>> results;
             for (auto& path : args.inputs)
             {
-                if (fs::is_directory(path))
+
+                if (args.recursive && fs::is_directory(path)){
+                  args.parentDir = path;
+                  // recursively get all files in the directory
+                  for (auto& entry : fs::recursive_directory_iterator(path)){
+                    if (fs::is_regular_file(entry) && _stricmp(entry.path().extension().string().c_str(), ".pex") == 0){
+                        results.push_back(std::move(std::async(std::launch::async, processFile, fs::path(entry.path()), args)));
+                    }
+                  }
+                }
+                else if (fs::is_directory(path))
                 {
+                    args.parentDir = fs::path();
                     fs::directory_iterator end;
                     fs::directory_iterator entry(path);
                     while(entry != end)
@@ -312,15 +358,24 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
+                    args.parentDir = fs::path();
                     results.push_back(std::move(std::async(std::launch::async, processFile, path, args)));
                 }
             }
 
             for (auto& result : results)
             {
-                for(auto& line : result.get())
+                auto processResult = result.get();
+                if (!printStarfieldWarning && processResult.isStarfield){
+                  printStarfieldWarning = true;
+                }
+
+                for(auto& line : processResult.output)
                 {
                     std::cout << line << '\n';
+                }
+                if (processResult.failed){
+                    ++failedFiles;
                 }
             }
             countFiles = results.size();
@@ -330,6 +385,23 @@ int main(int argc, char* argv[])
         auto diff = end - start;
 
         std::cout << countFiles << " files processed in " << std::chrono::duration <double> (diff).count() << " s" << std::endl;
+        if (failedFiles > 0){
+            std::cout << failedFiles << " files failed to decompile." << std::endl;
+        }
+
+        if (printStarfieldWarning){
+          // TODO: Remove this warning when the CK comes out
+          std::cout << "********************* STARFIELD PRELIMINARY SYNTAX WARNING *********************" << std::endl;
+          std::cout << "The syntax for new features in Starfield (Guard, TryGuard, GetMatchingStructs) is not yet known." << std::endl;
+          std::cout << "Decompiled Starfield scripts use guessed-at syntax for these features." << std::endl;
+          std::cout << "This syntax should be considered as experimental, unstable, and subject to change." << std::endl << std::endl;
+          std::cout << "The proper syntax will only be known when the Creation Kit comes out in early 2024." << std::endl;
+          std::cout << "If you are using decompiled scripts as the basis for mods, please be aware of this," << std::endl;
+          std::cout << "and be prepared to update your scripts when the final syntax is known." << std::endl << std::endl;
+          std::cout << "The lines in the decompiled scripts which contain this guessed-at syntax are" << std::endl;
+          std::cout << "marked with a comment beginning with '" << Decompiler::WARNING_COMMENT_PREFIX << "'." << std::endl;
+          std::cout << "********************* STARFIELD PRELIMINARY SYNTAX WARNING *********************" << std::endl;
+        }
         return 0;
     }
     if (result == HelpOrVersion){

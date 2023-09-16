@@ -3,6 +3,7 @@
 
 
 namespace Decompiler {
+static const char* WARNING_COMMENT_PREFIX = ";***";
 /**
  * @brief Write a PEX file as a PSC file.
  */

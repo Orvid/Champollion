@@ -16,6 +16,7 @@ Champollion is a CLI-only program.
 | -a [*assembly directory*] | --asm [*assembly directory*] | Champollion will write an assembly version of the PEX file in the given directory, if one. The assembly file is an human readable version of the content of the PEX file |
 | -c                        | --comment                    | The decompiled file will be annotated with the assembly instruction corresponding to the decompiled code lines. |
 | -t                        | --threaded                   | Champollion will parallelize the decompilation. It is useful when decompiling a directory containing many PEX files. |
+| -r                        | --recursive                  | Recursively scan specified directory(s) for pex files to decompile|
 | -s                        | --recreate-subdirs           | Recreates directory structure for script in root of output directory (Fallout 4 only, default false) |
 | -e                        | --header                     | Write header to decompiled psc file                          |
 | -g                        | --trace                      | Trace the decompilation and output results to rebuild log    |

@@ -479,7 +479,9 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                         node = std::make_shared<Node::Cast>(ip, args[0].getId(), fromValue(ip, args[1]), typeOfVar(args[0].getId()));
                     } else // two variables of the same type, equivalent to an assign
                     {
-                        node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
+                        // check if this is a useless cast
+                        if (args[0].getId() != args[1].getId())
+                          node = std::make_shared<Node::Copy>(ip, args[0].getId(), fromValue(ip, args[1]));
                     }
                     break;
                 }
@@ -826,7 +828,8 @@ void Decompiler::PscDecompiler::rebuildExpression(Node::BasePtr scope)
             }
             else
             {
-                throw std::runtime_error("Decompilation failed");
+              auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+              throw std::runtime_error("Failed to rebuild expression in " + funcname + " at instruction " + std::to_string(expressionUse->getBegin()));
             }
         }
         else
@@ -1015,7 +1018,8 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
 {
     if (endBlock < startBlock)
     {
-        throw std::runtime_error("Decompilation failed");
+      auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+      throw std::runtime_error("Failed to rebuild control flow for " + funcname + ".");
     }
     auto begin = m_CodeBlocs.find(startBlock);
     auto end = m_CodeBlocs.find(endBlock);
@@ -1036,9 +1040,20 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
             if (beforeExit == PscCodeBlock::END)
             {
                 // Decompilation failed
-                throw std::runtime_error("Decompilation failed");
+                auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+                throw std::runtime_error("Failed to rebuild control flow for " + funcname + ".");
             }
-            auto& lastBlock = m_CodeBlocs[beforeExit];
+            Node::BasePtr condition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
+
+            if (m_CodeBlocs[beforeExit] == source){
+                assert(source->onFalse() < source->onTrue());
+                auto scope = source->getScope();
+                condition = std::make_shared<Node::UnaryOperator>(-1, 10, source->getCondition(), "!", condition);
+                source->setCondition(source->getCondition(), source->onFalse(), source->onTrue());
+                exit = source->onFalse();
+                beforeExit = findBlockForInstruction(exit-1);
+              }
+              auto& lastBlock = m_CodeBlocs[beforeExit];
 
             // The last block is an unconditional jump to the current block
             // This is a while.
@@ -1048,15 +1063,12 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                 auto whileStartBlock = source->onTrue();
                 auto whileEndBlock = source->onFalse();
 
-
-                Node::BasePtr whileCondition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
-
                 result->mergeChildren(source->getScope()->shared_from_this());
 
                 // Rebuild the statements in the while loop.
                 auto whileBody = rebuildControlFlow(whileStartBlock, whileEndBlock);
 
-                *result << std::make_shared<Node::While>(-1, whileCondition, whileBody);
+                *result << std::make_shared<Node::While>(-1, condition, whileBody);
 
                 advance = 0;
                 it = m_CodeBlocs.find(whileEndBlock);
@@ -1071,14 +1083,12 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                     auto ifStartBlock = source->onTrue();
                     auto ifEndBlock = source->onFalse();
 
-                    Node::BasePtr ifCondition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
-
                     result->mergeChildren(source->getScope()->shared_from_this());
 
                     // Rebuild the statements of the if body
                     auto ifBody = rebuildControlFlow(ifStartBlock, ifEndBlock);
 
-                    *result << std::make_shared<Node::IfElse>(-1, ifCondition, ifBody, nullptr);
+                    *result << std::make_shared<Node::IfElse>(-1, condition, ifBody, nullptr);
 
                     advance = 0;
                     it = m_CodeBlocs.find(ifEndBlock);
@@ -1089,7 +1099,6 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                     auto elseStartBlock = source->onFalse();
                     auto endElseBlock = lastBlock->getNext();
 
-                    Node::BasePtr ifCondition = std::make_shared<Node::Constant>(-1, Pex::Value(source->getCondition(), true));
 
                     result->mergeChildren(source->getScope()->shared_from_this());
 
@@ -1098,7 +1107,7 @@ Node::BasePtr Decompiler::PscDecompiler::rebuildControlFlow(size_t startBlock, s
                     // Rebuilds the statements in the else body.
                     auto elseBody = rebuildControlFlow(elseStartBlock, endElseBlock);
 
-                    *result << std::make_shared<Node::IfElse>(-1, ifCondition, ifBody, elseBody);
+                    *result << std::make_shared<Node::IfElse>(-1, condition, ifBody, elseBody);
 
                     advance = 0;
                     it = m_CodeBlocs.find(endElseBlock);
@@ -1375,6 +1384,17 @@ void Decompiler::PscDecompiler::cleanUpTree(Node::BasePtr program)
         .on(program);
 
     program->computeInstructionBounds();
+
+    // check for orphaned nodes on m_CodeBlocs
+    for (auto& bloc_kv : m_CodeBlocs)
+    {
+        auto& bloc = bloc_kv.second;
+        auto scope = bloc->getScope();
+        if (scope->size() > 0) {
+          auto funcname = m_Function.getName().isValid() ? m_Function.getName().asString() : "unknown function";
+          throw std::runtime_error("Orphaned nodes in " + funcname + " from instruction " + std::to_string(scope->front()->getBegin()) + " to " + std::to_string(scope->back()->getEnd()) + ".");
+        }
+    }
 
 }
 
