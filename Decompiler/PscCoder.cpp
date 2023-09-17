@@ -673,15 +673,17 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         for (auto &line: decomp) {
             auto & linemap = decomp.getLineMap();
             if (m_PrintDebugLineNo){
-              line += " ; #DEBUG_LINE_NO:";
               // get index of line
               auto result = linemap[index];
-              for (auto i = 0; i < result.size(); ++i)
-              {
-                if (i > 0){
-                  line += ",";
+              if (result.size() > 0){
+                line += " ; #DEBUG_LINE_NO:";
+                for (auto i = 0; i < result.size(); ++i)
+                {
+                    if (i > 0){
+                    line += ",";
+                    }
+                    line += std::to_string(result[i]);
                 }
-                line += std::to_string(result[i]);
               }
             }
             write(indent(i+1) << line);
