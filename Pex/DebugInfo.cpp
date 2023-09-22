@@ -82,6 +82,8 @@ const Pex::DebugInfo::FunctionInfo* Pex::DebugInfo::getFunctionInfo(const Pex::S
     return &(*it);
 }
 
+
+
 /**
  * @brief Default constructor
  */
@@ -196,5 +198,24 @@ Pex::DebugInfo::FunctionInfo::LineNumbers &Pex::DebugInfo::FunctionInfo::getLine
     return m_LineNumbers;
 }
 
+std::vector<uint16_t> Pex::DebugInfo::FunctionInfo::getLineNumbersForIpRange(int64_t begin, int64_t end) const {
+  if (begin < 0 || end < 0){
+    return {};
+  }
+  // no debug info
+  if (m_LineNumbers.empty() || begin > m_LineNumbers.size() - 1) {
+    return {};
+  }
+  std::vector<uint16_t> result;
+  int64_t line = -1;
+  for (auto i = begin; i <= end; ++i)
+  {
+    if (i < m_LineNumbers.size() && std::find(result.begin(), result.end(), m_LineNumbers[i]) == result.end())
+    {
+      result.push_back(m_LineNumbers[i]);
+    }
+  }
+  return result;
+}
 
 

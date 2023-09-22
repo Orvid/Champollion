@@ -31,6 +31,7 @@ struct Params
     bool recreateDirStructure;
     bool decompileDebugFuncs;
     bool recursive;
+    bool verbose;
 
     fs::path assemblyDir;
     fs::path papyrusDir;
@@ -54,8 +55,9 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.parallel = false;
     params.traceDecompilation = false;
     params.dumpTree = true;
-    params.recreateDirStructure = true;
+    params.recreateDirStructure = false;
     params.decompileDebugFuncs = false;
+    params.verbose = false;
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
@@ -73,6 +75,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
             ("trace,g", "Trace the decompilation and output results to rebuild log")
             ("no-dump-tree", "Do not dump tree for each node during decompilation tracing (requires --trace)")
             ("debug-funcs,d", "Decompile debug and compiler-generated functions (default false)")
+            ("verbose,v", "Verbose output")
             ("version", "Output version number")
     ;
     options::options_description files;
@@ -117,6 +120,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.recursive = (args.count("recursive") != 0);
     params.recreateDirStructure = (args.count("recreate-subdirs") != 0);
     params.decompileDebugFuncs = (args.count("debug-funcs") != 0);
+    params.verbose = (args.count("verbose") != 0);
     try
     {
         if (args.count("asm"))
@@ -251,8 +255,9 @@ ProcessResults processFile(fs::path file, Params params)
                 params.outputComment,
                 params.writeHeader,
                 params.traceDecompilation,
-                params.dumpTree, 
+                params.dumpTree,
                 params.decompileDebugFuncs,
+                true,
                 params.papyrusDir.string()); // using string instead of path here for C++14 compatability for staticlib targets
 
         pscCoder.code(pex);
@@ -271,17 +276,23 @@ size_t countFiles = 0;
 size_t failedFiles = 0;
 bool printStarfieldWarning = false;
 
-void processResult(ProcessResults result)
+void processResult(const ProcessResults &result, const Params& params)
 {
-    if (result.failed){
-        ++failedFiles;
-    }
+    countFiles++;
     if (!printStarfieldWarning && result.isStarfield){
       printStarfieldWarning = true;
     }
-    for (auto line : result.output)
-    {
+    if (result.failed){
+      ++failedFiles;
+      for (auto line : result.output)
+      {
+        std::cerr << line << '\n';
+      }
+    } else if (params.verbose) { // only output each individual successful result if `verbose` is on
+      for (auto line : result.output)
+      {
         std::cout << line << '\n';
+      }
     }
 }
 
@@ -303,7 +314,7 @@ int main(int argc, char* argv[])
                     // recursively get all files in the directory
                     for (auto& entry : fs::recursive_directory_iterator(path)){
                         if (fs::is_regular_file(entry) && _stricmp(entry.path().extension().string().c_str(), ".pex") == 0){
-                            processResult(processFile(entry, args));
+                            processResult(processFile(entry, args), args);
                         }
                     }
                 } else if (fs::is_directory(path)){
@@ -314,7 +325,7 @@ int main(int argc, char* argv[])
                     {
                         if (_stricmp(entry->path().extension().string().c_str(), ".pex") == 0)
                         {
-                            processResult(processFile(path, args));
+                            processResult(processFile(path, args), args);
                         }
                         entry++;
                     }
@@ -322,7 +333,7 @@ int main(int argc, char* argv[])
                 else
                 {
                   args.parentDir = fs::path();
-                  processResult(processFile(path, args));
+                  processResult(processFile(path, args), args);
                 }
             }
         }
@@ -365,18 +376,9 @@ int main(int argc, char* argv[])
 
             for (auto& result : results)
             {
-                auto processResult = result.get();
-                if (!printStarfieldWarning && processResult.isStarfield){
-                  printStarfieldWarning = true;
-                }
+                auto pResult = result.get();
+                processResult(pResult, args);
 
-                for(auto& line : processResult.output)
-                {
-                    std::cout << line << '\n';
-                }
-                if (processResult.failed){
-                    ++failedFiles;
-                }
             }
             countFiles = results.size();
 
@@ -387,6 +389,12 @@ int main(int argc, char* argv[])
         std::cout << countFiles << " files processed in " << std::chrono::duration <double> (diff).count() << " s" << std::endl;
         if (failedFiles > 0){
             std::cout << failedFiles << " files failed to decompile." << std::endl;
+        }
+        if (countFiles > 0 && countFiles != failedFiles){
+          if (args.outputAssembly){
+            std::cout << "Disassembled scripts written to " << args.assemblyDir.string() << std::endl;
+          }
+          std::cout << "Decompiled scripts written to " << args.papyrusDir.string() << std::endl << std::endl;
         }
 
         if (printStarfieldWarning){

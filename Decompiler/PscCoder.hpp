@@ -12,7 +12,7 @@ class PscCoder :
 {
 public:
     PscCoder(OutputWriter *writer, bool commentAsm, bool writeHeader, bool traceDecompilation, bool dumpTree,
-             bool writeDebugFuncs, std::string traceDir);
+             bool writeDebugFuncs, bool printDebugLineNo, std::string traceDir);
     PscCoder(OutputWriter* writer);
     ~PscCoder();
 
@@ -35,7 +35,9 @@ protected:
     void writeGuards(const Pex::Object& object, const Pex::Binary& pex);
     void writeStates(const Pex::Object& object, const Pex::Binary& pex);
     void writeFunctions(int i, const Pex::State& state, const Pex::Object &object, const Pex::Binary& pex);
-    void writeFunction(int i, const Pex::Function& function, const Pex::Object &object, const Pex::Binary& pex, const std::string& name = "");
+    void writeFunction(int i, const Pex::Function &function, const Pex::Object &object,
+                       const Pex::Binary &pex, const Pex::DebugInfo::FunctionInfo *functionInfo,
+                       const std::string &name = "");
 
     void writeUserFlag(std::ostream &stream, const Pex::UserFlagged& flagged, const Pex::Binary& pex);
     void writeDocString(int i, const Pex::DocumentedItem& item);
@@ -46,6 +48,7 @@ protected:
     bool m_TraceDecompilation;
     bool m_DumpTree;
     bool m_WriteDebugFuncs;
+    bool m_PrintDebugLineNo;
     std::string m_OutputDir;
 
 
