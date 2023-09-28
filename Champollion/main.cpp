@@ -64,7 +64,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.verbose = false;
     params.printInfo = false;
     params.printCompileTime = false;
-    params.debugLineComment = false;
+    params.debugLineComment = true;
 
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
@@ -83,7 +83,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
             ("trace,g", "Trace the decompilation and output results to rebuild log")
             ("no-dump-tree", "Do not dump tree for each node during decompilation tracing (requires --trace)")
             ("debug-funcs,d", "Decompile debug and compiler-generated functions (default false)")
-            ("debug-line-comment", "Output debug info line number to comment (default false)")
+            ("no-debug-line", "Do not comment with debug info line numbers on script lines (default false)")
             ("print-info,i", "Print header info from the specified PEX file(s) and exit")
             ("print-compile-time", "Print the compile time of the script in format of {filename}: {time_integer} and exit")
             ("verbose,v", "Verbose output")
@@ -133,7 +133,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.decompileDebugFuncs = (args.count("debug-funcs") != 0);
     params.printInfo = (args.count("print-info") != 0);
     params.printCompileTime = (args.count("print-compile-time") != 0);
-    params.debugLineComment = (args.count("debug-line-comment") != 0);
+    params.debugLineComment = !(args.count("no-debug-line") != 0);
     params.verbose = (args.count("verbose") != 0);
     if (!params.printInfo) {
       try {
