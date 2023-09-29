@@ -5,9 +5,12 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+  release:
+    types: [ created ]
+  
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  PROJECT_NAME: Champollion
   BUILD_TYPE: Release
 
 jobs:
@@ -40,7 +43,7 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHAMPOLLION_USE_STATIC_RUNTIME:BOOL=TRUE -DENABLE_STATIC_RUNTIME:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHAMPOLLION_USE_STATIC_RUNTIME:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
     - name: Build
       # Build your program with the given configuration
@@ -50,8 +53,31 @@ jobs:
       uses: actions/upload-artifact@v3.1.2
       with:
         # Artifact name
-        name: Champollion
+        name: ${{env.PROJECT_NAME}}
         # A file, directory or wildcard pattern that describes what to upload
         path: build/Champollion/Release/Champollion.exe
         # The desired behavior if no files are found using the provided path.
         retention-days: 90
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.PROJECT_NAME }}
+          path: artifacts/${{ env.PROJECT_NAME }}
+      - name: Zip artifacts
+        run: |
+          ls -la artifacts/*
+          cd artifacts/${{ env.PROJECT_NAME }}
+          zip -r9 "../${{ env.PROJECT_NAME }}-${{ github.ref_name }}.zip" *
+      - name: Release
+        uses: nikitalita/action-gh-release@v1.0
+        with:
+          files: |
+            artifacts/${{ env.PROJECT_NAME }}-${{ github.ref_name }}.zip
