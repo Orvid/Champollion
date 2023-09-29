@@ -19,6 +19,7 @@ namespace fs = std::filesystem;
 #include "Decompiler/PscCoder.hpp"
 
 #include "Decompiler/StreamWriter.hpp"
+#include "Decompiler/Version.hpp"
 #include "glob.hpp"
 
 struct Params
@@ -69,7 +70,7 @@ OptionsResult getProgramOptions(int argc, char* argv[], Params& params)
     params.assemblyDir = fs::current_path();
     params.papyrusDir = fs::current_path();
 
-    std::string version_string = "Champollion PEX decompiler v1.3.1";
+    std::string version_string = "Champollion PEX decompiler " + std::string(CHAMPOLLION_VERSION_STRING);
     options::options_description desc(version_string);
     desc.add_options()
             ("help,h", "Display the help message")
