@@ -11,7 +11,7 @@
 #include <regex>
 
 #include "PscDecompiler.hpp"
-
+#include "Version.hpp"
 #include "EventNames.hpp"
 
 /**
@@ -139,7 +139,7 @@ void Decompiler::PscCoder::writeHeader(const Pex::Binary &pex)
 {
     auto& header = pex.getHeader();
     auto& debug  = pex.getDebugInfo();
-    write(";/ Decompiled by Champollion V1.1.3"); // TODO: Make this get the version number dynamically
+    write(";/ Decompiled by Champollion " + std::string(CHAMPOLLION_VERSION_STRING));
     write(indent(0) << "PEX format v" << (int)header.getMajorVersion() << "." << (int)header.getMinorVersion() << " GameID: " << header.getGameID());
     write(indent(0) << "Source   : " << header.getSourceFileName());
     if (debug.getModificationTime() != 0)
@@ -673,15 +673,17 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         for (auto &line: decomp) {
             auto & linemap = decomp.getLineMap();
             if (m_PrintDebugLineNo){
-              line += " ; #DEBUG_LINE_NO:";
               // get index of line
               auto result = linemap[index];
-              for (auto i = 0; i < result.size(); ++i)
-              {
-                if (i > 0){
-                  line += ",";
+              if (result.size() > 0){
+                line += " ; #DEBUG_LINE_NO:";
+                for (auto i = 0; i < result.size(); ++i)
+                {
+                    if (i > 0){
+                    line += ",";
+                    }
+                    line += std::to_string(result[i]);
                 }
-                line += std::to_string(result[i]);
               }
             }
             write(indent(i+1) << line);

@@ -937,7 +937,8 @@ void Decompiler::PscDecompiler::rebuildBooleanOperators(size_t startBlock, size_
                   {
                     if (*sourceLines.rbegin() != *nextLines.begin()){
                       if (*nextLines.begin() - *sourceLines.rbegin() == 1) {
-                        // check if the next statement is an assign; if not, then this is probably not a boolean
+                        // if the possible boolean is on the next line,
+                        // check if the next statement is an assign; if so, then this is probably not a boolean
                         if (nextNode->is<Node::Assign>()){
                           maybeAnd = false;
                           maybeOr = false;
