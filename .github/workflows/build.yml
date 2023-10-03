@@ -9,7 +9,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  CMAKE_ARGS: "-DCHAMPOLLION_USE_STATIC_RUNTIME:BOOL=TRUE -DENABLE_STATIC_RUNTIME:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CMAKE_ARGS: "-DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
   
 jobs:
   build:
