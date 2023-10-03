@@ -21,8 +21,12 @@ Champollion is a CLI-only program.
 | -e                        | --header                     | Write header to decompiled psc file                          |
 | -g                        | --trace                      | Trace the decompilation and output results to rebuild log    |
 |                           | --no-dump-tree               | Do not dump tree for each node during decompilation tracing (requires --trace) |
-|                           | --version                    | Output version number                                        |
+|                           | --no-debug-line              | Do not comment with debug info line numbers on script lines (default false) |
+| -i                        | --print-info                 | Print header info from the specified PEX file(s) and exit    |
+|                           | --print-compile-time         | Print the compile time of the script in format of {filename}: {time_integer} and exit |
+| -V                        | --version                    | Output version number                                        |
 | -h                        | --help                       | Print help message                                           |
+
 
 ## Build Dependencies
 
