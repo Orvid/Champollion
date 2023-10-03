@@ -1,6 +1,6 @@
 # Champollion
 
-Champollion is a decompiler for the Papyrus script language used in Skyrim and Fallout 4. It aims to produce a Papyrus Script file (.psc) from a .pex binary file. The decompiled script should recompile to a functionally equivalent PEX binary.
+Champollion is a decompiler for the Papyrus script language used in Skyrim, Fallout 4, Fallout 76, and Starfield. It aims to produce a Papyrus Script file (.psc) from a .pex binary file. The decompiled script should recompile to a functionally equivalent PEX binary.
 
 ## Usage
 
