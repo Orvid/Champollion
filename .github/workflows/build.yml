@@ -9,7 +9,6 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  CMAKE_ARGS: "-DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
   
 jobs:
   build:
@@ -41,7 +40,7 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHAMPOLLION_USE_STATIC_RUNTIME:BOOL=TRUE -DENABLE_STATIC_RUNTIME:BOOL=TRUE -DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX:STRING=build/extern -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_TOOLCHAIN_FILE:STRING=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
     - name: Build
       # Build your program with the given configuration
