@@ -57,12 +57,14 @@ Pex::FileReader::~FileReader()
 void Pex::FileReader::read(Pex::Binary &binary)
 {
     readHeader(binary.getHeader());
-    if (m_endianness == BIG_ENDIAN){
+    if (m_endianness == BIG_ENDIAN) {
         binary.setScriptType(Pex::Binary::ScriptType::SkyrimScript);
     } else { // LITTLE_ENDIAN
         auto header = binary.getHeader();
-        if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() >= 12)){
+        if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() == 12)) {
             binary.setScriptType(Pex::Binary::ScriptType::StarfieldScript);
+        } else if(header.getMajorVersion() == 3 && header.getMinorVersion() == 15) {
+            binary.setScriptType(Pex::Binary::ScriptType::Fallout76Script);
         } else {
             binary.setScriptType(Pex::Binary::ScriptType::Fallout4Script);
         }
