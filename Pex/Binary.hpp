@@ -24,6 +24,7 @@ public:
         Unknown = -1,
         SkyrimScript,
         Fallout4Script,
+        Fallout76Script,
         StarfieldScript
     };
     Binary();
