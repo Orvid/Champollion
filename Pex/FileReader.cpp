@@ -61,9 +61,9 @@ void Pex::FileReader::read(Pex::Binary &binary)
         binary.setScriptType(Pex::Binary::ScriptType::SkyrimScript);
     } else { // Little
         auto header = binary.getHeader();
-        if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() == 12)) {
+        if (header.getGameID() == 4) {
             binary.setScriptType(Pex::Binary::ScriptType::StarfieldScript);
-        } else if(header.getMajorVersion() == 3 && header.getMinorVersion() == 15) {
+        } else if(header.getGameID() == 3) {
             binary.setScriptType(Pex::Binary::ScriptType::Fallout76Script);
         } else {
             binary.setScriptType(Pex::Binary::ScriptType::Fallout4Script);
