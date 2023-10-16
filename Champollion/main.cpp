@@ -5,7 +5,6 @@ namespace options = boost::program_options;
 
 
 #include <fmt/format.h>
-using fmt::format;
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -216,7 +215,7 @@ ProcessResults processFile(fs::path file, Params params)
     }
     catch(std::exception& ex)
     {
-       result.output.push_back(format("ERROR: {} : {}", file.string(), ex.what()));
+       result.output.push_back(fmt::format("ERROR: {} : {}", file.string(), ex.what()));
        result.failed = true;
        return result;
     }
@@ -240,27 +239,27 @@ ProcessResults processFile(fs::path file, Params params)
             break;
         }
 
-        result.output.push_back(format("Script:             {}", file.string() ));
+        result.output.push_back(fmt::format("Script:             {}", file.string() ));
         // print out all the info contained in the header and exit
-        result.output.push_back(format("  Game:             {}", gameType));
+        result.output.push_back(fmt::format("  Game:             {}", gameType));
         auto header = pex.getHeader();
-        result.output.push_back(format("  Game Version:     {}.{}", header.getMajorVersion(), header.getMinorVersion()));
-        result.output.push_back(format("  GameID:           {}", header.getGameID()));
+        result.output.push_back(fmt::format("  Game Version:     {}.{}", header.getMajorVersion(), header.getMinorVersion()));
+        result.output.push_back(fmt::format("  GameID:           {}", header.getGameID()));
         auto time = header.getCompilationTime();
         std::string hrtime = ctime(&time);
         // trim trailing line break
         hrtime.erase(hrtime.find_last_not_of("\n") + 1);
-        result.output.push_back(format("  Compilation Time: {} ({}) ", time, hrtime));
-        result.output.push_back(format("  Source File:      {}", header.getSourceFileName()));
-        result.output.push_back(format("  User Name:        {}", header.getUserName()));
-        result.output.push_back(format("  Computer Name:    {}\n", header.getComputerName()));
+        result.output.push_back(fmt::format("  Compilation Time: {} ({}) ", time, hrtime));
+        result.output.push_back(fmt::format("  Source File:      {}", header.getSourceFileName()));
+        result.output.push_back(fmt::format("  User Name:        {}", header.getUserName()));
+        result.output.push_back(fmt::format("  Computer Name:    {}\n", header.getComputerName()));
         return result;
     }
     if (params.printCompileTime)
     {
         auto header = pex.getHeader();
         auto time = header.getCompilationTime();
-        result.output.push_back(format("{}: {}", file.string(), time));
+        result.output.push_back(fmt::format("{}: {}", file.string(), time));
         return result;
     }
     if (params.outputAssembly)
@@ -272,11 +271,11 @@ ProcessResults processFile(fs::path file, Params params)
             Decompiler::AsmCoder asmCoder(new Decompiler::StreamWriter(asmStream));
 
             asmCoder.code(pex);
-            result.output.push_back(format("{} dissassembled to {}", file.string(), asmFile.string()));
+            result.output.push_back(fmt::format("{} dissassembled to {}", file.string(), asmFile.string()));
         }
         catch(std::exception& ex)
         {
-            result.output.push_back(format("ERROR: {} : {}", file.string(), ex.what()));
+            result.output.push_back(fmt::format("ERROR: {} : {}", file.string(), ex.what()));
             result.failed = true;
             fs::remove(asmFile);
         }
@@ -299,7 +298,7 @@ ProcessResults processFile(fs::path file, Params params)
     {   
         std::ofstream pscStream(pscFile);
         if (pscStream.fail()){
-            throw std::runtime_error(format("Failed to open {} for writing", pscFile.string()));
+            throw std::runtime_error(fmt::format("Failed to open {} for writing", pscFile.string()));
         }
         Decompiler::PscCoder pscCoder(
                 new Decompiler::StreamWriter(pscStream),
@@ -312,11 +311,11 @@ ProcessResults processFile(fs::path file, Params params)
                 params.papyrusDir.string()); // using string instead of path here for C++14 compatability for staticlib targets
 
         pscCoder.code(pex);
-        result.output.push_back(format("{} decompiled to {}", file.string(), pscFile.string()));
+        result.output.push_back(fmt::format("{} decompiled to {}", file.string(), pscFile.string()));
     }
     catch(std::exception& ex)
     {
-        result.output.push_back(format("ERROR: {} : {}", file.string() , ex.what()));
+        result.output.push_back(fmt::format("ERROR: {} : {}", file.string() , ex.what()));
         result.failed = true;
         fs::remove(pscFile);
     }
