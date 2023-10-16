@@ -154,6 +154,8 @@ else()
     endif()
   endif()
   find_package(Boost REQUIRED COMPONENTS program_options)
+  find_package(fmt CONFIG REQUIRED)
+
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Boost_INCLUDE_DIRS}
@@ -161,6 +163,7 @@ else()
   add_subdirectory(Decompiler)
   add_subdirectory(Pex)
   add_subdirectory(Champollion)
+  target_link_libraries(Champollion fmt::fmt)
   install(
     TARGETS Champollion
   )

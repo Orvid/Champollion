@@ -47,7 +47,7 @@ private:
     DynamicVisitor m_Visitor;
     bool m_Result;
 
-    void visit(EndGuard *node);
+    void visit(EndGuard *node) override;
 };
 
 bool isSameTree(BasePtr left, BasePtr right);

@@ -13,12 +13,14 @@
 #include "Node/NodeComparer.hpp"
 
 #include "PscCodeGenerator.hpp"
+#include <Champollion/CaselessCompare.h>
+
 
 static inline
 bool isTempVar(const Pex::StringTable::Index& var)
 {
     auto& name = var.asString();
-    return (name.length() > 6 && name.substr(0, 6) == "::temp" && name.substr(name.length() - 4, 4) != "_var") || _stricmp(name.c_str(), "::nonevar") == 0;
+    return (name.length() > 6 && name.substr(0, 6) == "::temp" && name.substr(name.length() - 4, 4) != "_var") || caselessCompare(name.c_str(), "::nonevar") == 0;
 }
 static inline
 bool isMangledVar(const Pex::StringTable::Index& var)
@@ -739,7 +741,7 @@ void Decompiler::PscDecompiler::createNodesForBlocks(size_t block)
                 }
                 default:
                 {
-                    throw std::exception("Unsupported opcode");
+                    throw std::runtime_error("Unknown opcode " + std::to_string(static_cast<int>(ins.getOpCode())));
                 }
             }
             if (node)

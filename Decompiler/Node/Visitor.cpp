@@ -17,7 +17,7 @@ void Node::Visitor::visitChildren(Node::Base *node)
 }
 
 #define DO_NODE(NODE) \
-void Node::VisitorBase::visit(Node::##NODE *node) \
+void Node::VisitorBase::visit(Node::NODE *node) \
 { \
     assert(node); \
     visitChildren(node); \
@@ -44,7 +44,7 @@ Node::DynamicVisitor &Node::DynamicVisitor::common(Node::DynamicVisitor::LambdaC
 
 
 #define DO_NODE(NODE) \
-void Node::DynamicVisitor::visit(Node::##NODE *node) \
+void Node::DynamicVisitor::visit(Node::NODE *node) \
 { \
     assert(node); \
     if (m_On##NODE) \

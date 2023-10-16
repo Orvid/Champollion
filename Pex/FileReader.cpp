@@ -57,9 +57,9 @@ Pex::FileReader::~FileReader()
 void Pex::FileReader::read(Pex::Binary &binary)
 {
     readHeader(binary.getHeader());
-    if (m_endianness == BIG_ENDIAN) {
+    if (m_endianness == Big) {
         binary.setScriptType(Pex::Binary::ScriptType::SkyrimScript);
-    } else { // LITTLE_ENDIAN
+    } else { // Little
         auto header = binary.getHeader();
         if (header.getMajorVersion() > 3 || (header.getMajorVersion() == 3 && header.getMinorVersion() == 12)) {
             binary.setScriptType(Pex::Binary::ScriptType::StarfieldScript);
@@ -100,9 +100,9 @@ void Pex::FileReader::readHeader(Pex::Header &header)
         if (magic != BE_MAGIC_NUMBER) {
             throw std::runtime_error("Invalid file magic");
         }
-        m_endianness = BIG_ENDIAN;
+        m_endianness = Big;
     } else {
-        m_endianness = LITTLE_ENDIAN;
+        m_endianness = Little;
     }
     header.setMajorVersion(getUint8());
     header.setMinorVersion(getUint8());
@@ -158,7 +158,7 @@ void Pex::FileReader::read(Pex::DebugInfo &debugInfo)
             }
         }
         // Skyrim scripts do not have the following info
-        if (m_endianness == BIG_ENDIAN){
+        if (m_endianness == Big){
             return;
         }
         auto groupCount = getUint16();
@@ -230,13 +230,13 @@ void Pex::FileReader::read(const Pex::Binary::ScriptType script_type, Pex::Objec
         object.setParentClassName(getStringIndex());
         object.setDocString(getStringIndex());
         // Skyrim scripts do not have this info 
-        if (m_endianness == LITTLE_ENDIAN) {
+        if (m_endianness == Little) {
             object.setConstFlag(getUint8());
         }
         object.setUserFlags(getUint32());
         object.setAutoStateName(getStringIndex());
         // Skyrim scripts do not have this info 
-        if (m_endianness == LITTLE_ENDIAN) {
+        if (m_endianness == Little) {
             read(object.getStructInfos());
         }
         read(object.getVariables());
@@ -291,7 +291,7 @@ void Pex::FileReader::read(Pex::Variables &variables)
 
         variable.setDefaultValue(getValue());
         // Skyrim scripts do not have this info 
-        if (m_endianness == LITTLE_ENDIAN) {
+        if (m_endianness == Little) {
             variable.setConstFlag(getUint8());
         }
     }
@@ -471,7 +471,7 @@ std::uint16_t Pex::FileReader::getUint16()
     {
         throw std::runtime_error("Error reading file");
     }
-    if (m_endianness == BIG_ENDIAN){
+    if (m_endianness == Big){
         return byteswap(value);
     }
     return value;
@@ -490,7 +490,7 @@ std::uint32_t Pex::FileReader::getUint32(bool le_override)
     {
         throw std::runtime_error("Error reading file");
     }
-    if (!le_override && m_endianness == BIG_ENDIAN){
+    if (!le_override && m_endianness == Big){
         return byteswap(value);
     }
     return value;
@@ -526,7 +526,7 @@ std::int16_t Pex::FileReader::getInt16()
     {
         throw std::runtime_error("Error reading file");
     }
-    if (m_endianness == BIG_ENDIAN){
+    if (m_endianness == Big){
         return byteswap(value);
     }
     return value;
@@ -545,7 +545,7 @@ float Pex::FileReader::getFloat()
     {
         throw std::runtime_error("Error reading file");
     }
-    if (m_endianness == BIG_ENDIAN){
+    if (m_endianness == Big){
        value = byteswap_float(value);
     }
     return value;
@@ -565,7 +565,7 @@ std::time_t Pex::FileReader::getTime()
     {
         throw std::runtime_error("Error reading file");
     }
-    if (m_endianness == BIG_ENDIAN){
+    if (m_endianness == Big){
         return byteswap(value);
     }
     return value;

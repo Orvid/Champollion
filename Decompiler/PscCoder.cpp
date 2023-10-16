@@ -13,6 +13,7 @@
 #include "PscDecompiler.hpp"
 #include "Version.hpp"
 #include "EventNames.hpp"
+#include "Champollion/CaselessCompare.h"
 
 /**
  * @brief Constructor
@@ -162,7 +163,7 @@ bool Decompiler::PscCoder::isNativeObject(const Pex::Object &object, const Pex::
     {
         for (auto& native : Fallout4::NativeClasses)
         {
-            if (_stricmp(object.getName().asString().c_str(), native.c_str()) == 0){
+            if (caselessCompare(object.getName().asString().c_str(), native.c_str()) == 0){
                 return true;
             }
         }
@@ -171,7 +172,7 @@ bool Decompiler::PscCoder::isNativeObject(const Pex::Object &object, const Pex::
     {
         for (auto& native : Starfield::NativeClasses)
         {
-            if (_stricmp(object.getName().asString().c_str(), native.c_str()) == 0){
+            if (caselessCompare(object.getName().asString().c_str(), native.c_str()) == 0){
                 return true;
             }
         }
@@ -484,7 +485,7 @@ void Decompiler::PscCoder::writeStates(const Pex::Object &object, const Pex::Bin
             auto stream = indent(0);
 
             // The auto state name canbe a different index than the state name, event if it is the same value.
-            if (_stricmp(state.getName().asString().c_str(), object.getAutoStateName().asString().c_str()) == 0)
+            if (caselessCompare(state.getName().asString().c_str(), object.getAutoStateName().asString().c_str()) == 0)
             {
                 stream << "Auto ";
             }
@@ -533,7 +534,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
 
     bool isEvent = false;
     
-    if (functionName.size() > 2 && !_stricmp(functionName.substr(0, 2).c_str(), "on")) {
+    if (functionName.size() > 2 && !caselessCompare(functionName.substr(0, 2).c_str(), "on")) {
         // We'd have to check for full inheritence to do this by object type
         // Right now, we're just seeing if matches all the built-in event names.
         std::string functionLower = functionName;
@@ -553,7 +554,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
         }
     }
 
-    if (functionName.size() > 9 && !_stricmp(functionName.substr(0, 9).c_str(), "::remote_")) {
+    if (functionName.size() > 9 && !caselessCompare(functionName.substr(0, 9).c_str(), "::remote_")) {
       isEvent = true;
       functionName = functionName.substr(9);
       functionName[function.getParams()[0].getTypeName().asString().size()] = '.';
@@ -565,7 +566,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
     }
 
     auto stream = indent(i);
-    if (_stricmp(function.getReturnTypeName().asString().c_str(), "none") != 0)
+    if (caselessCompare(function.getReturnTypeName().asString().c_str(), "none") != 0)
         stream << mapType(function.getReturnTypeName().asString()) << " ";
 
     if (isEvent)
@@ -611,9 +612,9 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
             bool fixed = false;
             if (pex.getGameType() == Pex::Binary::ScriptType::StarfieldScript) {
                 if (functionName == "warning" ||
-                    (_stricmp(object.getName().asString().c_str(), "ENV_Hazard_ParentScript") == 0 &&
+                    (caselessCompare(object.getName().asString().c_str(), "ENV_Hazard_ParentScript") == 0 &&
                      functionName == "GlobalWarning") || // only present on this script
-                    (_stricmp(object.getName().asString().c_str(), "ENV_AfflictionScript") == 0 &&
+                    (caselessCompare(object.getName().asString().c_str(), "ENV_AfflictionScript") == 0 &&
                      functionName == "TraceStats")) { // Only present on this script
                   // find the `::temp\d+` variable in the lines with regex
                   // replace it with `false`
@@ -623,7 +624,7 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
                       line = std::regex_replace(line, tempRegex, "false");
                     }
                   }
-                } else if ((_stricmp(object.getName().asString().c_str(), "RobotQuestRunner") == 0)) {
+                } else if ((caselessCompare(object.getName().asString().c_str(), "RobotQuestRunner") == 0)) {
                     if (functionName == "UpdateState") {
                       fixed = true;
                       for (auto &line: decomp) {
@@ -650,9 +651,9 @@ void Decompiler::PscCoder::writeFunction(int i, const Pex::Function &function, c
               write(indent(i) << "; Skipped inoperative debug function " << functionName);
               return;
             }
-        } else if (_stricmp(functionName.c_str(), "GotoState") == 0 || _stricmp(functionName.c_str(), "GetState") == 0) {
+        } else if (caselessCompare(functionName.c_str(), "GotoState") == 0 || caselessCompare(functionName.c_str(), "GetState") == 0) {
             // Starfield GotoState/GetState function fixup hacks
-            if (_stricmp(object.getName().asString().c_str(), "ScriptObject") == 0) {
+            if (caselessCompare(object.getName().asString().c_str(), "ScriptObject") == 0) {
                 // find the `::State` variable in the lines
                 // replace it with `__state`
                 write(indent(i) << "; Fixup hacks for native ScriptObject::GotoState/GetState");
@@ -849,7 +850,7 @@ bool Decompiler::PscCoder::isCompilerGeneratedFunc(const std::string &name, cons
     static const std::vector<std::string> starfieldCompilerGeneratedFuncs = {
     };
     // Do not remove these for the actual `scriptobject` script which is the base class for all scripts
-    if (_stricmp(object.getName().asString().c_str(), "ScriptObject") == 0){
+    if (caselessCompare(object.getName().asString().c_str(), "ScriptObject") == 0){
         return false;
     }
     std::string nameLower = name;
