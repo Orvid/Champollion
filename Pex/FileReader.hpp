@@ -23,8 +23,8 @@ public:
 
     void read(Binary& binary);
     enum Endianness{
-        BIG_ENDIAN,
-        LITTLE_ENDIAN
+        Big,
+        Little
     };
     static constexpr std::uint32_t LE_MAGIC_NUMBER = 0xFA57C0DE;
     static constexpr std::uint32_t BE_MAGIC_NUMBER = 0xDEC057FA;

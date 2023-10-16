@@ -11,7 +11,7 @@
     "standalone": {
       "description": "Build as a standalone program",
       "dependencies": [
-        "boost-program-options"
+        "boost-program-options", "fmt"
       ]
     }
   },

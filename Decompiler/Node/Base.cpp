@@ -1,4 +1,5 @@
 #include "Base.hpp"
+#include <Champollion/CaselessCompare.h>
 
 #include <algorithm>
 #include <cassert>
@@ -27,7 +28,7 @@ bool Node::Base::isFinal() const
     if (m_Result.isValid() && !m_Result.isUndefined())
     {
         auto& id = m_Result.asString();
-        return id.substr(0, 6) != "::temp" && _stricmp(id.c_str(), "::nonevar") != 0;
+        return id.substr(0, 6) != "::temp" && caselessCompare(id.c_str(), "::nonevar") != 0;
     }
     return true;
 
